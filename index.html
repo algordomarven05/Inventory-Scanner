@@ -4,20 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR & Barcode Receipt Scanner</title>
-  <!-- Load HTML5 QR Code Library -->
+  <!-- Load HTML5 QR & Barcode Library -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
-    .container { display: flex; gap: 20px; max-width: 1000px; margin: auto; }
+    .container { display: flex; gap: 20px; max-width: 1100px; margin: auto; }
     .scanner-box, .receipt-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
-    #reader { width: 100%; }
+    #reader { width: 100%; min-height: 300px; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #007bff; color: white; }
     .btn { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; }
     .btn-stop { background: #dc3545; }
     
-    /* Print styling to format as a clean receipt */
     @media print {
       body * { visibility: hidden; }
       .receipt-box, .receipt-box * { visibility: visible; }
@@ -59,23 +58,32 @@
   </div>
 
   <script>
-    // Sample Inventory Database (Replace this with API fetch later)
+    // Sample Inventory Database
     const inventoryDB = {
       "123456": "Standard Screwdriver Set",
       "789012": "AA Battery 4-Pack",
       "XYZ-99": "Safety Goggles"
     };
 
-    let html5QrcodeScanner = null;
+    let html5QrCode = null;
     let scannedItems = {};
+    let lastScannedCode = null;
+    let lastScannedTime = 0;
 
     document.getElementById('receipt-date').innerText = new Date().toLocaleString();
 
     function onScanSuccess(decodedText) {
-      // Find item description or fallback to "Unknown Item"
+      const now = Date.now();
+      // Prevent duplicate rapid scans of the same item within 2 seconds
+      if (decodedText === lastScannedCode && now - lastScannedTime < 2000) {
+        return;
+      }
+      
+      lastScannedCode = decodedText;
+      lastScannedTime = now;
+
       let itemName = inventoryDB[decodedText] || "Unknown Item / Raw Code";
 
-      // Increment quantity if already scanned, otherwise add it
       if (scannedItems[decodedText]) {
         scannedItems[decodedText].qty += 1;
       } else {
@@ -100,27 +108,51 @@
     }
 
     function startCamera() {
-      html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
-      html5QrcodeScanner.render(onScanSuccess);
-      document.getElementById('stop-btn').style.display = 'block';
+      html5QrCode = new Html5Qrcode("reader");
+
+      // Set formats to prioritize standard 1D barcodes and QR codes
+      const config = {
+        fps: 20,
+        qrbox: { width: 300, height: 180 }, // Rectangular scanning box works best for 1D barcodes
+        aspectRatio: 1.333333,
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.QR_CODE
+        ]
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" }, // Prefers rear/main webcam
+        config,
+        onScanSuccess
+      ).then(() => {
+        document.getElementById('stop-btn').style.display = 'block';
+      }).catch(err => {
+        console.error("Camera start error:", err);
+      });
     }
 
     function stopCamera() {
-      if (html5QrcodeScanner) {
-        html5QrcodeScanner.clear().then(() => {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
           document.getElementById('stop-btn').style.display = 'none';
-        });
+        }).catch(err => console.error(err));
       }
     }
 
     function printReceipt() {
-      // Safely release the camera before triggering print box
       stopCamera();
       window.print();
     }
 
-    // Initialize scanner on page load
-    startCamera();
+    // Auto start scanner
+    window.addEventListener("load", startCamera);
   </script>
 
 </body>
