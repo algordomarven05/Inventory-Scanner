@@ -382,7 +382,7 @@
               <th>Date</th>
               <th>Requesting Office</th>
               <th>Requester</th>
-              <th>Item Code</th>
+              <th>Item Code(s)</th>
               <th>Qty Issued</th>
               <th>Released By</th>
               <th>Remarks</th>
@@ -472,7 +472,7 @@
               <th>Type</th>
               <th>Reference No</th>
               <th>Office / Source</th>
-              <th>Code</th>
+              <th>Code(s)</th>
               <th>Qty</th>
               <th class="admin-only no-print">Actions</th>
             </tr>
@@ -843,12 +843,33 @@
         return;
       }
 
+      let codeSummaries = [];
+      let qtySummaries = [];
+      let itemsList = [];
+
       for (let code in scannedReceiptItems) {
         let qty = scannedReceiptItems[code].qty;
+        let itemName = scannedReceiptItems[code].name;
         let invItem = inventory.find(i => i.code === code);
         if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
-        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty, remarks, releasedBy });
+
+        codeSummaries.push(code);
+        qtySummaries.push(`${qty}x (${code})`);
+        itemsList.push({ code: code, name: itemName, qty: qty });
       }
+
+      // Group into a SINGLE COMBINED ENTRY per receipt transaction
+      stockOutLogs.push({ 
+        receiptNo, 
+        date: new Date().toLocaleString(), 
+        office, 
+        requester, 
+        code: codeSummaries.join(', '), 
+        qty: qtySummaries.join(', '), 
+        items: itemsList,
+        remarks, 
+        releasedBy 
+      });
 
       receiptCounter++;
       saveToGoogleSheet();
@@ -1113,7 +1134,7 @@
           : (l.requester || '-');
 
         let qtyCell = isAdmin 
-          ? `<input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 50px;">`
+          ? `<input type="text" id="so-qty-${index}" value="${l.qty}" style="width: 100px;">`
           : l.qty;
 
         let relCell = isAdmin
@@ -1149,7 +1170,7 @@
 
     function saveStockOutRow(index) {
       const newReq = document.getElementById(`so-req-${index}`).value.trim();
-      const newQty = parseInt(document.getElementById(`so-qty-${index}`).value) || 0;
+      const newQty = document.getElementById(`so-qty-${index}`).value.trim();
       const newRel = document.getElementById(`so-rel-${index}`).value.trim();
       const newRem = document.getElementById(`so-rem-${index}`).value.trim();
 
@@ -1182,11 +1203,21 @@
       document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
       document.getElementById('receipt-remarks-text').value = log.remarks || '';
 
-      let item = inventory.find(i => i.code === log.code);
       scannedReceiptItems = {};
-      scannedReceiptItems[log.code] = { name: item ? item.name : 'Item ' + log.code, qty: log.qty };
-      renderReceipt();
+      if (log.items && log.items.length > 0) {
+        log.items.forEach(item => {
+          scannedReceiptItems[item.code] = { name: item.name, qty: item.qty };
+        });
+      } else {
+        let codes = String(log.code).split(',');
+        codes.forEach(c => {
+          let cleanCode = c.trim();
+          let item = inventory.find(i => i.code === cleanCode);
+          scannedReceiptItems[cleanCode] = { name: item ? item.name : 'Item ' + cleanCode, qty: 1 };
+        });
+      }
 
+      renderReceipt();
       switchTab('scanner', document.getElementById('tab-scanner-btn'));
       setTimeout(() => window.print(), 300);
     }
@@ -1202,7 +1233,7 @@
         allLogs.push({ date: l.date, type: 'Stock In', ref: '-', office: l.office, code: l.code, qty: `+${l.qty}`, source: 'in', index: originalIdx });
       });
       stockOutLogs.forEach((l, originalIdx) => {
-        allLogs.push({ date: l.date, type: 'Stock Out', ref: l.receiptNo, office: l.office, code: l.code, qty: `-${l.qty}`, source: 'out', index: originalIdx });
+        allLogs.push({ date: l.date, type: 'Stock Out', ref: l.receiptNo, office: l.office, code: l.code, qty: l.qty, source: 'out', index: originalIdx });
       });
 
       allLogs.forEach((l, index) => {
