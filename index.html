@@ -876,8 +876,8 @@
         releasedBy 
       });
 
-      // Increment counter for next distinct transaction slip
-      receiptCounter++;
+      // Increment counter strictly for the NEXT sequential slip (0001 -> 0002 -> 0003...)
+      receiptCounter = parseInt(receiptCounter || 1) + 1;
       saveToGoogleSheet();
 
       scannedReceiptItems = {};
@@ -1140,33 +1140,41 @@
           ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 110px;">`
           : (l.requester || '-');
 
-        let qtyCell = isAdmin 
-          ? `<input type="text" id="so-qty-${index}" value="${l.qty.replace(/<br\s*[\/]?>/gi, ', ')}" style="width: 100px;">`
-          : l.qty;
+        let codeDisplay = Array.isArray(l.code) ? l.code.join('<br>') : l.code;
+        let nameDisplay = Array.isArray(l.name) ? l.name.join('<br>') : (l.name || '-');
+
+        let qtyDisplay = '';
+        if (isAdmin) {
+          let qtyText = String(l.qty).replace(/<br\s*[\/]?>/gi, '\n');
+          let itemCount = l.items ? l.items.length : String(l.qty).split('<br>').length;
+          qtyDisplay = `<textarea id="so-qty-${index}" style="width: 50px; height: ${Math.max(35, itemCount * 22)}px; resize: none; font-family: inherit; text-align: center;">${qtyText}</textarea>`;
+        } else {
+          qtyDisplay = String(l.qty);
+        }
 
         let relCell = isAdmin
-          ? `<input type="text" id="so-rel-${index}" value="${l.releasedBy || ''}" style="width: 130px;">`
+          ? `<input type="text" id="so-rel-${index}" value="${l.releasedBy || ''}" style="width: 120px;">`
           : (l.releasedBy || 'N/A');
 
         let remCell = isAdmin
-          ? `<input type="text" id="so-rem-${index}" value="${l.remarks || ''}" style="width: 120px;">`
+          ? `<input type="text" id="so-rem-${index}" value="${l.remarks || ''}" style="width: 110px;">`
           : (l.remarks || '-');
 
         let actionCell = isAdmin
-          ? `<button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
-             <button class="btn btn-primary" style="padding: 4px 8px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>
+          ? `<button class="btn btn-success" style="padding: 4px 8px; margin-bottom: 2px;" onclick="saveStockOutRow(${index})">Save</button>
+             <button class="btn btn-primary" style="padding: 4px 8px; margin-bottom: 2px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>
              <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteStockOutRow(${index})">🗑️ Delete</button>`
           : `-`;
 
         tbody.innerHTML += `
           <tr>
-            <td>${l.receiptNo}</td>
-            <td>${l.date}</td>
+            <td style="font-weight: bold; font-family: monospace;">${l.receiptNo}</td>
+            <td style="font-size: 11px;">${l.date}</td>
             <td>${l.office}</td>
             <td>${reqCell}</td>
-            <td>${l.code}</td>
-            <td>${l.name || '-'}</td>
-            <td>${qtyCell}</td>
+            <td style="font-family: monospace; line-height: 1.6;">${codeDisplay}</td>
+            <td style="line-height: 1.6;">${nameDisplay}</td>
+            <td style="line-height: 1.6; text-align: center;">${qtyDisplay}</td>
             <td>${relCell}</td>
             <td>${remCell}</td>
             <td class="admin-only">${actionCell}</td>
@@ -1178,12 +1186,14 @@
 
     function saveStockOutRow(index) {
       const newReq = document.getElementById(`so-req-${index}`).value.trim();
-      const newQty = document.getElementById(`so-qty-${index}`).value.trim();
+      const newQtyInput = document.getElementById(`so-qty-${index}`).value.trim();
       const newRel = document.getElementById(`so-rel-${index}`).value.trim();
       const newRem = document.getElementById(`so-rem-${index}`).value.trim();
 
+      const formattedQty = newQtyInput.split('\n').map(q => q.trim()).filter(q => q !== '').join('<br>');
+
       stockOutLogs[index].requester = newReq;
-      stockOutLogs[index].qty = newQty.replace(/,\s*/g, '<br>');
+      stockOutLogs[index].qty = formattedQty;
       stockOutLogs[index].releasedBy = newRel;
       stockOutLogs[index].remarks = newRem;
 
@@ -1218,11 +1228,13 @@
         });
       } else {
         let codes = String(log.code).split(/<br\s*[\/]?>|,/gi);
-        codes.forEach(c => {
+        let qtys = String(log.qty).split(/<br\s*[\/]?>|,/gi);
+        codes.forEach((c, i) => {
           let cleanCode = c.trim();
+          let parsedQty = parseInt(qtys[i]) || 1;
           if (cleanCode) {
-            let item = inventory.find(i => i.code === cleanCode);
-            scannedReceiptItems[cleanCode] = { name: item ? item.name : 'Item ' + cleanCode, qty: 1 };
+            let item = inventory.find(inv => inv.code === cleanCode);
+            scannedReceiptItems[cleanCode] = { name: item ? item.name : 'Item ' + cleanCode, qty: parsedQty };
           }
         });
       }
@@ -1256,11 +1268,11 @@
             <td class="no-print"><input type="checkbox" class="history-chk" data-idx="${index}"></td>
             <td>${l.date}</td>
             <td>${l.type}</td>
-            <td>${l.ref}</td>
+            <td style="font-family: monospace; font-weight: bold;">${l.ref}</td>
             <td>${l.office}</td>
-            <td>${l.code}</td>
-            <td>${l.name}</td>
-            <td>${l.qty}</td>
+            <td style="font-family: monospace; line-height: 1.6;">${l.code}</td>
+            <td style="line-height: 1.6;">${l.name}</td>
+            <td style="line-height: 1.6; text-align: center;">${l.qty}</td>
             <td class="admin-only no-print">${actionCell}</td>
           </tr>`;
       });
