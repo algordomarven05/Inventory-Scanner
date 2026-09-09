@@ -16,16 +16,43 @@
     }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; color: #333; }
     
-    /* Navigation Bar */
-    .navbar { background: var(--dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+    /* Header Bar */
+    .navbar { background: var(--dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
     .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tab-btn { background: #2c3e50; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
-    .tab-btn.active { background: var(--primary); }
+    .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+    .tab-btn:hover { background: #34495e; }
+    .tab-btn.active { background: var(--primary); border-color: #004085; }
 
     .main-container { padding: 20px; max-width: 1400px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    /* Highlighted Scanner & Receipt Section */
+    .scanner-receipt-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+    
+    .scanner-card {
+      flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 10px;
+      border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15);
+    }
+    .receipt-card {
+      flex: 1.5; min-width: 400px; background: #fff; padding: 20px; border-radius: 10px;
+      border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Laser Line & Reader */
+    .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
+    #reader { width: 100%; height: 100%; min-height: 280px; }
+    #reader video { transform: none !important; object-fit: cover; }
+
+    /* Controls & Buttons */
+    .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+    .btn { padding: 8px 14px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-primary { background: var(--primary); }
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-dark { background: var(--dark); }
 
     /* Dashboard Grid */
     .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
@@ -33,22 +60,15 @@
     .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #666; text-transform: uppercase; }
     .dash-card .count { font-size: 22px; font-weight: bold; }
 
-    /* Tables & Inputs */
+    /* Tables */
     .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
     th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
     th { background: #f1f3f5; font-weight: 600; }
     
-    /* Action & Quantity Controls */
     .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
     .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 28px; }
-    .qty-btn:hover { background: #dee2e6; }
-    .btn { padding: 8px 12px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .btn-primary { background: var(--primary); }
-    .btn-success { background: var(--success); }
-    .btn-danger { background: var(--danger); }
-    .btn-warning { background: var(--warning); color: #000; }
-    
+
     /* Badges */
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
     .bg-ok { background: #28a745; }
@@ -58,13 +78,11 @@
     .bg-expiring { background: #6f42c1; }
     .bg-expired { background: #343a40; }
 
-    /* Receipt Styling */
+    /* Official Receipt Styling */
     .receipt-paper { background: #fff; padding: 25px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; max-width: 650px; margin: auto; }
     .pgso-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
     .pgso-logo { width: 75px; height: auto; margin-bottom: 5px; }
-    .scanner-container { position: relative; max-width: 500px; margin: auto; border: 2px solid #000; background: #000; }
 
-    /* Modals */
     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
 
@@ -78,51 +96,43 @@
 </head>
 <body>
 
+  <!-- Top Navigation & Section Switcher -->
   <div class="navbar no-print">
     <h2>PGSO WMS & Scanner</h2>
     <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('scanner')">Scanner & Issue</button>
-      <button class="tab-btn" onclick="switchTab('inventory')">Inventory</button>
-      <button class="tab-btn" onclick="switchTab('stockin')">Stock In</button>
-      <button class="tab-btn" onclick="switchTab('stockout')">Stock Out Log</button>
-      <button class="tab-btn" onclick="switchTab('reorder')">Reorder List</button>
-      <button class="tab-btn" onclick="switchTab('history')">Monthly Report</button>
+      <button class="tab-btn active" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
+      <button class="tab-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
+      <button class="tab-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
+      <button class="tab-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
+      <button class="tab-btn" onclick="switchTab('reorder', this)">📋 Reorder List</button>
+      <button class="tab-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
     </div>
   </div>
 
   <div class="main-container">
 
-    <!-- DASHBOARD TAB -->
-    <div id="dashboard" class="tab-content active">
-      <h3>System & Warehouse Overview</h3>
-      <div class="dash-grid">
-        <div class="dash-card"><h4>Total Items</h4><div class="count" id="dash-total">0</div></div>
-        <div class="dash-card"><h4>Units in Stock</h4><div class="count" id="dash-units">0</div></div>
-        <div class="dash-card" style="border-color: #28a745;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
-        <div class="dash-card" style="border-color: #ffc107;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
-        <div class="dash-card" style="border-color: #fd7e14;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
-        <div class="dash-card" style="border-color: #dc3545;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
-        <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
-        <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
-      </div>
-    </div>
-
-    <!-- SCANNER & RECEIPT TAB -->
-    <div id="scanner" class="tab-content">
-      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div class="card-box" style="flex: 1; min-width: 320px;">
-          <h3>Barcode Reader</h3>
-          <div class="scanner-container">
+    <!-- SCANNER & RECEIPT TAB (HIGHLIGHTED MAIN VIEW) -->
+    <div id="scanner" class="tab-content active">
+      <div class="scanner-receipt-grid">
+        
+        <!-- Barcode Reader Card -->
+        <div class="scanner-card">
+          <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
+          <div class="scanner-wrapper">
             <div id="reader"></div>
           </div>
-          <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+          
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+            <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
             <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
-            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned Items</button>
+            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
           </div>
         </div>
 
-        <div class="card-box printable" style="flex: 1.5; min-width: 400px;">
+        <!-- Official Receipt Card -->
+        <div class="receipt-card printable">
           <div class="receipt-paper">
             <div class="pgso-header">
               <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
@@ -133,7 +143,7 @@
 
             <div style="font-size: 13px; margin-bottom: 15px;">
               <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
-              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 200px;" value="PGSO"></div>
+              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 200px;" value="PGSO" onchange="generateReceiptNumber()"></div>
               <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 200px;"></div>
               <div><strong>Date:</strong> <span id="receipt-date"></span></div>
             </div>
@@ -150,7 +160,7 @@
               <tbody id="receipt-rows"></tbody>
             </table>
 
-            <div style="margin-top: 30px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
+            <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
               <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
               <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Released By (PGSO)</div>
             </div>
@@ -161,6 +171,22 @@
             <button class="btn btn-success" onclick="exportReceiptCSV()">Export CSV</button>
           </div>
         </div>
+
+      </div>
+    </div>
+
+    <!-- DASHBOARD TAB -->
+    <div id="dashboard" class="tab-content">
+      <h3>System Overview</h3>
+      <div class="dash-grid">
+        <div class="dash-card"><h4>Total Items</h4><div class="count" id="dash-total">0</div></div>
+        <div class="dash-card"><h4>Units in Stock</h4><div class="count" id="dash-units">0</div></div>
+        <div class="dash-card" style="border-color: #28a745;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
+        <div class="dash-card" style="border-color: #ffc107;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
+        <div class="dash-card" style="border-color: #fd7e14;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
+        <div class="dash-card" style="border-color: #dc3545;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
+        <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
+        <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
       </div>
     </div>
 
@@ -223,7 +249,7 @@
 
     <!-- STOCK OUT LOG TAB -->
     <div id="stockout" class="tab-content">
-      <h3>Stock Out History (Successful Releases)</h3>
+      <h3>Stock Out History</h3>
       <div class="card-box" style="overflow-x: auto;">
         <table>
           <thead>
@@ -243,10 +269,7 @@
 
     <!-- REORDER TAB -->
     <div id="reorder" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3>Reorder List</h3>
-        <button class="btn btn-warning" onclick="openReorderModal()">+ Create Reorder Request</button>
-      </div>
+      <h3>Reorder Tracker</h3>
       <div class="card-box">
         <table>
           <thead>
@@ -257,7 +280,6 @@
               <th>Code</th>
               <th>Reorder Qty</th>
               <th>Status</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody id="reorder-table-body"></tbody>
@@ -267,8 +289,8 @@
 
     <!-- MONTHLY HISTORY REPORT TAB -->
     <div id="history" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Monthly Transaction & Activity Reports</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>Monthly Activity Reports</h3>
         <div>
           <button class="btn btn-primary" onclick="window.print()">Print Report (PDF)</button>
           <button class="btn btn-success" onclick="exportMonthlyCSV()">Export Excel (CSV)</button>
@@ -294,27 +316,20 @@
 
   </div>
 
-  <!-- MODAL: ADD / EDIT ITEM -->
+  <!-- MODAL: ADD ITEM -->
   <div id="itemModal" class="modal">
     <div class="modal-content">
       <h3>Inventory Item Details</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div><label>Item Name:</label><input type="text" id="m-name" style="width:100%;"></div>
-        <div><label>Category:</label><input type="text" id="m-category" placeholder="e.g. Office Supplies" style="width:100%;"></div>
-        <div>
-          <label>Barcode/QR Code:</label>
-          <div style="display:flex; gap:5px;">
-            <input type="text" id="m-code" style="flex:1;">
-            <button class="btn btn-primary" onclick="scanToInput('m-code')">📷 Scan</button>
-          </div>
-        </div>
-        <div><label>Storage Location:</label><input type="text" id="m-location" placeholder="e.g. Rack A-1" style="width:100%;"></div>
-        <div><label>Unit:</label><input type="text" id="m-unit" placeholder="e.g. Box, Pc, Pack" style="width:100%;"></div>
+        <div><label>Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%;"></div>
+        <div><label>Barcode/QR Code:</label><input type="text" id="m-code" style="width:100%;"></div>
+        <div><label>Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%;"></div>
+        <div><label>Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%;"></div>
         <div><label>Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%;"></div>
-        <div><label>Min Level (Reorder Threshold):</label><input type="number" id="m-min" value="5" style="width:100%;"></div>
+        <div><label>Min Level:</label><input type="number" id="m-min" value="5" style="width:100%;"></div>
         <div><label>Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%;"></div>
         <div><label>Expiry Date:</label><input type="date" id="m-expiry" style="width:100%;"></div>
-        <div><label>Last Restock Date:</label><input type="date" id="m-restock" style="width:100%;"></div>
       </div>
       <div style="text-align: right; margin-top: 15px;">
         <button class="btn btn-danger" onclick="closeModal('itemModal')">Cancel</button>
@@ -328,13 +343,7 @@
     <div class="modal-content">
       <h3>Record New Stock In</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div>
-          <label>Item Barcode/QR Code:</label>
-          <div style="display:flex; gap:5px;">
-            <input type="text" id="si-code" style="flex:1;">
-            <button class="btn btn-primary" onclick="scanToInput('si-code')">📷 Scan</button>
-          </div>
-        </div>
+        <div><label>Item Barcode/QR Code:</label><input type="text" id="si-code" style="width:100%;"></div>
         <div><label>Quantity Delivered:</label><input type="number" id="si-qty" value="1" style="width:100%;"></div>
         <div><label>Delivered By / Office:</label><input type="text" id="si-office" style="width:100%;"></div>
         <div><label>Receiving Staff:</label><input type="text" id="si-staff" style="width:100%;"></div>
@@ -350,29 +359,26 @@
   </div>
 
   <script>
-    // System Data Stores
     let inventory = JSON.parse(localStorage.getItem('pgso_inventory')) || [];
     let stockInLogs = JSON.parse(localStorage.getItem('pgso_stockin')) || [];
     let stockOutLogs = JSON.parse(localStorage.getItem('pgso_stockout')) || [];
-    let reorderList = JSON.parse(localStorage.getItem('pgso_reorder')) || [];
     let receiptCounter = parseInt(localStorage.getItem('pgso_receipt_counter')) || 1;
 
     let scannedReceiptItems = {};
     let html5QrCode = null;
     let isTorchOn = false;
 
-    // Initialization
     window.addEventListener('load', () => {
-      initScanner();
       refreshAllViews();
       generateReceiptNumber();
+      startCamera();
     });
 
-    function switchTab(tabId) {
+    function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-      event.target.classList.add('active');
+      btn.classList.add('active');
       refreshAllViews();
     }
 
@@ -383,21 +389,31 @@
       const seq = String(receiptCounter).padStart(4, '0');
       const office = document.getElementById('req-office').value.toUpperCase() || 'PGSO';
       
-      const receiptNo = `${office}-${year}-${month}-${seq}`;
-      document.getElementById('receipt-no').innerText = receiptNo;
+      document.getElementById('receipt-no').innerText = `${office}-${year}-${month}-${seq}`;
       document.getElementById('receipt-date').innerText = date.toLocaleString();
     }
 
-    /* BARCODE & SCANNER CONTROLS */
-    function initScanner() {
-      html5QrCode = new Html5Qrcode("reader");
+    /* CAMERA & SCANNER ENGINE */
+    function startCamera() {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
       const config = { fps: 15, qrbox: { width: 250, height: 180 } };
-      html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => console.log(err));
+
+      html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned)
+        .catch(err => console.log("Camera access error:", err));
+    }
+
+    function stopCamera() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log(err));
+      }
     }
 
     function onCodeScanned(code) {
       let item = inventory.find(i => i.code === code);
-      let name = item ? item.name : "Unknown Product";
+      let name = item ? item.name : "Unknown Item / Raw Code";
 
       if (scannedReceiptItems[code]) {
         scannedReceiptItems[code].qty++;
@@ -410,11 +426,11 @@
     function toggleTorch() {
       if (html5QrCode) {
         isTorchOn = !isTorchOn;
-        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => alert("Torch not supported on this device."));
+        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => alert("Flashlight not supported on this device."));
       }
     }
 
-    /* RECEIPT LOGIC */
+    /* RECEIPT FUNCTIONS */
     function renderReceipt() {
       const tbody = document.getElementById('receipt-rows');
       tbody.innerHTML = '';
@@ -431,7 +447,7 @@
                 <button class="qty-btn no-print" onclick="modQty('${code}', 1)">+</button>
               </div>
             </td>
-            <td class="no-print"><button class="btn btn-danger" onclick="removeReceiptItem('${code}')">X</button></td>
+            <td class="no-print" style="text-align: center;"><button class="btn btn-danger" onclick="removeReceiptItem('${code}')">X</button></td>
           </tr>`;
       }
     }
@@ -470,9 +486,7 @@
         if (invItem) {
           invItem.stock = Math.max(0, invItem.stock - qty);
         }
-        stockOutLogs.push({
-          receiptNo, date: new Date().toLocaleString(), office, requester, code, qty
-        });
+        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty });
       }
 
       receiptCounter++;
@@ -486,7 +500,7 @@
       refreshAllViews();
     }
 
-    /* INVENTORY MANAGEMENT */
+    /* INVENTORY DATA HELPERS */
     function calculateStatus(item) {
       const today = new Date();
       if (item.expiry) {
@@ -495,9 +509,7 @@
         item.daysLeft = diffDays;
         if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
         if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
-      } else {
-        item.daysLeft = 'N/A';
-      }
+      } else { item.daysLeft = 'N/A'; }
 
       if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
       if (item.stock <= Math.floor(item.min / 2)) return { label: 'Critical', class: 'bg-critical' };
@@ -530,6 +542,7 @@
     }
 
     function openItemModal() { document.getElementById('itemModal').style.display = 'block'; }
+    function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function saveInventoryItem() {
@@ -542,8 +555,7 @@
         stock: parseInt(document.getElementById('m-stock').value) || 0,
         min: parseInt(document.getElementById('m-min').value) || 5,
         batch: document.getElementById('m-batch').value,
-        expiry: document.getElementById('m-expiry').value,
-        restock: document.getElementById('m-restock').value
+        expiry: document.getElementById('m-expiry').value
       };
 
       const existingIdx = inventory.findIndex(i => i.code === item.code);
@@ -554,9 +566,6 @@
       closeModal('itemModal');
       refreshAllViews();
     }
-
-    /* STOCK IN MANAGEMENT */
-    function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
 
     function processStockIn() {
       const code = document.getElementById('si-code').value;
@@ -574,16 +583,12 @@
         if (batch) item.batch = batch;
       }
 
-      stockInLogs.push({
-        date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes
-      });
-
+      stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
       saveAll();
       closeModal('stockInModal');
       refreshAllViews();
     }
 
-    /* DASHBOARD REFRESH */
     function refreshDashboard() {
       let units = 0, ok = 0, low = 0, critical = 0, out = 0, expiring = 0, expired = 0;
       inventory.forEach(item => {
@@ -646,7 +651,6 @@
       localStorage.setItem('pgso_inventory', JSON.stringify(inventory));
       localStorage.setItem('pgso_stockin', JSON.stringify(stockInLogs));
       localStorage.setItem('pgso_stockout', JSON.stringify(stockOutLogs));
-      localStorage.setItem('pgso_reorder', JSON.stringify(reorderList));
     }
 
     function exportMonthlyCSV() {
