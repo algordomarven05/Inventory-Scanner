@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR & Barcode Receipt Scanner</title>
+  <!-- Load HTML5 QR Code Library -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+    .container { display: flex; gap: 20px; max-width: 1000px; margin: auto; }
+    .scanner-box, .receipt-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
+    #reader { width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #007bff; color: white; }
+    .btn { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+    .btn-stop { background: #dc3545; }
+    
+    /* Print styling to format as a clean receipt */
+    @media print {
+      body * { visibility: hidden; }
+      .receipt-box, .receipt-box * { visibility: visible; }
+      .receipt-box { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+      .btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Inventory Scanner & Receipt Generator</h2>
+
+  <div class="container">
+    <!-- Camera Section -->
+    <div class="scanner-box">
+      <h3>1. Scan Code</h3>
+      <div id="reader"></div>
+      <button class="btn btn-stop" id="stop-btn" onclick="stopCamera()" style="display:none;">Stop Camera</button>
+    </div>
+
+    <!-- Receipt Section -->
+    <div class="receipt-box">
+      <h3>2. Scanned Receipt</h3>
+      <p><strong>Date:</strong> <span id="receipt-date"></span></p>
+      <table>
+        <thead>
+          <tr>
+            <th>Code ID</th>
+            <th>Item Name</th>
+            <th>Qty</th>
+          </tr>
+        </thead>
+        <tbody id="receipt-body">
+          <!-- Scanned items appear here -->
+        </tbody>
+      </table>
+      <button class="btn" onclick="printReceipt()">Finish & Print Receipt</button>
+    </div>
+  </div>
+
+  <script>
+    // Sample Inventory Database (Replace this with API fetch later)
+    const inventoryDB = {
+      "123456": "Standard Screwdriver Set",
+      "789012": "AA Battery 4-Pack",
+      "XYZ-99": "Safety Goggles"
+    };
+
+    let html5QrcodeScanner = null;
+    let scannedItems = {};
+
+    document.getElementById('receipt-date').innerText = new Date().toLocaleString();
+
+    function onScanSuccess(decodedText) {
+      // Find item description or fallback to "Unknown Item"
+      let itemName = inventoryDB[decodedText] || "Unknown Item / Raw Code";
+
+      // Increment quantity if already scanned, otherwise add it
+      if (scannedItems[decodedText]) {
+        scannedItems[decodedText].qty += 1;
+      } else {
+        scannedItems[decodedText] = { name: itemName, qty: 1 };
+      }
+
+      updateReceiptTable();
+    }
+
+    function updateReceiptTable() {
+      const tbody = document.getElementById('receipt-body');
+      tbody.innerHTML = '';
+
+      for (let code in scannedItems) {
+        let row = `<tr>
+          <td>${code}</td>
+          <td>${scannedItems[code].name}</td>
+          <td>${scannedItems[code].qty}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
+    function startCamera() {
+      html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
+      html5QrcodeScanner.render(onScanSuccess);
+      document.getElementById('stop-btn').style.display = 'block';
+    }
+
+    function stopCamera() {
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().then(() => {
+          document.getElementById('stop-btn').style.display = 'none';
+        });
+      }
+    }
+
+    function printReceipt() {
+      // Safely release the camera before triggering print box
+      stopCamera();
+      window.print();
+    }
+
+    // Initialize scanner on page load
+    startCamera();
+  </script>
+
+</body>
+</html>
