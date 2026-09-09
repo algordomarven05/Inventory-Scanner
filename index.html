@@ -58,7 +58,6 @@
   </div>
 
   <script>
-    // Sample Inventory Database
     const inventoryDB = {
       "123456": "Standard Screwdriver Set",
       "789012": "AA Battery 4-Pack",
@@ -67,20 +66,35 @@
 
     let html5QrCode = null;
     let scannedItems = {};
-    let lastScannedCode = null;
-    let lastScannedTime = 0;
+    let isCooldown = false; // Block rapid duplicate scans
 
     document.getElementById('receipt-date').innerText = new Date().toLocaleString();
 
-    function onScanSuccess(decodedText) {
-      const now = Date.now();
-      // Prevent duplicate rapid scans of the same item within 2 seconds
-      if (decodedText === lastScannedCode && now - lastScannedTime < 2000) {
-        return;
+    // Generate a simple scanner beep sound using Web Audio API (no audio file required)
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 1800; // Beep pitch
+        gain.gain.value = 0.1;      // Volume
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.12); // Beep duration (120ms)
+      } catch (e) {
+        console.log("Audio not allowed yet:", e);
       }
-      
-      lastScannedCode = decodedText;
-      lastScannedTime = now;
+    }
+
+    function onScanSuccess(decodedText) {
+      // Ignore scans if we are in cooldown mode
+      if (isCooldown) return;
+
+      // Enable cooldown flag for 2 seconds
+      isCooldown = true;
+      playBeepSound();
 
       let itemName = inventoryDB[decodedText] || "Unknown Item / Raw Code";
 
@@ -91,6 +105,11 @@
       }
 
       updateReceiptTable();
+
+      // Reset cooldown after 2000 ms (2 seconds)
+      setTimeout(() => {
+        isCooldown = false;
+      }, 2000);
     }
 
     function updateReceiptTable() {
@@ -110,10 +129,9 @@
     function startCamera() {
       html5QrCode = new Html5Qrcode("reader");
 
-      // Set formats to prioritize standard 1D barcodes and QR codes
       const config = {
-        fps: 20,
-        qrbox: { width: 300, height: 180 }, // Rectangular scanning box works best for 1D barcodes
+        fps: 15,
+        qrbox: { width: 300, height: 180 },
         aspectRatio: 1.333333,
         formatsToSupport: [
           Html5QrcodeSupportedFormats.EAN_13,
@@ -127,7 +145,7 @@
       };
 
       html5QrCode.start(
-        { facingMode: "environment" }, // Prefers rear/main webcam
+        { facingMode: "environment" },
         config,
         onScanSuccess
       ).then(() => {
@@ -151,7 +169,6 @@
       window.print();
     }
 
-    // Auto start scanner
     window.addEventListener("load", startCamera);
   </script>
 
