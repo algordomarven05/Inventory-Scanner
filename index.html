@@ -173,7 +173,7 @@
             </div>
           </div>
 
-          <!-- SEPARATED ACTIONS -->
+          <!-- ACTIONS -->
           <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
             <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
             <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
@@ -371,7 +371,9 @@
       if (!GOOGLE_SCRIPT_URL) return;
 
       try {
-        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const cacheBuster = GOOGLE_SCRIPT_URL + (GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+        const res = await fetch(cacheBuster, { method: 'GET', redirect: 'follow' });
+
         if (res.ok) {
           const record = await res.json();
           inventory = record.inventory || [];
@@ -379,13 +381,18 @@
           stockOutLogs = record.stockOutLogs || [];
           receiptCounter = record.receiptCounter || 1;
           
-          document.getElementById('sync-indicator').innerText = '🟢 Live Cloud Synced (Google Sheets)';
-          document.getElementById('sync-indicator').style.background = '#28a745';
+          const syncEl = document.getElementById('sync-indicator');
+          syncEl.innerText = '🟢 Live Cloud Synced (Google Sheets)';
+          syncEl.style.background = '#28a745';
           refreshAllViews();
+        } else {
+          throw new Error('Sync response failed');
         }
       } catch (err) {
-        document.getElementById('sync-indicator').innerText = '🔴 Cloud Sync Offline';
-        document.getElementById('sync-indicator').style.background = '#d9534f';
+        console.error("Cloud Sync Error:", err);
+        const syncEl = document.getElementById('sync-indicator');
+        syncEl.innerText = '🔴 Cloud Sync Offline';
+        syncEl.style.background = '#d9534f';
       }
     }
 
@@ -395,7 +402,7 @@
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, receiptCounter })
         });
       } catch (err) {
