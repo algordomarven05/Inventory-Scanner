@@ -35,7 +35,7 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* In-Screen Notification Banner */
+    /* Notifications */
     .notification-box {
       margin-top: 10px;
       padding: 10px 15px;
@@ -101,7 +101,7 @@
     .bg-expiring { background: #6f42c1; }
     .bg-expired { background: #343a40; }
 
-    /* REAL THERMAL RECEIPT STYLING WITH FULL COLORED LOGO */
+    /* THERMAL RECEIPT STYLING */
     .receipt-paper { 
       background: #ffffff; 
       padding: 18px 15px; 
@@ -116,7 +116,6 @@
     }
 
     .pgso-header { text-align: center; margin-bottom: 12px; }
-    /* FULL COLORED LOGO */
     .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
     .receipt-divider { border-top: 1px dashed #333; margin: 10px 0; }
 
@@ -138,7 +137,7 @@
       display: flex;
       justify-content: space-between;
       gap: 15px;
-      margin-top: 25px;
+      margin-top: 35px;
       font-size: 10px;
       text-align: center;
     }
@@ -169,10 +168,10 @@
     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
 
-    /* Print Isolation & Thermal Receipt Paper Formatting */
+    /* Print Formatting */
     @media print {
       body * { visibility: hidden !important; }
-      #printable-receipt, #printable-receipt * { visibility: visible !important; }
+      #printable-receipt, #printable-receipt *, .printable, .printable * { visibility: visible !important; }
       #printable-receipt { 
         position: absolute; 
         left: 0; 
@@ -224,7 +223,7 @@
     </div>
   </div>
 
-  <!-- Hidden File Input for Profile Picture Upload -->
+  <!-- Profile Picture Upload -->
   <input type="file" id="pfp-upload" accept="image/*" style="display: none;" onchange="handlePfpUpload(event)">
 
   <!-- Top Navigation Bar -->
@@ -237,12 +236,12 @@
       <button class="tab-btn active" id="tab-scanner-btn" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
       <button class="tab-btn" id="tab-dashboard-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
       <button class="tab-btn" id="tab-stockout-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
-      <button class="tab-btn admin-only" id="tab-inventory-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
+      <button class="tab-btn" id="tab-inventory-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
       <button class="tab-btn admin-only" id="tab-stockin-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
       <button class="tab-btn admin-only" id="tab-history-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
       <button class="tab-btn admin-only" id="tab-users-btn" onclick="switchTab('users', this)">👥 User Management</button>
       
-      <!-- User Profile Header Display -->
+      <!-- Profile Header -->
       <div class="user-profile-badge">
         <img id="user-avatar" class="profile-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile" onclick="triggerPfpUpload()" title="Click to change profile picture">
         <span id="user-fullname" class="profile-name" onclick="triggerPfpUpload()" title="Click to change profile picture">User</span>
@@ -259,7 +258,7 @@
       <div class="scanner-receipt-container">
         <div class="scanner-receipt-grid">
           
-          <!-- LEFT: Scanner Box -->
+          <!-- Scanner Box -->
           <div class="scanner-card">
             <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
             <div class="scanner-wrapper">
@@ -275,15 +274,14 @@
             <div id="scanner-notif" class="notification-box"></div>
           </div>
 
-          <!-- RIGHT: Authentic Thermal Receipt Box -->
+          <!-- Thermal Receipt Box -->
           <div class="receipt-card">
             <div class="receipt-paper" id="printable-receipt">
               <div class="pgso-header">
-                <!-- COLORED LOGO -->
                 <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
                 <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
-                <div style="font-size:10px; font-weight:bold; color: #444;">Provincial General Services Office</div>
-                <div style="font-size:11px; font-weight:bold; margin-top:4px; text-decoration: underline;">SUPPLY RELEASE RECEIPT</div>
+                <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
+                <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
               </div>
 
               <div class="receipt-divider"></div>
@@ -291,7 +289,7 @@
               <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
                 <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
                 <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;" oninput="updateReceivedByName(this.value)"></div>
+                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
                 <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
               </div>
 
@@ -311,18 +309,16 @@
 
               <div class="receipt-divider"></div>
 
-              <!-- SIDE-BY-SIDE SIGNATURE SECTION -->
+              <!-- SIGNATURE SECTION -->
               <div class="signature-grid">
-                <!-- LEFT: RELEASED BY -->
                 <div class="sig-box">
                   <div id="released-by-signature" class="sig-name">STAFF NAME</div>
                   <div class="sig-line"></div>
                   <div class="sig-label">RELEASED BY</div>
                 </div>
 
-                <!-- RIGHT: RECEIVED BY -->
                 <div class="sig-box">
-                  <div id="received-by-signature" class="sig-name">REQUESTER NAME</div>
+                  <div class="sig-name"></div>
                   <div class="sig-line"></div>
                   <div class="sig-label">RECEIVED BY</div>
                 </div>
@@ -386,7 +382,7 @@
     <div id="inventory" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3>Master Inventory List</h3>
-        <button class="btn btn-primary" onclick="openItemModal()">+ Add New Item</button>
+        <button class="btn btn-primary admin-only" onclick="openItemModal()">+ Add New Item</button>
       </div>
       <div class="card-box" style="overflow-x: auto;">
         <table>
@@ -404,6 +400,7 @@
               <th>Expiry</th>
               <th>Days Left</th>
               <th>Status</th>
+              <th class="admin-only">Actions</th>
             </tr>
           </thead>
           <tbody id="inventory-table-body"></tbody>
@@ -443,8 +440,8 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3>Monthly Activity Reports</h3>
         <div>
-          <button class="btn btn-primary" onclick="window.print()">Print Report (PDF)</button>
-          <button class="btn btn-success" onclick="exportMonthlyCSV()">Export Excel (CSV)</button>
+          <button class="btn btn-primary" onclick="printSelectedHistory()">Print Selected (PDF)</button>
+          <button class="btn btn-success" onclick="exportSelectedMonthlyCSV()">Export Selected (CSV)</button>
         </div>
       </div>
       <div class="card-box printable">
@@ -452,6 +449,7 @@
         <table>
           <thead>
             <tr>
+              <th class="no-print" style="width: 30px;"><input type="checkbox" id="select-all-history" onchange="toggleSelectAllHistory(this)"></th>
               <th>Date</th>
               <th>Type</th>
               <th>Reference No</th>
@@ -487,10 +485,11 @@
 
   </div>
 
-  <!-- MODAL: ADD ITEM -->
+  <!-- MODAL: ADD / EDIT ITEM -->
   <div id="itemModal" class="modal">
     <div class="modal-content">
-      <h3>Inventory Item Details</h3>
+      <h3 id="item-modal-title">Inventory Item Details</h3>
+      <input type="hidden" id="m-edit-index" value="-1">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div><label>Item Name:</label><input type="text" id="m-name" style="width:100%;"></div>
         <div><label>Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%;"></div>
@@ -537,7 +536,6 @@
     let stockOutLogs = [];
     let receiptCounter = 1;
 
-    // Default Accounts List
     let users = [
       { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
       { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
@@ -566,19 +564,16 @@
       setTimeout(() => { notifEl.style.display = 'none'; }, 4000);
     }
 
-    /* AUTHENTICATION & PROFILE MANAGEMENT */
     function checkAuthStatus() {
       const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-screen').style.display = 'none';
         
-        // Display Complete Name
         const nameToDisplay = currentUser.fullname || currentUser.username;
         document.getElementById('user-fullname').innerText = nameToDisplay;
         document.getElementById('released-by-signature').innerText = nameToDisplay;
         
-        // Load Avatar
         const avatarEl = document.getElementById('user-avatar');
         if (currentUser.pfp) { avatarEl.src = currentUser.pfp; }
 
@@ -670,11 +665,6 @@
       }
     }
 
-    function updateReceivedByName(val) {
-      document.getElementById('received-by-signature').innerText = val.trim().toUpperCase() || 'REQUESTER NAME';
-    }
-
-    /* GOOGLE SHEETS CLOUD SYNC */
     async function loadFromGoogleSheet() {
       if (!GOOGLE_SCRIPT_URL) return;
 
@@ -841,7 +831,6 @@
       showNotification('receipt-notif', 'Supply release completed & synced to cloud!', 'success');
     }
 
-    /* PRINTING & SAVE AS PDF */
     function printReceiptOnly() {
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items to print in receipt.', 'warning');
@@ -850,7 +839,6 @@
       setTimeout(() => { window.print(); }, 150);
     }
 
-    /* DIRECT RECEIPT CSV EXPORT FUNCTION */
     function exportReceiptCSV() {
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items in receipt to export.', 'warning');
@@ -895,8 +883,15 @@
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       tbody.innerHTML = '';
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
       inventory.forEach((item, index) => {
         const status = calculateStatus(item);
+        let actionCell = isAdmin 
+          ? `<button class="btn btn-warning" style="padding: 3px 6px; font-size: 11px;" onclick="editInventoryItem(${index})">✏️ Edit</button>
+             <button class="btn btn-danger" style="padding: 3px 6px; font-size: 11px;" onclick="deleteInventoryItem(${index})">🗑️ Delete</button>`
+          : `-`;
+
         tbody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
@@ -911,15 +906,57 @@
             <td>${item.expiry || '-'}</td>
             <td>${item.daysLeft}</td>
             <td><span class="badge ${status.class}">${status.label}</span></td>
+            <td class="admin-only">${actionCell}</td>
           </tr>`;
       });
+
+      applyUserPermissions();
     }
 
-    function openItemModal() { document.getElementById('itemModal').style.display = 'block'; }
+    function openItemModal() {
+      document.getElementById('m-edit-index').value = "-1";
+      document.getElementById('item-modal-title').innerText = "Add New Inventory Item";
+      document.getElementById('m-name').value = '';
+      document.getElementById('m-category').value = '';
+      document.getElementById('m-code').value = '';
+      document.getElementById('m-location').value = '';
+      document.getElementById('m-unit').value = '';
+      document.getElementById('m-stock').value = '0';
+      document.getElementById('m-min').value = '5';
+      document.getElementById('m-batch').value = '';
+      document.getElementById('m-expiry').value = '';
+      document.getElementById('itemModal').style.display = 'block';
+    }
+
+    function editInventoryItem(index) {
+      const item = inventory[index];
+      document.getElementById('m-edit-index').value = index;
+      document.getElementById('item-modal-title').innerText = "Edit Inventory Item";
+      document.getElementById('m-name').value = item.name || '';
+      document.getElementById('m-category').value = item.category || '';
+      document.getElementById('m-code').value = item.code || '';
+      document.getElementById('m-location').value = item.location || '';
+      document.getElementById('m-unit').value = item.unit || '';
+      document.getElementById('m-stock').value = item.stock || 0;
+      document.getElementById('m-min').value = item.min || 5;
+      document.getElementById('m-batch').value = item.batch || '';
+      document.getElementById('m-expiry').value = item.expiry || '';
+      document.getElementById('itemModal').style.display = 'block';
+    }
+
+    function deleteInventoryItem(index) {
+      if (confirm(`Are you sure you want to delete '${inventory[index].name}'?`)) {
+        inventory.splice(index, 1);
+        saveToGoogleSheet();
+        refreshAllViews();
+      }
+    }
+
     function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function saveInventoryItem() {
+      const editIndex = parseInt(document.getElementById('m-edit-index').value);
       const item = {
         name: document.getElementById('m-name').value,
         category: document.getElementById('m-category').value,
@@ -932,9 +969,13 @@
         expiry: document.getElementById('m-expiry').value
       };
 
-      const existingIdx = inventory.findIndex(i => i.code === item.code);
-      if (existingIdx >= 0) inventory[existingIdx] = item;
-      else inventory.push(item);
+      if (editIndex >= 0) {
+        inventory[editIndex] = item;
+      } else {
+        const existingIdx = inventory.findIndex(i => i.code === item.code);
+        if (existingIdx >= 0) inventory[existingIdx] = item;
+        else inventory.push(item);
+      }
 
       saveToGoogleSheet();
       closeModal('itemModal');
@@ -1003,7 +1044,6 @@
       });
     }
 
-    /* STOCK OUT LOG TABLE */
     function renderStockOutTable() {
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
@@ -1060,37 +1100,95 @@
     function reprintHistoricalReceipt(index) {
       const log = stockOutLogs[index];
       
-      // Load receipt fields
       document.getElementById('receipt-no').innerText = log.receiptNo;
       document.getElementById('req-office').value = log.office;
       document.getElementById('req-name').value = log.requester;
       document.getElementById('receipt-date').innerText = log.date;
       document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
-      document.getElementById('received-by-signature').innerText = log.requester ? log.requester.toUpperCase() : 'REQUESTER NAME';
 
-      // Load item row
       let item = inventory.find(i => i.code === log.code);
       scannedReceiptItems = {};
       scannedReceiptItems[log.code] = { name: item ? item.name : 'Item ' + log.code, qty: log.qty };
       renderReceipt();
 
-      // Switch to Scanner tab and trigger print
       switchTab('scanner', document.getElementById('tab-scanner-btn'));
       setTimeout(() => window.print(), 300);
     }
 
+    /* MONTHLY REPORT WITH CHECKBOX SELECTION */
     function renderHistoryTable() {
       const tbody = document.getElementById('history-table-body');
       tbody.innerHTML = '';
+      
+      let allLogs = [];
       stockInLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock In</td><td>-</td><td>${l.office}</td><td>${l.code}</td><td>+${l.qty}</td></tr>`;
+        allLogs.push({ date: l.date, type: 'Stock In', ref: '-', office: l.office, code: l.code, qty: `+${l.qty}` });
       });
       stockOutLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock Out</td><td>${l.receiptNo}</td><td>${l.office}</td><td>${l.code}</td><td>-${l.qty}</td></tr>`;
+        allLogs.push({ date: l.date, type: 'Stock Out', ref: l.receiptNo, office: l.office, code: l.code, qty: `-${l.qty}` });
+      });
+
+      allLogs.forEach((l, index) => {
+        tbody.innerHTML += `
+          <tr class="history-row">
+            <td class="no-print"><input type="checkbox" class="history-chk" data-idx="${index}"></td>
+            <td>${l.date}</td>
+            <td>${l.type}</td>
+            <td>${l.ref}</td>
+            <td>${l.office}</td>
+            <td>${l.code}</td>
+            <td>${l.qty}</td>
+          </tr>`;
       });
     }
 
-    /* USER MANAGEMENT TABLE */
+    function toggleSelectAllHistory(master) {
+      document.querySelectorAll('.history-chk').forEach(chk => chk.checked = master.checked);
+    }
+
+    function printSelectedHistory() {
+      const rows = document.querySelectorAll('.history-row');
+      rows.forEach(r => {
+        const chk = r.querySelector('.history-chk');
+        if (chk && !chk.checked) {
+          r.style.display = 'none';
+        }
+      });
+
+      window.print();
+
+      // Reset view after printing dialog closes
+      setTimeout(() => {
+        rows.forEach(r => r.style.display = '');
+      }, 500);
+    }
+
+    function exportSelectedMonthlyCSV() {
+      let csv = "Date,Type,Reference No,Office,Code,Qty\n";
+      const rows = document.querySelectorAll('.history-row');
+      let count = 0;
+
+      rows.forEach(r => {
+        const chk = r.querySelector('.history-chk');
+        if (chk && chk.checked) {
+          const cells = r.querySelectorAll('td');
+          csv += `"${cells[1].innerText}","${cells[2].innerText}","${cells[3].innerText}","${cells[4].innerText}","${cells[5].innerText}","${cells[6].innerText}"\n`;
+          count++;
+        }
+      });
+
+      if (count === 0) {
+        alert("Please select at least one record to export.");
+        return;
+      }
+
+      let blob = new Blob([csv], { type: 'text/csv' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `PGSO_Selected_Report_${Date.now()}.csv`;
+      link.click();
+    }
+
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
@@ -1154,17 +1252,6 @@
       saveToGoogleSheet();
       showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
       refreshAllViews();
-    }
-
-    function exportMonthlyCSV() {
-      let csv = "Date,Type,Reference No,Office,Code,Qty\n";
-      stockInLogs.forEach(l => { csv += `"${l.date}","Stock In","-","${l.office}","${l.code}",${l.qty}\n`; });
-      stockOutLogs.forEach(l => { csv += `"${l.date}","Stock Out","${l.receiptNo}","${l.office}","${l.code}",-${l.qty}\n`; });
-      let blob = new Blob([csv], { type: 'text/csv' });
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `PGSO_Monthly_Report_${Date.now()}.csv`;
-      link.click();
     }
   </script>
 </body>
