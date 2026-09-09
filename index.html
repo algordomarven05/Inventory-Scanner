@@ -3,58 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR & Barcode Receipt Scanner</title>
+  <title>PGSO - Inventory Scanner & Receipt Generator</title>
   <!-- Load HTML5 QR & Barcode Library -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
-    .container { display: flex; gap: 20px; max-width: 1100px; margin: auto; }
-    .scanner-box, .receipt-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
-    #reader { width: 100%; min-height: 300px; }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #007bff; color: white; }
-    .btn { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; }
-    .btn-stop { background: #dc3545; }
+    body { font-family: 'Courier New', Courier, monospace; margin: 20px; background: #eef2f5; color: #222; }
+    .container { display: flex; gap: 20px; max-width: 1200px; margin: auto; }
+    .scanner-box, .receipt-container { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; }
     
+    /* Formal Barcode Reader Styling */
+    .scanner-wrapper { position: relative; border: 3px solid #1a252f; border-radius: 8px; overflow: hidden; background: #000; }
+    #reader { width: 100%; min-height: 320px; }
+    #reader video { transform: none !important; } /* Unmirrored camera view */
+    
+    .scanner-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; border: 2px dashed rgba(0, 255, 65, 0.4);
+      box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+    }
+    .laser-line {
+      position: absolute; width: 90%; height: 2px; background: red;
+      box-shadow: 0 0 8px red; animation: scanAnimation 2s infinite ease-in-out;
+    }
+    @keyframes scanAnimation {
+      0% { top: 15%; }
+      50% { top: 85%; }
+      100% { top: 15%; }
+    }
+
+    /* Official PGSO Receipt Styling */
+    .receipt-paper {
+      background: #fff; padding: 20px; border: 1px solid #ccc;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05); font-family: 'Times New Roman', Times, serif;
+    }
+    .pgso-header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    .pgso-logo { width: 85px; height: auto; display: block; margin: 0 auto 5px auto; }
+    .pgso-title { font-size: 20px; font-weight: bold; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
+    .pgso-sub { font-size: 11px; margin-top: 2px; font-style: italic; }
+
+    .meta-section { margin-bottom: 15px; font-size: 14px; }
+    .field-group { display: flex; margin-bottom: 6px; align-items: baseline; }
+    .field-label { font-weight: bold; width: 150px; }
+    .field-input { flex: 1; border: none; border-bottom: 1px dotted #000; font-family: inherit; font-size: 14px; outline: none; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
+    th { background: #f0f0f0; text-transform: uppercase; font-size: 12px; }
+
+    .signature-container { display: flex; justify-content: space-between; margin-top: 35px; text-align: center; }
+    .sig-box { width: 45%; }
+    .sig-line { border-top: 1px solid #000; margin-top: 40px; font-size: 12px; font-weight: bold; }
+
+    /* Controls */
+    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+    .btn { padding: 10px 16px; font-family: sans-serif; font-weight: bold; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1; }
+    .btn-print { background: #0056b3; }
+    .btn-reset { background: #d9534f; }
+    .btn-stop { background: #6c757d; }
+
     @media print {
       body * { visibility: hidden; }
-      .receipt-box, .receipt-box * { visibility: visible; }
-      .receipt-box { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
-      .btn { display: none; }
+      .receipt-container, .receipt-container * { visibility: visible; }
+      .receipt-container { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; }
+      .btn-group, .btn { display: none !important; }
+      .field-input { border-bottom: none; }
     }
   </style>
 </head>
 <body>
 
-  <h2>Inventory Scanner & Receipt Generator</h2>
-
   <div class="container">
     <!-- Camera Section -->
     <div class="scanner-box">
-      <h3>1. Scan Code</h3>
-      <div id="reader"></div>
-      <button class="btn btn-stop" id="stop-btn" onclick="stopCamera()" style="display:none;">Stop Camera</button>
+      <h3 style="font-family: sans-serif; margin-top: 0;">1. Barcode & QR Reader</h3>
+      <div class="scanner-wrapper">
+        <div id="reader"></div>
+        <div class="scanner-overlay"><div class="laser-line"></div></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-stop" id="stop-btn" onclick="stopCamera()" style="display:none;">Stop Camera</button>
+        <button class="btn btn-reset" onclick="resetReceipt()">Reset Scanned Items</button>
+      </div>
     </div>
 
-    <!-- Receipt Section -->
-    <div class="receipt-box">
-      <h3>2. Scanned Receipt</h3>
-      <p><strong>Date:</strong> <span id="receipt-date"></span></p>
-      <table>
-        <thead>
-          <tr>
-            <th>Code ID</th>
-            <th>Item Name</th>
-            <th>Qty</th>
-          </tr>
-        </thead>
-        <tbody id="receipt-body">
-          <!-- Scanned items appear here -->
-        </tbody>
-      </table>
-      <button class="btn" onclick="printReceipt()">Finish & Print Receipt</button>
+    <!-- Official Receipt Section -->
+    <div class="receipt-container">
+      <div class="receipt-paper">
+        <!-- PGSO Official Header -->
+        <div class="pgso-header">
+          <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
+          <h1 class="pgso-title">PGSO</h1>
+          <div class="pgso-sub">Provincial General Services Office</div>
+          <div style="font-size: 13px; font-weight: bold; margin-top: 5px;">PROPERTY & INVENTORY RECEIPT</div>
+        </div>
+
+        <!-- Meta Information -->
+        <div class="meta-section">
+          <div class="field-group">
+            <span class="field-label">Requesting Office:</span>
+            <input type="text" class="field-input" placeholder="e.g. Provincial Health Office">
+          </div>
+          <div class="field-group">
+            <span class="field-label">Requester Name:</span>
+            <input type="text" class="field-input" placeholder="e.g. Juan Dela Cruz">
+          </div>
+          <div class="field-group">
+            <span class="field-label">Date & Time:</span>
+            <span id="receipt-date" style="font-weight: bold;"></span>
+          </div>
+        </div>
+
+        <!-- Scanned Items Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>Code ID</th>
+              <th>Item Description</th>
+              <th style="width: 50px; text-align: center;">Qty</th>
+            </tr>
+          </thead>
+          <tbody id="receipt-body">
+            <!-- Dynamic rows will appear here -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="text-align: right; font-weight: bold;">Total Items:</td>
+              <td id="total-qty" style="text-align: center; font-weight: bold;">0</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Signatures -->
+        <div class="signature-container">
+          <div class="sig-box">
+            <div class="sig-line">Received By</div>
+            <div style="font-size: 11px; margin-top: 2px;">(Signature over Printed Name)</div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-line">Released By</div>
+            <div style="font-size: 11px; margin-top: 2px;">PGSO Authorized Staff</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-print" onclick="printReceipt()">Print Receipt</button>
+      </div>
     </div>
   </div>
 
@@ -131,14 +225,26 @@
     function updateReceiptTable() {
       const tbody = document.getElementById('receipt-body');
       tbody.innerHTML = '';
+      let totalCount = 0;
 
       for (let code in scannedItems) {
+        let item = scannedItems[code];
+        totalCount += item.qty;
         let row = `<tr>
           <td>${code}</td>
-          <td>${scannedItems[code].name}</td>
-          <td>${scannedItems[code].qty}</td>
+          <td>${item.name}</td>
+          <td style="text-align: center;">${item.qty}</td>
         </tr>`;
         tbody.innerHTML += row;
+      }
+
+      document.getElementById('total-qty').innerText = totalCount;
+    }
+
+    function resetReceipt() {
+      if (confirm("Are you sure you want to clear all scanned items?")) {
+        scannedItems = {};
+        updateReceiptTable();
       }
     }
 
@@ -191,7 +297,6 @@
     }
 
     function printReceipt() {
-      stopCamera();
       window.print();
     }
 
