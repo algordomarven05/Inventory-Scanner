@@ -1,755 +1,359 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PGSO - Inventory & Warehouse Management System</title>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <style>
-    :root {
-      --primary: #0056b3;
-      --success: #1e7e34;
-      --warning: #f39c12;
-      --danger: #d9534f;
-      --dark: #1a252f;
-      --light: #f8f9fa;
-    }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; color: #333; }
+<script>
+  // PASTE YOUR GOOGLE WEB APP URL HERE:
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu_2kpm2dJfWkYuoIUBPzWAbSBikUb435auHKIx6E6M-jDKriSNxmZBSoJSxWM1nT4/exec";
+
+  let inventory = [];
+  let stockInLogs = [];
+  let stockOutLogs = [];
+  let receiptCounter = 1;
+
+  let scannedReceiptItems = {};
+  let html5QrCode = null;
+  let isTorchOn = false;
+  let lastScannedCode = null;
+  let lastScanTime = 0;
+
+  window.addEventListener('load', () => {
+    loadFromGoogleSheet();
+    generateReceiptNumber();
+    startCamera();
     
-    /* Header Bar */
-    .navbar { background: var(--dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-    .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
-    .tab-btn:hover { background: #34495e; }
-    .tab-btn.active { background: var(--primary); border-color: #004085; }
+    // Auto-sync polling every 5 seconds across laptop and all phones
+    setInterval(loadFromGoogleSheet, 5000);
+  });
 
-    .main-container { padding: 20px; max-width: 1400px; margin: auto; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* Left-Right Split Grid */
-    .scanner-receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-    @media (max-width: 900px) {
-      .scanner-receipt-grid { grid-template-columns: 1fr; }
-    }
-    
-    .scanner-card {
-      background: #fff; padding: 20px; border-radius: 10px;
-      border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15);
-    }
-    .receipt-card {
-      background: #fff; padding: 20px; border-radius: 10px;
-      border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  async function loadFromGoogleSheet() {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_DEPLOYED_WEB_APP_URL_HERE")) {
+      document.getElementById('sync-indicator').innerText = '⚠️ Add Google Script URL';
+      document.getElementById('sync-indicator').style.background = '#f39c12';
+      return;
     }
 
-    /* Scanner Camera Frame */
-    .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
-    #reader { width: 100%; height: 100%; min-height: 280px; }
-    #reader video { transform: none !important; object-fit: cover; }
-
-    /* Controls & Buttons */
-    .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-    .btn { padding: 8px 14px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .btn-primary { background: var(--primary); }
-    .btn-success { background: var(--success); }
-    .btn-danger { background: var(--danger); }
-    .btn-warning { background: var(--warning); color: #000; }
-    .btn-dark { background: var(--dark); }
-
-    /* Dashboard Grid */
-    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; border-left: 5px solid var(--primary); }
-    .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #666; text-transform: uppercase; }
-    .dash-card .count { font-size: 22px; font-weight: bold; }
-
-    /* Tables */
-    .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
-    th { background: #f1f3f5; font-weight: 600; }
-    
-    .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
-    .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 28px; }
-
-    /* Badges */
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
-    .bg-ok { background: #28a745; }
-    .bg-low { background: #ffc107; color: #000; }
-    .bg-critical { background: #fd7e14; }
-    .bg-out { background: #dc3545; }
-    .bg-expiring { background: #6f42c1; }
-    .bg-expired { background: #343a40; }
-
-    /* Official Receipt Styling */
-    .receipt-paper { background: #fff; padding: 20px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; }
-    .pgso-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-    .pgso-logo { width: 75px; height: auto; margin-bottom: 5px; }
-
-    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
-
-    @media print {
-      body * { visibility: hidden; }
-      .printable, .printable * { visibility: visible; }
-      .printable { position: absolute; left: 0; top: 0; width: 100%; }
-      .no-print { display: none !important; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Top Navigation & Section Switcher -->
-  <div class="navbar no-print">
-    <h2>PGSO WMS & Scanner</h2>
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
-      <button class="tab-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
-      <button class="tab-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
-      <button class="tab-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
-      <button class="tab-btn" onclick="switchTab('reorder', this)">📋 Reorder List</button>
-      <button class="tab-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
-      <button class="tab-btn" onclick="switchTab('sync', this)">🔄 Sync Data</button>
-    </div>
-  </div>
-
-  <div class="main-container">
-
-    <!-- SCANNER & RECEIPT TAB (LEFT: SCANNER, RIGHT: RECEIPT) -->
-    <div id="scanner" class="tab-content active">
-      <div class="scanner-receipt-grid">
+    try {
+      const res = await fetch(GOOGLE_SCRIPT_URL);
+      if (res.ok) {
+        const record = await res.json();
+        inventory = record.inventory || [];
+        stockInLogs = record.stockInLogs || [];
+        stockOutLogs = record.stockOutLogs || [];
+        receiptCounter = record.receiptCounter || 1;
         
-        <!-- LEFT: Barcode Reader Card -->
-        <div class="scanner-card">
-          <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
-          <div class="scanner-wrapper">
-            <div id="reader"></div>
-          </div>
-          
-          <div class="btn-group">
-            <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
-            <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
-            <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
-            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
-          </div>
-        </div>
-
-        <!-- RIGHT: Official Receipt Card -->
-        <div class="receipt-card printable">
-          <div class="receipt-paper">
-            <div class="pgso-header">
-              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
-              <h2 style="margin:0;">PGSO</h2>
-              <div style="font-size:12px; font-style:italic;">Provincial General Services Office</div>
-              <div style="font-weight:bold; margin-top:5px; text-transform:uppercase;">Property Release Receipt</div>
-            </div>
-
-            <div style="font-size: 13px; margin-bottom: 15px;">
-              <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
-              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 180px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-              <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 180px;"></div>
-              <div><strong>Date:</strong> <span id="receipt-date"></span></div>
-            </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>Code ID</th>
-                  <th>Item Name</th>
-                  <th style="text-align: center;">Qty</th>
-                  <th class="no-print">Action</th>
-                </tr>
-              </thead>
-              <tbody id="receipt-rows"></tbody>
-            </table>
-
-            <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
-              <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
-              <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Released By (PGSO)</div>
-            </div>
-          </div>
-
-          <div style="margin-top: 15px; display: flex; gap: 10px;" class="no-print">
-            <button class="btn btn-primary" onclick="completeReleaseAndPrint()">Complete & Print Receipt</button>
-            <button class="btn btn-success" onclick="exportReceiptCSV()">Export CSV</button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- DASHBOARD TAB -->
-    <div id="dashboard" class="tab-content">
-      <h3>System Overview</h3>
-      <div class="dash-grid">
-        <div class="dash-card"><h4>Total Items</h4><div class="count" id="dash-total">0</div></div>
-        <div class="dash-card"><h4>Units in Stock</h4><div class="count" id="dash-units">0</div></div>
-        <div class="dash-card" style="border-color: #28a745;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
-        <div class="dash-card" style="border-color: #ffc107;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
-        <div class="dash-card" style="border-color: #fd7e14;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
-        <div class="dash-card" style="border-color: #dc3545;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
-        <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
-        <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
-      </div>
-    </div>
-
-    <!-- INVENTORY TAB -->
-    <div id="inventory" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3>Master Inventory List</h3>
-        <button class="btn btn-primary" onclick="openItemModal()">+ Add New Item</button>
-      </div>
-      <div class="card-box" style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Code</th>
-              <th>Location</th>
-              <th>Unit</th>
-              <th>Stock</th>
-              <th>Min</th>
-              <th>Batch</th>
-              <th>Expiry</th>
-              <th>Days Left</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- STOCK IN TAB -->
-    <div id="stockin" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3>Stock In Records</h3>
-        <button class="btn btn-success" onclick="openStockInModal()">+ New Delivery Stock In</button>
-      </div>
-      <div class="card-box" style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Date</th>
-              <th>Code</th>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Delivered By / Office</th>
-              <th>Staff</th>
-              <th>Batch</th>
-              <th>Location</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody id="stockin-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- STOCK OUT LOG TAB -->
-    <div id="stockout" class="tab-content">
-      <h3>Stock Out History</h3>
-      <div class="card-box" style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Receipt No</th>
-              <th>Date</th>
-              <th>Requesting Office</th>
-              <th>Requester</th>
-              <th>Item Code</th>
-              <th>Qty Issued</th>
-            </tr>
-          </thead>
-          <tbody id="stockout-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- REORDER TAB -->
-    <div id="reorder" class="tab-content">
-      <h3>Reorder Tracker</h3>
-      <div class="card-box">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Code</th>
-              <th>Reorder Qty</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="reorder-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- MONTHLY HISTORY REPORT TAB -->
-    <div id="history" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3>Monthly Activity Reports</h3>
-        <div>
-          <button class="btn btn-primary" onclick="window.print()">Print Report (PDF)</button>
-          <button class="btn btn-success" onclick="exportMonthlyCSV()">Export Excel (CSV)</button>
-        </div>
-      </div>
-      <div class="card-box printable">
-        <h4>Completed Transactions Log</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Reference No</th>
-              <th>Office / Source</th>
-              <th>Code</th>
-              <th>Qty</th>
-            </tr>
-          </thead>
-          <tbody id="history-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- SYNC / TRANSFER DATA TAB -->
-    <div id="sync" class="tab-content">
-      <h3>Transfer / Sync Data Between Devices</h3>
-      <p style="font-size: 13px; color: #666;">Browser storage (localStorage) is stored locally on each device. Use export/import below to transfer data from your Laptop to your Mobile Phone.</p>
-      <div class="card-box">
-        <button class="btn btn-primary" onclick="exportDatabaseJSON()">📥 Export Data to File (From Laptop)</button>
-        <hr style="margin: 20px 0;">
-        <h4>Upload Data File (On Mobile Phone):</h4>
-        <input type="file" id="import-file" accept=".json">
-        <button class="btn btn-success" onclick="importDatabaseJSON()">📤 Import & Replace Data</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- MODAL: ADD ITEM -->
-  <div id="itemModal" class="modal">
-    <div class="modal-content">
-      <h3>Inventory Item Details</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div><label>Item Name:</label><input type="text" id="m-name" style="width:100%;"></div>
-        <div><label>Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%;"></div>
-        <div><label>Barcode/QR Code:</label><input type="text" id="m-code" style="width:100%;"></div>
-        <div><label>Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%;"></div>
-        <div><label>Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%;"></div>
-        <div><label>Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%;"></div>
-        <div><label>Min Level:</label><input type="number" id="m-min" value="5" style="width:100%;"></div>
-        <div><label>Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%;"></div>
-        <div><label>Expiry Date:</label><input type="date" id="m-expiry" style="width:100%;"></div>
-      </div>
-      <div style="text-align: right; margin-top: 15px;">
-        <button class="btn btn-danger" onclick="closeModal('itemModal')">Cancel</button>
-        <button class="btn btn-success" onclick="saveInventoryItem()">Save Item</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: STOCK IN -->
-  <div id="stockInModal" class="modal">
-    <div class="modal-content">
-      <h3>Record New Stock In</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div><label>Item Barcode/QR Code:</label><input type="text" id="si-code" style="width:100%;"></div>
-        <div><label>Quantity Delivered:</label><input type="number" id="si-qty" value="1" style="width:100%;"></div>
-        <div><label>Delivered By / Office:</label><input type="text" id="si-office" style="width:100%;"></div>
-        <div><label>Receiving Staff:</label><input type="text" id="si-staff" style="width:100%;"></div>
-        <div><label>Batch / Lot Number:</label><input type="text" id="si-batch" style="width:100%;"></div>
-        <div><label>Rack / Storage Section:</label><input type="text" id="si-location" style="width:100%;"></div>
-        <div style="grid-column: span 2;"><label>Notes / Remarks:</label><input type="text" id="si-notes" style="width:100%;"></div>
-      </div>
-      <div style="text-align: right; margin-top: 15px;">
-        <button class="btn btn-danger" onclick="closeModal('stockInModal')">Cancel</button>
-        <button class="btn btn-success" onclick="processStockIn()">Submit Stock In</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let inventory = JSON.parse(localStorage.getItem('pgso_inventory')) || [];
-    let stockInLogs = JSON.parse(localStorage.getItem('pgso_stockin')) || [];
-    let stockOutLogs = JSON.parse(localStorage.getItem('pgso_stockout')) || [];
-    let receiptCounter = parseInt(localStorage.getItem('pgso_receipt_counter')) || 1;
-
-    let scannedReceiptItems = {};
-    let html5QrCode = null;
-    let isTorchOn = false;
-    let lastScannedCode = null;
-    let lastScanTime = 0;
-
-    /* WEB AUDIO BEEP SYNTHESIZER */
-    function playBeepSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // 1800Hz standard scanner beep
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.12);
-      } catch (e) {
-        console.log("Audio not supported or permitted yet", e);
+        document.getElementById('sync-indicator').innerText = '🟢 Live Cloud Synced (Google Sheets)';
+        document.getElementById('sync-indicator').style.background = '#28a745';
+        refreshAllViews();
       }
+    } catch (err) {
+      document.getElementById('sync-indicator').innerText = '🔴 Cloud Sync Offline';
+      document.getElementById('sync-indicator').style.background = '#d9534f';
+    }
+  }
+
+  async function saveToGoogleSheet() {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_DEPLOYED_WEB_APP_URL_HERE")) return;
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, receiptCounter })
+      });
+    } catch (err) {
+      console.error("Google Sheets Save Failed", err);
+    }
+  }
+
+  /* WEB AUDIO BEEP */
+  function playBeepSound() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {}
+  }
+
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    refreshAllViews();
+  }
+
+  function generateReceiptNumber() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const seq = String(receiptCounter).padStart(4, '0');
+    const office = document.getElementById('req-office').value.toUpperCase() || 'PGSO';
+    document.getElementById('receipt-no').innerText = `${office}-${year}-${month}-${seq}`;
+    document.getElementById('receipt-date').innerText = date.toLocaleString();
+  }
+
+  /* CAMERA & SCANNER ENGINE */
+  function startCamera() {
+    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 15, qrbox: { width: 250, height: 180 } };
+    html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => console.log(err));
+  }
+
+  function stopCamera() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log(err));
+    }
+  }
+
+  function onCodeScanned(code) {
+    const now = Date.now();
+    if (code === lastScannedCode && (now - lastScanTime) < 1500) return;
+    lastScannedCode = code;
+    lastScanTime = now;
+    playBeepSound();
+
+    let item = inventory.find(i => i.code === code);
+    let name = item ? item.name : "Unknown Item / Raw Code";
+
+    if (scannedReceiptItems[code]) scannedReceiptItems[code].qty++;
+    else scannedReceiptItems[code] = { name: name, qty: 1 };
+    renderReceipt();
+  }
+
+  function toggleTorch() {
+    if (html5QrCode) {
+      isTorchOn = !isTorchOn;
+      html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => alert("Flashlight not supported."));
+    }
+  }
+
+  /* RECEIPT ACTIONS */
+  function renderReceipt() {
+    const tbody = document.getElementById('receipt-rows');
+    tbody.innerHTML = '';
+    for (let code in scannedReceiptItems) {
+      let item = scannedReceiptItems[code];
+      tbody.innerHTML += `
+        <tr>
+          <td>${code}</td>
+          <td>${item.name}</td>
+          <td style="text-align: center;">
+            <div class="qty-controls">
+              <button class="qty-btn no-print" onclick="modQty('${code}', -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="qty-btn no-print" onclick="modQty('${code}', 1)">+</button>
+            </div>
+          </td>
+          <td class="no-print" style="text-align: center;"><button class="btn btn-danger" onclick="removeReceiptItem('${code}')">X</button></td>
+        </tr>`;
+    }
+  }
+
+  function modQty(code, delta) {
+    if (scannedReceiptItems[code]) {
+      scannedReceiptItems[code].qty += delta;
+      if (scannedReceiptItems[code].qty <= 0) delete scannedReceiptItems[code];
+      renderReceipt();
+    }
+  }
+
+  function removeReceiptItem(code) { delete scannedReceiptItems[code]; renderReceipt(); }
+  function clearReceipt() { scannedReceiptItems = {}; renderReceipt(); }
+
+  /* ACTION 1: COMPLETE RELEASE ONLY */
+  function completeReleaseOnly() {
+    const receiptNo = document.getElementById('receipt-no').innerText;
+    const office = document.getElementById('req-office').value;
+    const requester = document.getElementById('req-name').value;
+
+    if (Object.keys(scannedReceiptItems).length === 0) {
+      alert("No items in receipt to release.");
+      return;
     }
 
-    window.addEventListener('load', () => {
-      refreshAllViews();
-      generateReceiptNumber();
-      startCamera();
+    for (let code in scannedReceiptItems) {
+      let qty = scannedReceiptItems[code].qty;
+      let invItem = inventory.find(i => i.code === code);
+      if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
+      stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty });
+    }
+
+    receiptCounter++;
+    saveToGoogleSheet();
+    scannedReceiptItems = {};
+    generateReceiptNumber();
+    renderReceipt();
+    refreshAllViews();
+    alert("Property release completed & synced to Google Sheet!");
+  }
+
+  /* ACTION 2: PRINT RECEIPT ONLY */
+  function printReceiptOnly() {
+    if (Object.keys(scannedReceiptItems).length === 0) {
+      alert("No items to print.");
+      return;
+    }
+    window.print();
+  }
+
+  /* INVENTORY HELPERS */
+  function calculateStatus(item) {
+    const today = new Date();
+    if (item.expiry) {
+      const expDate = new Date(item.expiry);
+      const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+      item.daysLeft = diffDays;
+      if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
+      if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
+    } else { item.daysLeft = 'N/A'; }
+
+    if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
+    if (item.stock <= Math.floor(item.min / 2)) return { label: 'Critical', class: 'bg-critical' };
+    if (item.stock <= item.min) return { label: 'Low Stock', class: 'bg-low' };
+    return { label: 'OK', class: 'bg-ok' };
+  }
+
+  function renderInventoryTable() {
+    const tbody = document.getElementById('inventory-table-body');
+    tbody.innerHTML = '';
+    inventory.forEach((item, index) => {
+      const status = calculateStatus(item);
+      tbody.innerHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>${item.name}</strong></td>
+          <td>${item.category || '-'}</td>
+          <td>${item.code}</td>
+          <td>${item.location || '-'}</td>
+          <td>${item.unit || '-'}</td>
+          <td><strong>${item.stock}</strong></td>
+          <td>${item.min}</td>
+          <td>${item.batch || '-'}</td>
+          <td>${item.expiry || '-'}</td>
+          <td>${item.daysLeft}</td>
+          <td><span class="badge ${status.class}">${status.label}</span></td>
+        </tr>`;
+    });
+  }
+
+  function openItemModal() { document.getElementById('itemModal').style.display = 'block'; }
+  function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  function saveInventoryItem() {
+    const item = {
+      name: document.getElementById('m-name').value,
+      category: document.getElementById('m-category').value,
+      code: document.getElementById('m-code').value,
+      location: document.getElementById('m-location').value,
+      unit: document.getElementById('m-unit').value,
+      stock: parseInt(document.getElementById('m-stock').value) || 0,
+      min: parseInt(document.getElementById('m-min').value) || 5,
+      batch: document.getElementById('m-batch').value,
+      expiry: document.getElementById('m-expiry').value
+    };
+
+    const existingIdx = inventory.findIndex(i => i.code === item.code);
+    if (existingIdx >= 0) inventory[existingIdx] = item;
+    else inventory.push(item);
+
+    saveToGoogleSheet();
+    closeModal('itemModal');
+    refreshAllViews();
+  }
+
+  function processStockIn() {
+    const code = document.getElementById('si-code').value;
+    const qty = parseInt(document.getElementById('si-qty').value) || 0;
+    const office = document.getElementById('si-office').value;
+    const staff = document.getElementById('si-staff').value;
+    const batch = document.getElementById('si-batch').value;
+    const location = document.getElementById('si-location').value;
+    const notes = document.getElementById('si-notes').value;
+
+    let item = inventory.find(i => i.code === code);
+    if (item) {
+      item.stock += qty;
+      if (location) item.location = location;
+      if (batch) item.batch = batch;
+    }
+
+    stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
+    saveToGoogleSheet();
+    closeModal('stockInModal');
+    refreshAllViews();
+  }
+
+  function refreshDashboard() {
+    let units = 0, ok = 0, low = 0, critical = 0, out = 0, expiring = 0, expired = 0;
+    inventory.forEach(item => {
+      units += item.stock;
+      const st = calculateStatus(item);
+      if (st.label === 'OK') ok++;
+      if (st.label === 'Low Stock') low++;
+      if (st.label === 'Critical') critical++;
+      if (st.label === 'Out of Stock') out++;
+      if (st.label === 'Expiring Soon') expiring++;
+      if (st.label === 'Expired') expired++;
     });
 
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-      refreshAllViews();
-    }
+    document.getElementById('dash-total').innerText = inventory.length;
+    document.getElementById('dash-units').innerText = units;
+    document.getElementById('dash-ok').innerText = ok;
+    document.getElementById('dash-low').innerText = low;
+    document.getElementById('dash-critical').innerText = critical;
+    document.getElementById('dash-out').innerText = out;
+    document.getElementById('dash-expiring').innerText = expiring;
+    document.getElementById('dash-expired').innerText = expired;
+  }
 
-    function generateReceiptNumber() {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const seq = String(receiptCounter).padStart(4, '0');
-      const office = document.getElementById('req-office').value.toUpperCase() || 'PGSO';
-      
-      document.getElementById('receipt-no').innerText = `${office}-${year}-${month}-${seq}`;
-      document.getElementById('receipt-date').innerText = date.toLocaleString();
-    }
+  function refreshAllViews() {
+    renderInventoryTable();
+    refreshDashboard();
+    renderStockInTable();
+    renderStockOutTable();
+    renderHistoryTable();
+  }
 
-    /* CAMERA & SCANNER ENGINE */
-    function startCamera() {
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
-      
-      const config = { fps: 15, qrbox: { width: 250, height: 180 } };
+  function renderStockInTable() {
+    const tbody = document.getElementById('stockin-table-body');
+    tbody.innerHTML = '';
+    stockInLogs.forEach((l, i) => {
+      tbody.innerHTML += `<tr><td>${i+1}</td><td>${l.date}</td><td>${l.code}</td><td>${l.name}</td><td>${l.qty}</td><td>${l.office}</td><td>${l.staff}</td><td>${l.batch}</td><td>${l.location}</td><td>${l.notes}</td></tr>`;
+    });
+  }
 
-      html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned)
-        .catch(err => console.log("Camera access error:", err));
-    }
+  function renderStockOutTable() {
+    const tbody = document.getElementById('stockout-table-body');
+    tbody.innerHTML = '';
+    stockOutLogs.forEach(l => {
+      tbody.innerHTML += `<tr><td>${l.receiptNo}</td><td>${l.date}</td><td>${l.office}</td><td>${l.requester}</td><td>${l.code}</td><td>${l.qty}</td></tr>`;
+    });
+  }
 
-    function stopCamera() {
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log(err));
-      }
-    }
+  function renderHistoryTable() {
+    const tbody = document.getElementById('history-table-body');
+    tbody.innerHTML = '';
+    stockInLogs.forEach(l => {
+      tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock In</td><td>-</td><td>${l.office}</td><td>${l.code}</td><td>+${l.qty}</td></tr>`;
+    });
+    stockOutLogs.forEach(l => {
+      tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock Out</td><td>${l.receiptNo}</td><td>${l.office}</td><td>${l.code}</td><td>-${l.qty}</td></tr>`;
+    });
+  }
 
-    function onCodeScanned(code) {
-      const now = Date.now();
-      // Debounce scanner to avoid rapid double triggers
-      if (code === lastScannedCode && (now - lastScanTime) < 1500) return;
-      
-      lastScannedCode = code;
-      lastScanTime = now;
-
-      playBeepSound();
-
-      let item = inventory.find(i => i.code === code);
-      let name = item ? item.name : "Unknown Item / Raw Code";
-
-      if (scannedReceiptItems[code]) {
-        scannedReceiptItems[code].qty++;
-      } else {
-        scannedReceiptItems[code] = { name: name, qty: 1 };
-      }
-      renderReceipt();
-    }
-
-    function toggleTorch() {
-      if (html5QrCode) {
-        isTorchOn = !isTorchOn;
-        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => alert("Flashlight not supported on this device."));
-      }
-    }
-
-    /* RECEIPT FUNCTIONS */
-    function renderReceipt() {
-      const tbody = document.getElementById('receipt-rows');
-      tbody.innerHTML = '';
-      for (let code in scannedReceiptItems) {
-        let item = scannedReceiptItems[code];
-        tbody.innerHTML += `
-          <tr>
-            <td>${code}</td>
-            <td>${item.name}</td>
-            <td style="text-align: center;">
-              <div class="qty-controls">
-                <button class="qty-btn no-print" onclick="modQty('${code}', -1)">-</button>
-                <span>${item.qty}</span>
-                <button class="qty-btn no-print" onclick="modQty('${code}', 1)">+</button>
-              </div>
-            </td>
-            <td class="no-print" style="text-align: center;"><button class="btn btn-danger" onclick="removeReceiptItem('${code}')">X</button></td>
-          </tr>`;
-      }
-    }
-
-    function modQty(code, delta) {
-      if (scannedReceiptItems[code]) {
-        scannedReceiptItems[code].qty += delta;
-        if (scannedReceiptItems[code].qty <= 0) delete scannedReceiptItems[code];
-        renderReceipt();
-      }
-    }
-
-    function removeReceiptItem(code) {
-      delete scannedReceiptItems[code];
-      renderReceipt();
-    }
-
-    function clearReceipt() {
-      scannedReceiptItems = {};
-      renderReceipt();
-    }
-
-    function completeReleaseAndPrint() {
-      const receiptNo = document.getElementById('receipt-no').innerText;
-      const office = document.getElementById('req-office').value;
-      const requester = document.getElementById('req-name').value;
-
-      if (Object.keys(scannedReceiptItems).length === 0) {
-        alert("No items in receipt to release.");
-        return;
-      }
-
-      for (let code in scannedReceiptItems) {
-        let qty = scannedReceiptItems[code].qty;
-        let invItem = inventory.find(i => i.code === code);
-        if (invItem) {
-          invItem.stock = Math.max(0, invItem.stock - qty);
-        }
-        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty });
-      }
-
-      receiptCounter++;
-      localStorage.setItem('pgso_receipt_counter', receiptCounter);
-      saveAll();
-      
-      window.print();
-      scannedReceiptItems = {};
-      generateReceiptNumber();
-      renderReceipt();
-      refreshAllViews();
-    }
-
-    /* INVENTORY DATA HELPERS */
-    function calculateStatus(item) {
-      const today = new Date();
-      if (item.expiry) {
-        const expDate = new Date(item.expiry);
-        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-        item.daysLeft = diffDays;
-        if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
-        if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
-      } else { item.daysLeft = 'N/A'; }
-
-      if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
-      if (item.stock <= Math.floor(item.min / 2)) return { label: 'Critical', class: 'bg-critical' };
-      if (item.stock <= item.min) return { label: 'Low Stock', class: 'bg-low' };
-      return { label: 'OK', class: 'bg-ok' };
-    }
-
-    function renderInventoryTable() {
-      const tbody = document.getElementById('inventory-table-body');
-      tbody.innerHTML = '';
-      inventory.forEach((item, index) => {
-        const status = calculateStatus(item);
-        tbody.innerHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td><strong>${item.name}</strong></td>
-            <td>${item.category || '-'}</td>
-            <td>${item.code}</td>
-            <td>${item.location || '-'}</td>
-            <td>${item.unit || '-'}</td>
-            <td><strong>${item.stock}</strong></td>
-            <td>${item.min}</td>
-            <td>${item.batch || '-'}</td>
-            <td>${item.expiry || '-'}</td>
-            <td>${item.daysLeft}</td>
-            <td><span class="badge ${status.class}">${status.label}</span></td>
-            <td><button class="btn btn-primary" onclick="editItem(${index})">Edit</button></td>
-          </tr>`;
-      });
-    }
-
-    function openItemModal() { document.getElementById('itemModal').style.display = 'block'; }
-    function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    function saveInventoryItem() {
-      const item = {
-        name: document.getElementById('m-name').value,
-        category: document.getElementById('m-category').value,
-        code: document.getElementById('m-code').value,
-        location: document.getElementById('m-location').value,
-        unit: document.getElementById('m-unit').value,
-        stock: parseInt(document.getElementById('m-stock').value) || 0,
-        min: parseInt(document.getElementById('m-min').value) || 5,
-        batch: document.getElementById('m-batch').value,
-        expiry: document.getElementById('m-expiry').value
-      };
-
-      const existingIdx = inventory.findIndex(i => i.code === item.code);
-      if (existingIdx >= 0) inventory[existingIdx] = item;
-      else inventory.push(item);
-
-      saveAll();
-      closeModal('itemModal');
-      refreshAllViews();
-    }
-
-    function processStockIn() {
-      const code = document.getElementById('si-code').value;
-      const qty = parseInt(document.getElementById('si-qty').value) || 0;
-      const office = document.getElementById('si-office').value;
-      const staff = document.getElementById('si-staff').value;
-      const batch = document.getElementById('si-batch').value;
-      const location = document.getElementById('si-location').value;
-      const notes = document.getElementById('si-notes').value;
-
-      let item = inventory.find(i => i.code === code);
-      if (item) {
-        item.stock += qty;
-        if (location) item.location = location;
-        if (batch) item.batch = batch;
-      }
-
-      stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
-      saveAll();
-      closeModal('stockInModal');
-      refreshAllViews();
-    }
-
-    function refreshDashboard() {
-      let units = 0, ok = 0, low = 0, critical = 0, out = 0, expiring = 0, expired = 0;
-      inventory.forEach(item => {
-        units += item.stock;
-        const st = calculateStatus(item);
-        if (st.label === 'OK') ok++;
-        if (st.label === 'Low Stock') low++;
-        if (st.label === 'Critical') critical++;
-        if (st.label === 'Out of Stock') out++;
-        if (st.label === 'Expiring Soon') expiring++;
-        if (st.label === 'Expired') expired++;
-      });
-
-      document.getElementById('dash-total').innerText = inventory.length;
-      document.getElementById('dash-units').innerText = units;
-      document.getElementById('dash-ok').innerText = ok;
-      document.getElementById('dash-low').innerText = low;
-      document.getElementById('dash-critical').innerText = critical;
-      document.getElementById('dash-out').innerText = out;
-      document.getElementById('dash-expiring').innerText = expiring;
-      document.getElementById('dash-expired').innerText = expired;
-    }
-
-    function refreshAllViews() {
-      renderInventoryTable();
-      refreshDashboard();
-      renderStockInTable();
-      renderStockOutTable();
-      renderHistoryTable();
-    }
-
-    function renderStockInTable() {
-      const tbody = document.getElementById('stockin-table-body');
-      tbody.innerHTML = '';
-      stockInLogs.forEach((l, i) => {
-        tbody.innerHTML += `<tr><td>${i+1}</td><td>${l.date}</td><td>${l.code}</td><td>${l.name}</td><td>${l.qty}</td><td>${l.office}</td><td>${l.staff}</td><td>${l.batch}</td><td>${l.location}</td><td>${l.notes}</td></tr>`;
-      });
-    }
-
-    function renderStockOutTable() {
-      const tbody = document.getElementById('stockout-table-body');
-      tbody.innerHTML = '';
-      stockOutLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.receiptNo}</td><td>${l.date}</td><td>${l.office}</td><td>${l.requester}</td><td>${l.code}</td><td>${l.qty}</td></tr>`;
-      });
-    }
-
-    function renderHistoryTable() {
-      const tbody = document.getElementById('history-table-body');
-      tbody.innerHTML = '';
-      stockInLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock In</td><td>-</td><td>${l.office}</td><td>${l.code}</td><td>+${l.qty}</td></tr>`;
-      });
-      stockOutLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock Out</td><td>${l.receiptNo}</td><td>${l.office}</td><td>${l.code}</td><td>-${l.qty}</td></tr>`;
-      });
-    }
-
-    function saveAll() {
-      localStorage.setItem('pgso_inventory', JSON.stringify(inventory));
-      localStorage.setItem('pgso_stockin', JSON.stringify(stockInLogs));
-      localStorage.setItem('pgso_stockout', JSON.stringify(stockOutLogs));
-    }
-
-    /* DATA SYNC (EXPORT/IMPORT JSON) */
-    function exportDatabaseJSON() {
-      const data = {
-        inventory: inventory,
-        stockInLogs: stockInLogs,
-        stockOutLogs: stockOutLogs,
-        receiptCounter: receiptCounter
-      };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `pgso_inventory_backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importDatabaseJSON() {
-      const fileInput = document.getElementById('import-file');
-      if (!fileInput.files.length) {
-        alert("Please select a JSON file first.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (data.inventory) inventory = data.inventory;
-          if (data.stockInLogs) stockInLogs = data.stockInLogs;
-          if (data.stockOutLogs) stockOutLogs = data.stockOutLogs;
-          if (data.receiptCounter) receiptCounter = data.receiptCounter;
-          saveAll();
-          refreshAllViews();
-          alert("Database successfully imported and updated!");
-        } catch (err) {
-          alert("Invalid file format.");
-        }
-      };
-      reader.readAsText(fileInput.files[0]);
-    }
-
-    function exportMonthlyCSV() {
-      let csv = "Date,Type,Reference No,Office,Code,Qty\n";
-      stockInLogs.forEach(l => { csv += `"${l.date}","Stock In","-","${l.office}","${l.code}",${l.qty}\n`; });
-      stockOutLogs.forEach(l => { csv += `"${l.date}","Stock Out","${l.receiptNo}","${l.office}","${l.code}",-${l.qty}\n`; });
-      let blob = new Blob([csv], { type: 'text/csv' });
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `PGSO_Monthly_Report_${Date.now()}.csv`;
-      link.click();
-    }
-  </script>
-</body>
-</html>
+  function exportMonthlyCSV() {
+    let csv = "Date,Type,Reference No,Office,Code,Qty\n";
+    stockInLogs.forEach(l => { csv += `"${l.date}","Stock In","-","${l.office}","${l.code}",${l.qty}\n`; });
+    stockOutLogs.forEach(l => { csv += `"${l.date}","Stock Out","${l.receiptNo}","${l.office}","${l.code}",-${l.qty}\n`; });
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `PGSO_Monthly_Report_${Date.now()}.csv`;
+    link.click();
+  }
+</script>
