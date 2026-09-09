@@ -12,7 +12,7 @@
     .scanner-box, .receipt-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
     #reader { width: 100%; min-height: 300px; }
     
-    /* Mirror video feed horizontally so camera moves like a mirror */
+    /* Mirror video feed horizontally */
     #reader video {
       transform: scaleX(-1);
     }
@@ -77,7 +77,6 @@
 
     document.getElementById('receipt-date').innerText = new Date().toLocaleString();
 
-    // Initialize/resume browser audio context on screen interaction
     document.addEventListener('click', function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -100,14 +99,14 @@
         const gain = audioCtx.createGain();
         
         osc.type = "sine";
-        osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // Beep pitch
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);      // Volume
+        osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
 
         osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.15); // 150ms duration
+        osc.stop(audioCtx.currentTime + 0.15);
       } catch (e) {
         console.warn("Audio playback failed:", e);
       }
@@ -129,7 +128,6 @@
 
       updateReceiptTable();
 
-      // 2-second cooldown to prevent multi-scans
       setTimeout(() => {
         isCooldown = false;
       }, 2000);
@@ -153,9 +151,14 @@
       html5QrCode = new Html5Qrcode("reader");
 
       const config = {
-        fps: 15,
-        qrbox: { width: 300, height: 180 },
-        aspectRatio: 1.333333,
+        fps: 20,
+        qrbox: { width: 320, height: 200 },
+        videoConstraints: {
+          width: { min: 640, ideal: 1280, max: 1920 },
+          height: { min: 480, ideal: 720, max: 1080 },
+          facingMode: "environment"
+        },
+        // Enable all available 1D and 2D barcode formats
         formatsToSupport: [
           Html5QrcodeSupportedFormats.EAN_13,
           Html5QrcodeSupportedFormats.EAN_8,
@@ -163,6 +166,12 @@
           Html5QrcodeSupportedFormats.UPC_E,
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_93,
+          Html5QrcodeSupportedFormats.ITF,
+          Html5QrcodeSupportedFormats.CODABAR,
+          Html5QrcodeSupportedFormats.DATA_MATRIX,
+          Html5QrcodeSupportedFormats.AZTEC,
+          Html5QrcodeSupportedFormats.PDF_417,
           Html5QrcodeSupportedFormats.QR_CODE
         ]
       };
