@@ -28,19 +28,22 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Highlighted Scanner & Receipt Section */
-    .scanner-receipt-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+    /* Left-Right Split Grid */
+    .scanner-receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 900px) {
+      .scanner-receipt-grid { grid-template-columns: 1fr; }
+    }
     
     .scanner-card {
-      flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 10px;
+      background: #fff; padding: 20px; border-radius: 10px;
       border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15);
     }
     .receipt-card {
-      flex: 1.5; min-width: 400px; background: #fff; padding: 20px; border-radius: 10px;
+      background: #fff; padding: 20px; border-radius: 10px;
       border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    /* Laser Line & Reader */
+    /* Scanner Camera Frame */
     .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
     #reader { width: 100%; height: 100%; min-height: 280px; }
     #reader video { transform: none !important; object-fit: cover; }
@@ -79,7 +82,7 @@
     .bg-expired { background: #343a40; }
 
     /* Official Receipt Styling */
-    .receipt-paper { background: #fff; padding: 25px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; max-width: 650px; margin: auto; }
+    .receipt-paper { background: #fff; padding: 20px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; }
     .pgso-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
     .pgso-logo { width: 75px; height: auto; margin-bottom: 5px; }
 
@@ -107,16 +110,17 @@
       <button class="tab-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
       <button class="tab-btn" onclick="switchTab('reorder', this)">📋 Reorder List</button>
       <button class="tab-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
+      <button class="tab-btn" onclick="switchTab('sync', this)">🔄 Sync Data</button>
     </div>
   </div>
 
   <div class="main-container">
 
-    <!-- SCANNER & RECEIPT TAB (HIGHLIGHTED MAIN VIEW) -->
+    <!-- SCANNER & RECEIPT TAB (LEFT: SCANNER, RIGHT: RECEIPT) -->
     <div id="scanner" class="tab-content active">
       <div class="scanner-receipt-grid">
         
-        <!-- Barcode Reader Card -->
+        <!-- LEFT: Barcode Reader Card -->
         <div class="scanner-card">
           <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
           <div class="scanner-wrapper">
@@ -131,7 +135,7 @@
           </div>
         </div>
 
-        <!-- Official Receipt Card -->
+        <!-- RIGHT: Official Receipt Card -->
         <div class="receipt-card printable">
           <div class="receipt-paper">
             <div class="pgso-header">
@@ -143,8 +147,8 @@
 
             <div style="font-size: 13px; margin-bottom: 15px;">
               <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
-              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 200px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-              <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 200px;"></div>
+              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 180px;" value="PGSO" onchange="generateReceiptNumber()"></div>
+              <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 180px;"></div>
               <div><strong>Date:</strong> <span id="receipt-date"></span></div>
             </div>
 
@@ -314,6 +318,19 @@
       </div>
     </div>
 
+    <!-- SYNC / TRANSFER DATA TAB -->
+    <div id="sync" class="tab-content">
+      <h3>Transfer / Sync Data Between Devices</h3>
+      <p style="font-size: 13px; color: #666;">Browser storage (localStorage) is stored locally on each device. Use export/import below to transfer data from your Laptop to your Mobile Phone.</p>
+      <div class="card-box">
+        <button class="btn btn-primary" onclick="exportDatabaseJSON()">📥 Export Data to File (From Laptop)</button>
+        <hr style="margin: 20px 0;">
+        <h4>Upload Data File (On Mobile Phone):</h4>
+        <input type="file" id="import-file" accept=".json">
+        <button class="btn btn-success" onclick="importDatabaseJSON()">📤 Import & Replace Data</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- MODAL: ADD ITEM -->
@@ -367,6 +384,26 @@
     let scannedReceiptItems = {};
     let html5QrCode = null;
     let isTorchOn = false;
+    let lastScannedCode = null;
+    let lastScanTime = 0;
+
+    /* WEB AUDIO BEEP SYNTHESIZER */
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // 1800Hz standard scanner beep
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.12);
+      } catch (e) {
+        console.log("Audio not supported or permitted yet", e);
+      }
+    }
 
     window.addEventListener('load', () => {
       refreshAllViews();
@@ -412,6 +449,15 @@
     }
 
     function onCodeScanned(code) {
+      const now = Date.now();
+      // Debounce scanner to avoid rapid double triggers
+      if (code === lastScannedCode && (now - lastScanTime) < 1500) return;
+      
+      lastScannedCode = code;
+      lastScanTime = now;
+
+      playBeepSound();
+
       let item = inventory.find(i => i.code === code);
       let name = item ? item.name : "Unknown Item / Raw Code";
 
@@ -651,6 +697,47 @@
       localStorage.setItem('pgso_inventory', JSON.stringify(inventory));
       localStorage.setItem('pgso_stockin', JSON.stringify(stockInLogs));
       localStorage.setItem('pgso_stockout', JSON.stringify(stockOutLogs));
+    }
+
+    /* DATA SYNC (EXPORT/IMPORT JSON) */
+    function exportDatabaseJSON() {
+      const data = {
+        inventory: inventory,
+        stockInLogs: stockInLogs,
+        stockOutLogs: stockOutLogs,
+        receiptCounter: receiptCounter
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `pgso_inventory_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDatabaseJSON() {
+      const fileInput = document.getElementById('import-file');
+      if (!fileInput.files.length) {
+        alert("Please select a JSON file first.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.inventory) inventory = data.inventory;
+          if (data.stockInLogs) stockInLogs = data.stockInLogs;
+          if (data.stockOutLogs) stockOutLogs = data.stockOutLogs;
+          if (data.receiptCounter) receiptCounter = data.receiptCounter;
+          saveAll();
+          refreshAllViews();
+          alert("Database successfully imported and updated!");
+        } catch (err) {
+          alert("Invalid file format.");
+        }
+      };
+      reader.readAsText(fileInput.files[0]);
     }
 
     function exportMonthlyCSV() {
