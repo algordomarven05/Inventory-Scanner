@@ -16,6 +16,7 @@
     .bg-ok { background-color: #198754 !important; color: white; }
     .navbar-dark-custom { background-color: #1e293b; }
     .card-stat { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .cursor-pointer { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -68,7 +69,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label fw-bold">Select Item</label>
-                <select id="itemSelect" class="form-select" required onchange="updateItemMaxQty()">
+                <select id="itemSelect" class="form-select" required>
                   <option value="">Choose item...</option>
                 </select>
               </div>
@@ -122,7 +123,10 @@
 
     <!-- Inventory Section -->
     <div id="inventorySection" class="content-section d-none">
-      <h3 class="mb-4">Inventory List</h3>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Inventory List</h3>
+        <button class="btn btn-success btn-sm" onclick="showAddItemModal()"><i class="bi bi-plus-circle"></i> Add New Item</button>
+      </div>
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="table-responsive">
@@ -240,13 +244,21 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let isEditingUser = false;
-
     let currentUser = JSON.parse(localStorage.getItem('current_user') || '{"username":"admin","fullName":"Marven P. Algordo","role":"Admin"}');
-
     let inventory = JSON.parse(localStorage.getItem('wms_inventory') || '[]');
 
+    // Default sample inventory if none exists
+    if (inventory.length === 0) {
+      inventory = [
+        { code: 'ITEM-001', name: 'A4 Printing Paper', category: 'Supplies', stock: 50, expiry: '' },
+        { code: 'ITEM-002', name: 'Ballpoint Pens (Black)', category: 'Supplies', stock: 120, expiry: '' }
+      ];
+      localStorage.setItem('wms_inventory', JSON.stringify(inventory));
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('currentUserDisplay').innerText = currentUser.fullName || currentUser.username;
+      const userDisplay = document.getElementById('currentUserDisplay');
+      if (userDisplay) userDisplay.innerText = currentUser.fullName || currentUser.username;
       refreshAllData();
       showSection('scannerSection');
     });
@@ -260,7 +272,9 @@
       renderStockInLog();
       renderMonthlyReport();
       renderUserManagement();
-      document.getElementById('slipNoInput').value = generateSlipNo();
+      
+      const slipInput = document.getElementById('slipNoInput');
+      if (slipInput) slipInput.value = generateSlipNo();
     }
 
     function showSection(sectionId) {
@@ -282,12 +296,7 @@
     }
 
     function renderDashboard() {
-      let totalItems = inventory.length;
-      let totalStock = 0;
-      let expiring = 0;
-      let expired = 0;
-      let outOfStock = 0;
-
+      let totalStock = 0, expiring = 0, expired = 0, outOfStock = 0;
       inventory.forEach(item => {
         totalStock += Number(item.stock || 0);
         const st = calculateStatus(item);
@@ -296,11 +305,11 @@
         else if (st.label === 'Expiring Soon') expiring++;
       });
 
-      document.getElementById('totalItemsStat').innerText = totalItems;
-      document.getElementById('totalStockStat').innerText = totalStock;
-      document.getElementById('expiringStat').innerText = expiring;
-      document.getElementById('expiredStat').innerText = expired;
-      document.getElementById('outOfStockStat').innerText = outOfStock;
+      if (document.getElementById('totalItemsStat')) document.getElementById('totalItemsStat').innerText = inventory.length;
+      if (document.getElementById('totalStockStat')) document.getElementById('totalStockStat').innerText = totalStock;
+      if (document.getElementById('expiringStat')) document.getElementById('expiringStat').innerText = expiring;
+      if (document.getElementById('expiredStat')) document.getElementById('expiredStat').innerText = expired;
+      if (document.getElementById('outOfStockStat')) document.getElementById('outOfStockStat').innerText = outOfStock;
     }
 
     function renderInventory() {
@@ -353,8 +362,8 @@
       const office = document.getElementById('officeInput').value;
       const requester = document.getElementById('requesterInput').value;
 
-      if (itemIdx === '' || !inventory[itemIdx]) return alert('Select an item.');
-      if (inventory[itemIdx].stock < qty) return alert('Insufficient stock!');
+      if (itemIdx === '' || !inventory[itemIdx]) return alert('Please select an item.');
+      if (inventory[itemIdx].stock < qty) return alert('Insufficient stock level!');
 
       inventory[itemIdx].stock -= qty;
       localStorage.setItem('wms_inventory', JSON.stringify(inventory));
@@ -372,7 +381,7 @@
       stockOutLogs.push(newLog);
       localStorage.setItem('stock_out_logs', JSON.stringify(stockOutLogs));
 
-      alert('Item issued successfully!');
+      alert('Requisition & Issue completed successfully!');
       e.target.reset();
       refreshAllData();
     }
@@ -486,7 +495,7 @@
       let users = JSON.parse(localStorage.getItem('wms_users') || '[]');
       if (users.length === 0) {
         users = [
-          { username: 'admin', fullName: '', role: 'Admin', status: 'Active' },
+          { username: 'admin', fullName: 'System Admin', role: 'Admin', status: 'Active' },
           { username: 'mpa', fullName: 'Marven P. Algordo', role: 'Admin', status: 'Active' }
         ];
         localStorage.setItem('wms_users', JSON.stringify(users));
@@ -509,6 +518,7 @@
             </select>
           </td>
           <td>
+            <button onclick="saveUser(${index})" class="btn btn-sm btn-success me-1">Save</button>
             <button onclick="deleteUser(${index})" class="btn btn-sm btn-danger">Delete</button>
           </td>
         </tr>
@@ -521,6 +531,11 @@
         users[index][field] = value;
         localStorage.setItem('wms_users', JSON.stringify(users));
       }
+    }
+
+    function saveUser(index) {
+      alert('User updated successfully!');
+      renderUserManagement();
     }
 
     function deleteUser(index) {
