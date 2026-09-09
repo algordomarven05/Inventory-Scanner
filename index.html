@@ -8,7 +8,7 @@
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body { font-family: 'Courier New', Courier, monospace; margin: 20px; background: #eef2f5; color: #222; }
-    .container { display: flex; gap: 20px; max-width: 1200px; margin: auto; }
+    .container { display: flex; gap: 20px; max-width: 1250px; margin: auto; }
     .scanner-box, .receipt-container { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; }
     
     /* Formal Barcode Reader Styling */
@@ -43,29 +43,38 @@
 
     .meta-section { margin-bottom: 15px; font-size: 14px; }
     .field-group { display: flex; margin-bottom: 6px; align-items: baseline; }
-    .field-label { font-weight: bold; width: 150px; }
+    .field-label { font-weight: bold; width: 160px; }
     .field-input { flex: 1; border: none; border-bottom: 1px dotted #000; font-family: inherit; font-size: 14px; outline: none; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
     th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
     th { background: #f0f0f0; text-transform: uppercase; font-size: 12px; }
 
+    .qty-btn { background: #ddd; border: 1px solid #999; padding: 2px 6px; cursor: pointer; font-weight: bold; margin: 0 3px; border-radius: 3px; }
+    .action-btn { background: #d9534f; color: white; border: none; padding: 2px 6px; cursor: pointer; border-radius: 3px; font-size: 11px; }
+
     .signature-container { display: flex; justify-content: space-between; margin-top: 35px; text-align: center; }
     .sig-box { width: 45%; }
     .sig-line { border-top: 1px solid #000; margin-top: 40px; font-size: 12px; font-weight: bold; }
 
     /* Controls */
-    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-    .btn { padding: 10px 16px; font-family: sans-serif; font-weight: bold; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1; }
+    .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    .btn { padding: 10px 14px; font-family: sans-serif; font-weight: bold; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1; min-width: 120px; text-align: center; }
     .btn-print { background: #0056b3; }
     .btn-reset { background: #d9534f; }
+    .btn-excel { background: #1e7e34; }
+    .btn-db { background: #6f42c1; }
     .btn-stop { background: #6c757d; }
+
+    /* Inventory Modal */
+    .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: #fff; margin: 5% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; font-family: sans-serif; }
 
     @media print {
       body * { visibility: hidden; }
       .receipt-container, .receipt-container * { visibility: visible; }
       .receipt-container { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; }
-      .btn-group, .btn { display: none !important; }
+      .btn-group, .btn, .qty-btn, .action-btn, .no-print { display: none !important; }
       .field-input { border-bottom: none; }
     }
   </style>
@@ -73,15 +82,17 @@
 <body>
 
   <div class="container">
-    <!-- Camera Section -->
+    <!-- Camera & Controls Section -->
     <div class="scanner-box">
       <h3 style="font-family: sans-serif; margin-top: 0;">1. Barcode & QR Reader</h3>
       <div class="scanner-wrapper">
         <div id="reader"></div>
         <div class="scanner-overlay"><div class="laser-line"></div></div>
       </div>
+      
       <div class="btn-group">
         <button class="btn btn-stop" id="stop-btn" onclick="stopCamera()" style="display:none;">Stop Camera</button>
+        <button class="btn btn-db" onclick="openDBModal()">Manage Inventory DB</button>
         <button class="btn btn-reset" onclick="resetReceipt()">Reset Scanned Items</button>
       </div>
     </div>
@@ -99,6 +110,10 @@
 
         <!-- Meta Information -->
         <div class="meta-section">
+          <div class="field-group">
+            <span class="field-label">Receipt No:</span>
+            <span id="receipt-no" style="font-weight: bold; color: #0056b3;"></span>
+          </div>
           <div class="field-group">
             <span class="field-label">Requesting Office:</span>
             <input type="text" class="field-input" placeholder="e.g. Provincial Health Office">
@@ -119,7 +134,8 @@
             <tr>
               <th>Code ID</th>
               <th>Item Description</th>
-              <th style="width: 50px; text-align: center;">Qty</th>
+              <th style="width: 90px; text-align: center;">Qty</th>
+              <th class="no-print" style="width: 50px; text-align: center;">Action</th>
             </tr>
           </thead>
           <tbody id="receipt-body">
@@ -129,6 +145,7 @@
             <tr>
               <td colspan="2" style="text-align: right; font-weight: bold;">Total Items:</td>
               <td id="total-qty" style="text-align: center; font-weight: bold;">0</td>
+              <td class="no-print"></td>
             </tr>
           </tfoot>
         </table>
@@ -148,12 +165,41 @@
 
       <div class="btn-group">
         <button class="btn btn-print" onclick="printReceipt()">Print Receipt</button>
+        <button class="btn btn-excel" onclick="exportToCSV()">Export to Excel (CSV)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Management Modal -->
+  <div id="dbModal" class="modal">
+    <div class="modal-content">
+      <h3>Manage Inventory Database</h3>
+      <p style="font-size: 13px;">Add custom items so scanned codes display official item names automatically:</p>
+      
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="new-code" placeholder="Barcode ID" style="flex: 1; padding: 6px;">
+        <input type="text" id="new-name" placeholder="Item Name / Description" style="flex: 2; padding: 6px;">
+        <button class="btn btn-excel" onclick="addDBItem()" style="flex: 0;">Add</button>
+      </div>
+
+      <div style="max-height: 200px; overflow-y: auto;">
+        <table style="width: 100%; font-family: sans-serif;">
+          <thead>
+            <tr><th>Code</th><th>Name</th><th>Action</th></tr>
+          </thead>
+          <tbody id="db-table-body"></tbody>
+        </table>
+      </div>
+
+      <div style="text-align: right; margin-top: 15px;">
+        <button class="btn btn-stop" onclick="closeDBModal()">Close</button>
       </div>
     </div>
   </div>
 
   <script>
-    const inventoryDB = {
+    // Load local inventory database or set defaults
+    let inventoryDB = JSON.parse(localStorage.getItem('pgso_inventoryDB')) || {
       "123456": "Standard Screwdriver Set",
       "789012": "AA Battery 4-Pack",
       "XYZ-99": "Safety Goggles"
@@ -164,36 +210,27 @@
     let isCooldown = false;
     let audioCtx = null;
 
+    // Generate unique Receipt Ref Number
+    document.getElementById('receipt-no').innerText = "PGSO-" + Date.now().toString().slice(-6);
     document.getElementById('receipt-date').innerText = new Date().toLocaleString();
 
     document.addEventListener('click', function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }, { once: false });
 
     function playBeepSound() {
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        
         osc.type = "sine";
         osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start(audioCtx.currentTime);
         osc.stop(audioCtx.currentTime + 0.15);
       } catch (e) {
@@ -203,7 +240,6 @@
 
     function onScanSuccess(decodedText) {
       if (isCooldown) return;
-
       isCooldown = true;
       playBeepSound();
 
@@ -217,9 +253,22 @@
 
       updateReceiptTable();
 
-      setTimeout(() => {
-        isCooldown = false;
-      }, 2000);
+      setTimeout(() => { isCooldown = false; }, 2000);
+    }
+
+    function changeQty(code, delta) {
+      if (scannedItems[code]) {
+        scannedItems[code].qty += delta;
+        if (scannedItems[code].qty <= 0) {
+          delete scannedItems[code];
+        }
+        updateReceiptTable();
+      }
+    }
+
+    function removeItem(code) {
+      delete scannedItems[code];
+      updateReceiptTable();
     }
 
     function updateReceiptTable() {
@@ -233,7 +282,14 @@
         let row = `<tr>
           <td>${code}</td>
           <td>${item.name}</td>
-          <td style="text-align: center;">${item.qty}</td>
+          <td style="text-align: center;">
+            <button class="qty-btn no-print" onclick="changeQty('${code}', -1)">-</button>
+            ${item.qty}
+            <button class="qty-btn no-print" onclick="changeQty('${code}', 1)">+</button>
+          </td>
+          <td class="no-print" style="text-align: center;">
+            <button class="action-btn" onclick="removeItem('${code}')">X</button>
+          </td>
         </tr>`;
         tbody.innerHTML += row;
       }
@@ -246,6 +302,62 @@
         scannedItems = {};
         updateReceiptTable();
       }
+    }
+
+    /* Inventory Database Modal Logic */
+    function openDBModal() {
+      renderDBTable();
+      document.getElementById('dbModal').style.display = 'block';
+    }
+
+    function closeDBModal() {
+      document.getElementById('dbModal').style.display = 'none';
+    }
+
+    function addDBItem() {
+      let code = document.getElementById('new-code').value.trim();
+      let name = document.getElementById('new-name').value.trim();
+      if (code && name) {
+        inventoryDB[code] = name;
+        localStorage.setItem('pgso_inventoryDB', JSON.stringify(inventoryDB));
+        document.getElementById('new-code').value = '';
+        document.getElementById('new-name').value = '';
+        renderDBTable();
+      }
+    }
+
+    function deleteDBItem(code) {
+      delete inventoryDB[code];
+      localStorage.setItem('pgso_inventoryDB', JSON.stringify(inventoryDB));
+      renderDBTable();
+    }
+
+    function renderDBTable() {
+      const tbody = document.getElementById('db-table-body');
+      tbody.innerHTML = '';
+      for (let code in inventoryDB) {
+        let row = `<tr>
+          <td>${code}</td>
+          <td>${inventoryDB[code]}</td>
+          <td><button class="action-btn" onclick="deleteDBItem('${code}')">Delete</button></td>
+        </tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
+    /* Export Receipt to Excel CSV */
+    function exportToCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Code ID,Item Description,Quantity\n";
+      for (let code in scannedItems) {
+        csvContent += `"${code}","${scannedItems[code].name}",${scannedItems[code].qty}\n`;
+      }
+      let encodedUri = encodeURI(csvContent);
+      let link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `PGSO_Receipt_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function startCamera() {
@@ -276,15 +388,9 @@
         ]
       };
 
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccess
-      ).then(() => {
-        document.getElementById('stop-btn').style.display = 'block';
-      }).catch(err => {
-        console.error("Camera start error:", err);
-      });
+      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+        .then(() => { document.getElementById('stop-btn').style.display = 'block'; })
+        .catch(err => { console.error("Camera start error:", err); });
     }
 
     function stopCamera() {
