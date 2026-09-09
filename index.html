@@ -59,7 +59,7 @@
 
     /* Layout Grids */
     .scanner-receipt-container { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); gap: 15px; align-items: start; min-width: 640px; }
+    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 400px); gap: 15px; align-items: start; min-width: 640px; }
     .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
     .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
@@ -90,7 +90,7 @@
     th { background: #f1f3f5; font-weight: 600; }
     
     .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
-    .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 28px; }
+    .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
 
     /* Badges */
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
@@ -101,20 +101,58 @@
     .bg-expiring { background: #6f42c1; }
     .bg-expired { background: #343a40; }
 
-    /* Official Receipt */
-    .receipt-paper { background: #fff; padding: 20px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; }
-    .pgso-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-    .pgso-logo { width: 75px; height: auto; margin-bottom: 5px; }
+    /* REAL THERMAL RECEIPT STYLING */
+    .receipt-paper { 
+      background: #fff8f0; 
+      padding: 18px 15px; 
+      border: 1px dashed #777; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Courier New', Courier, monospace, 'Lucida Console'; 
+      color: #111;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
 
+    .pgso-header { text-align: center; margin-bottom: 12px; }
+    .pgso-logo { width: 60px; height: auto; margin-bottom: 4px; filter: grayscale(100%); }
+    .receipt-divider { border-top: 1px dashed #333; margin: 10px 0; }
+
+    .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; font-family: inherit; }
+    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #888; padding: 5px 2px; }
+    .receipt-paper th { text-align: left; background: transparent; font-weight: bold; text-transform: uppercase; }
+
+    .receipt-inputs input {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      border: none;
+      border-bottom: 1px solid #444;
+      background: transparent;
+      outline: none;
+    }
+
+    /* Modal Styling */
     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
 
-    /* Print Isolation */
+    /* Print Isolation & Thermal Receipt Paper Formatting */
     @media print {
       body * { visibility: hidden !important; }
       #printable-receipt, #printable-receipt * { visibility: visible !important; }
-      #printable-receipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+      #printable-receipt { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 80mm !important; 
+        margin: 0; 
+        padding: 10px; 
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+      }
       .no-print { display: none !important; }
+      .receipt-inputs input { border: none !important; }
     }
   </style>
 </head>
@@ -204,45 +242,62 @@
             <div id="scanner-notif" class="notification-box"></div>
           </div>
 
-          <!-- RIGHT: Receipt Box -->
+          <!-- RIGHT: Authentic Thermal Receipt Box -->
           <div class="receipt-card">
             <div class="receipt-paper" id="printable-receipt">
               <div class="pgso-header">
                 <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
-                <h2 style="margin:0;">PGSO</h2>
-                <div style="font-size:12px; font-style:italic;">Provincial General Services Office</div>
-                <div style="font-weight:bold; margin-top:5px; text-transform:uppercase;">Property Release Receipt</div>
+                <div style="font-size:16px; font-weight:bold; letter-spacing: 1px;">PGSO WAREHOUSE</div>
+                <div style="font-size:10px;">PROVINCIAL GENERAL SERVICES OFFICE</div>
+                <div style="font-size:12px; font-weight:bold; margin-top:4px;">PROPERTY RELEASE RECEIPT</div>
               </div>
 
-              <div style="font-size: 13px; margin-bottom: 15px;">
-                <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
-                <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 180px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-                <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 180px;"></div>
-                <div><strong>Date:</strong> <span id="receipt-date"></span></div>
+              <div class="receipt-divider"></div>
+
+              <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
+                <div><strong>RECEIPT NO:</strong> <span id="receipt-no"></span></div>
+                <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
+                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
+                <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
               </div>
+
+              <div class="receipt-divider"></div>
 
               <table>
                 <thead>
                   <tr>
-                    <th>Code ID</th>
-                    <th>Item Name</th>
-                    <th style="text-align: center;">Qty</th>
-                    <th class="no-print">Action</th>
+                    <th>CODE</th>
+                    <th>ITEM NAME</th>
+                    <th style="text-align: center;">QTY</th>
+                    <th class="no-print"></th>
                   </tr>
                 </thead>
                 <tbody id="receipt-rows"></tbody>
               </table>
 
-              <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
-                <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
-                <div style="width: 45%; border-top: 1px solid #000; padding-top: 5px;">
-                  Released By: <strong id="released-by-signature">Staff Name</strong>
+              <div class="receipt-divider"></div>
+
+              <!-- Signature Area: Full Name directly ABOVE the line -->
+              <div style="margin-top: 30px; font-size: 11px; text-align: center;">
+                <div style="margin-bottom: 25px;">
+                  <div style="border-bottom: 1px solid #000; width: 80%; margin: 0 auto 3px auto;"></div>
+                  <div style="font-size: 10px;">RECEIVED BY (SIGNATURE)</div>
+                </div>
+
+                <div>
+                  <div id="released-by-signature" style="font-weight: bold; text-transform: uppercase; font-size: 12px; margin-bottom: 2px;">
+                    STAFF NAME
+                  </div>
+                  <div style="border-top: 1px solid #000; width: 85%; margin: 0 auto 3px auto;"></div>
+                  <div style="font-size: 10px;">RELEASED BY (AUTHORIZED PERSONNEL)</div>
                 </div>
               </div>
+
+              <div style="text-align: center; margin-top: 15px; font-size: 9px;">*** OFFICIAL SYSTEM RECORD ***</div>
             </div>
 
             <!-- ACTIONS -->
-            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;" class="no-print">
               <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
               <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
             </div>
@@ -374,7 +429,7 @@
       </div>
     </div>
 
-    <!-- USER MANAGEMENT TAB (ADMIN ONLY) -->
+    <!-- USER MANAGEMENT TAB (ADMIN EDITABLE) -->
     <div id="users" class="tab-content">
       <h3>User Management & Permissions</h3>
       <div class="card-box" style="overflow-x: auto;">
@@ -446,7 +501,7 @@
     let stockOutLogs = [];
     let receiptCounter = 1;
 
-    // Accounts List
+    // Default Accounts List
     let users = [
       { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
       { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
@@ -482,9 +537,10 @@
         currentUser = savedUser;
         document.getElementById('auth-screen').style.display = 'none';
         
-        // Display Complete Name cleanly
-        document.getElementById('user-fullname').innerText = currentUser.fullname || currentUser.username;
-        document.getElementById('released-by-signature').innerText = currentUser.fullname || currentUser.username;
+        // Display Complete Name
+        const nameToDisplay = currentUser.fullname || currentUser.username;
+        document.getElementById('user-fullname').innerText = nameToDisplay;
+        document.getElementById('released-by-signature').innerText = nameToDisplay;
         
         // Load Avatar
         const avatarEl = document.getElementById('user-avatar');
@@ -557,7 +613,6 @@
         return;
       }
 
-      // Default role to 'user' and status to 'pending'
       users.push({ username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" });
       saveToGoogleSheet();
       showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
@@ -694,7 +749,7 @@
         let item = scannedReceiptItems[code];
         tbody.innerHTML += `
           <tr>
-            <td>${code}</td>
+            <td style="font-size:10px;">${code}</td>
             <td>${item.name}</td>
             <td style="text-align: center;">
               <div class="qty-controls">
@@ -703,7 +758,7 @@
                 <button class="qty-btn no-print" onclick="modQty('${code}', 1)">+</button>
               </div>
             </td>
-            <td class="no-print" style="text-align: center;"><button class="btn btn-danger" onclick="removeReceiptItem('${code}')">X</button></td>
+            <td class="no-print" style="text-align: center;"><button class="btn btn-danger" style="padding: 1px 5px; font-size: 10px;" onclick="removeReceiptItem('${code}')">X</button></td>
           </tr>`;
       }
     }
@@ -881,7 +936,7 @@
       });
     }
 
-    /* STOCK OUT LOG TABLE (READ-ONLY FOR USER, EDITABLE & REPRINT FOR ADMIN) */
+    /* STOCK OUT LOG TABLE (EDITABLE 'RELEASED BY' & REPRINT FOR ADMIN) */
     function renderStockOutTable() {
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
@@ -889,12 +944,16 @@
 
       stockOutLogs.forEach((l, index) => {
         let reqCell = isAdmin 
-          ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 120px;">`
+          ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 110px;">`
           : (l.requester || '-');
 
         let qtyCell = isAdmin 
-          ? `<input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 60px;">`
+          ? `<input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 50px;">`
           : l.qty;
+
+        let relCell = isAdmin
+          ? `<input type="text" id="so-rel-${index}" value="${l.releasedBy || ''}" style="width: 130px;">`
+          : (l.releasedBy || 'N/A');
 
         let actionCell = isAdmin
           ? `<button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
@@ -909,7 +968,7 @@
             <td>${reqCell}</td>
             <td>${l.code}</td>
             <td>${qtyCell}</td>
-            <td><strong>${l.releasedBy || 'N/A'}</strong></td>
+            <td>${relCell}</td>
             <td class="admin-only">${actionCell}</td>
           </tr>`;
       });
@@ -920,9 +979,11 @@
     function saveStockOutRow(index) {
       const newReq = document.getElementById(`so-req-${index}`).value.trim();
       const newQty = parseInt(document.getElementById(`so-qty-${index}`).value) || 0;
+      const newRel = document.getElementById(`so-rel-${index}`).value.trim();
 
       stockOutLogs[index].requester = newReq;
       stockOutLogs[index].qty = newQty;
+      stockOutLogs[index].releasedBy = newRel;
 
       saveToGoogleSheet();
       showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated!`, 'success');
@@ -961,15 +1022,15 @@
       });
     }
 
-    /* USER MANAGEMENT TABLE */
+    /* EDITABLE USER MANAGEMENT TABLE (ADMIN ONLY) */
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
       users.forEach((u, index) => {
         tbody.innerHTML += `
           <tr>
-            <td><strong>${u.fullname || 'N/A'}</strong></td>
-            <td>${u.username}</td>
+            <td><input type="text" id="usr-name-${index}" value="${u.fullname || ''}" style="width: 140px;"></td>
+            <td><input type="text" id="usr-user-${index}" value="${u.username || ''}" style="width: 110px;"></td>
             <td>
               <select id="usr-role-${index}">
                 <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
@@ -992,11 +1053,31 @@
     }
 
     function saveUserRow(index) {
-      users[index].role = document.getElementById(`usr-role-${index}`).value;
-      users[index].status = document.getElementById(`usr-status-${index}`).value;
+      const newName = document.getElementById(`usr-name-${index}`).value.trim();
+      const newUsername = document.getElementById(`usr-user-${index}`).value.trim();
+      const newRole = document.getElementById(`usr-role-${index}`).value;
+      const newStatus = document.getElementById(`usr-status-${index}`).value;
+
+      if (!newName || !newUsername) {
+        showNotification('user-mgmt-notif', 'Complete Name and Username cannot be empty!', 'danger');
+        return;
+      }
+
+      users[index].fullname = newName;
+      users[index].username = newUsername;
+      users[index].role = newRole;
+      users[index].status = newStatus;
+
+      // If updating the currently logged-in admin, update session storage
+      if (currentUser && currentUser.username === users[index].username) {
+        currentUser.fullname = newName;
+        sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+        document.getElementById('user-fullname').innerText = newName;
+        document.getElementById('released-by-signature').innerText = newName;
+      }
 
       saveToGoogleSheet();
-      showNotification('user-mgmt-notif', `User '${users[index].username}' updated!`, 'success');
+      showNotification('user-mgmt-notif', `User account '${newUsername}' saved successfully!`, 'success');
       refreshAllViews();
     }
 
