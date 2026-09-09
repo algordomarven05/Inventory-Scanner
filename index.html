@@ -17,7 +17,7 @@
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; color: #333; }
     
     /* Header Bar */
-    .navbar { background: var(--dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
     .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
@@ -25,13 +25,17 @@
     .tab-btn.active { background: var(--primary); border-color: #004085; }
 
     .sync-status { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #28a745; color: white; font-weight: bold; margin-left: 10px; }
-    .user-badge { font-size: 12px; background: #34495e; padding: 5px 10px; border-radius: 4px; font-weight: bold; color: #00d2d3; }
+    
+    /* User Profile Bar */
+    .user-profile-badge { display: flex; align-items: center; gap: 10px; background: #2c3e50; padding: 4px 10px; border-radius: 20px; border: 1px solid #34495e; }
+    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #00d2d3; cursor: pointer; background: #fff; }
+    .profile-name { font-size: 13px; font-weight: bold; color: #fff; cursor: pointer; }
 
     .main-container { padding: 20px; max-width: 1400px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* In-Screen Notification Toast System */
+    /* In-Screen Notification Banner */
     .notification-box {
       margin-top: 10px;
       padding: 10px 15px;
@@ -53,31 +57,18 @@
     .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
     .auth-toggle a { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: underline; }
 
-    /* Mobile Side-by-Side Horizontal Scroll Container */
-    .scanner-receipt-container {
-      overflow-x: auto;
-      padding-bottom: 10px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Fixed Side-by-Side Grid Layout */
-    .scanner-receipt-grid { 
-      display: grid; 
-      grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); 
-      gap: 15px; 
-      align-items: start;
-      min-width: 640px;
-    }
-    
+    /* Layout Grids */
+    .scanner-receipt-container { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); gap: 15px; align-items: start; min-width: 640px; }
     .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
     .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-    /* Scanner Camera Frame */
+    /* Scanner Wrapper */
     .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
     #reader { width: 100%; height: 100%; min-height: 280px; }
     #reader video { transform: none !important; object-fit: cover; }
 
-    /* Controls & Buttons */
+    /* Buttons & Controls */
     .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
     .btn { padding: 8px 14px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
     .btn-primary { background: var(--primary); }
@@ -86,7 +77,7 @@
     .btn-warning { background: var(--warning); color: #000; }
     .btn-dark { background: var(--dark); }
 
-    /* Dashboard Grid */
+    /* Dashboard */
     .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; border-left: 5px solid var(--primary); }
     .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #666; text-transform: uppercase; }
@@ -110,7 +101,7 @@
     .bg-expiring { background: #6f42c1; }
     .bg-expired { background: #343a40; }
 
-    /* Official Receipt Styling */
+    /* Official Receipt */
     .receipt-paper { background: #fff; padding: 20px; border: 1px solid #ccc; font-family: 'Times New Roman', Times, serif; }
     .pgso-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
     .pgso-logo { width: 75px; height: auto; margin-bottom: 5px; }
@@ -118,7 +109,7 @@
     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
 
-    /* Dedicated Print Styling Fix */
+    /* Print Isolation */
     @media print {
       body * { visibility: hidden !important; }
       #printable-receipt, #printable-receipt * { visibility: visible !important; }
@@ -129,7 +120,7 @@
 </head>
 <body>
 
-  <!-- LOGIN / REGISTER OVERLAY -->
+  <!-- AUTHENTICATION OVERLAY -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
       <h3 id="auth-title">System Login</h3>
@@ -147,15 +138,12 @@
       </div>
 
       <div id="register-form" style="display: none;">
+        <label>Complete Name:</label>
+        <input type="text" id="reg-fullname" placeholder="e.g. Juan Dela Cruz">
         <label>Username:</label>
         <input type="text" id="reg-user">
         <label>Password:</label>
         <input type="password" id="reg-pass">
-        <label>Requested Role:</label>
-        <select id="reg-role">
-          <option value="user">User (Scanner & Dashboard)</option>
-          <option value="admin">Admin (Full Access)</option>
-        </select>
         <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="handleRegister()">Register Account</button>
         <div id="reg-notif" class="notification-box"></div>
         <div class="auth-toggle">
@@ -164,6 +152,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Hidden File Input for Profile Picture Upload -->
+  <input type="file" id="pfp-upload" accept="image/*" style="display: none;" onchange="handlePfpUpload(event)">
 
   <!-- Top Navigation Bar -->
   <div class="navbar no-print">
@@ -174,12 +165,18 @@
     <div class="nav-tabs">
       <button class="tab-btn active" id="tab-scanner-btn" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
       <button class="tab-btn" id="tab-dashboard-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+      <button class="tab-btn" id="tab-stockout-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
       <button class="tab-btn admin-only" id="tab-inventory-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
       <button class="tab-btn admin-only" id="tab-stockin-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
-      <button class="tab-btn admin-only" id="tab-stockout-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
       <button class="tab-btn admin-only" id="tab-history-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
       <button class="tab-btn admin-only" id="tab-users-btn" onclick="switchTab('users', this)">👥 User Management</button>
-      <span class="user-badge" id="current-user-display">User: Guest</span>
+      
+      <!-- User Profile Header Display -->
+      <div class="user-profile-badge">
+        <img id="user-avatar" class="profile-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile" onclick="triggerPfpUpload()" title="Click to change profile picture">
+        <span id="user-fullname" class="profile-name" onclick="triggerPfpUpload()" title="Click to change profile picture">User</span>
+      </div>
+
       <button class="btn btn-danger" style="padding: 5px 10px;" onclick="handleLogout()">Logout</button>
     </div>
   </div>
@@ -238,7 +235,9 @@
 
               <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
                 <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
-                <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Released By (PGSO)</div>
+                <div style="width: 45%; border-top: 1px solid #000; padding-top: 5px;">
+                  Released By: <strong id="released-by-signature">Staff Name</strong>
+                </div>
               </div>
             </div>
 
@@ -267,6 +266,29 @@
         <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
         <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
       </div>
+    </div>
+
+    <!-- STOCK OUT LOG TAB (READ-ONLY FOR USERS, EDITABLE & REPRINT FOR ADMIN) -->
+    <div id="stockout" class="tab-content">
+      <h3>Stock Out History</h3>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt No</th>
+              <th>Date</th>
+              <th>Requesting Office</th>
+              <th>Requester</th>
+              <th>Item Code</th>
+              <th>Qty Issued</th>
+              <th>Released By</th>
+              <th class="admin-only">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="stockout-table-body"></tbody>
+        </table>
+      </div>
+      <div id="stockout-notif" class="notification-box"></div>
     </div>
 
     <!-- INVENTORY TAB -->
@@ -325,28 +347,6 @@
       </div>
     </div>
 
-    <!-- STOCK OUT LOG TAB (ADMIN EDITABLE) -->
-    <div id="stockout" class="tab-content">
-      <h3>Stock Out History</h3>
-      <div class="card-box" style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Receipt No</th>
-              <th>Date</th>
-              <th>Requesting Office</th>
-              <th>Requester</th>
-              <th>Item Code</th>
-              <th>Qty Issued</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="stockout-table-body"></tbody>
-        </table>
-      </div>
-      <div id="stockout-notif" class="notification-box"></div>
-    </div>
-
     <!-- MONTHLY HISTORY REPORT TAB -->
     <div id="history" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -381,6 +381,7 @@
         <table>
           <thead>
             <tr>
+              <th>Complete Name</th>
               <th>Username</th>
               <th>Role</th>
               <th>Status</th>
@@ -445,10 +446,10 @@
     let stockOutLogs = [];
     let receiptCounter = 1;
 
-    // Default System Accounts
+    // Accounts List
     let users = [
-      { username: "admin", pass: "admin123", role: "admin", status: "active" },
-      { username: "staff", pass: "staff123", role: "user", status: "active" }
+      { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
+      { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
     ];
 
     let currentUser = null;
@@ -465,7 +466,6 @@
       setInterval(loadFromGoogleSheet, 5000);
     });
 
-    // In-Screen Notification Helper Function
     function showNotification(elementId, message, type = 'success') {
       const notifEl = document.getElementById(elementId);
       if (!notifEl) return;
@@ -475,17 +475,46 @@
       setTimeout(() => { notifEl.style.display = 'none'; }, 4000);
     }
 
-    /* AUTHENTICATION & PERMISSIONS */
+    /* AUTHENTICATION & PROFILE MANAGEMENT */
     function checkAuthStatus() {
       const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('current-user-display').innerText = `${currentUser.username} (${currentUser.role.toUpperCase()})`;
+        
+        // Display Complete Name cleanly
+        document.getElementById('user-fullname').innerText = currentUser.fullname || currentUser.username;
+        document.getElementById('released-by-signature').innerText = currentUser.fullname || currentUser.username;
+        
+        // Load Avatar
+        const avatarEl = document.getElementById('user-avatar');
+        if (currentUser.pfp) { avatarEl.src = currentUser.pfp; }
+
         applyUserPermissions();
         startCamera();
       } else {
         document.getElementById('auth-screen').style.display = 'flex';
+      }
+    }
+
+    function triggerPfpUpload() { document.getElementById('pfp-upload').click(); }
+
+    function handlePfpUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const imgData = evt.target.result;
+          document.getElementById('user-avatar').src = imgData;
+          currentUser.pfp = imgData;
+          
+          let uIdx = users.findIndex(u => u.username === currentUser.username);
+          if (uIdx >= 0) users[uIdx].pfp = imgData;
+
+          sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+          saveToGoogleSheet();
+        };
+        reader.readAsDataURL(file);
       }
     }
 
@@ -515,12 +544,12 @@
     }
 
     function handleRegister() {
+      const fname = document.getElementById('reg-fullname').value.trim();
       const u = document.getElementById('reg-user').value.trim();
       const p = document.getElementById('reg-pass').value.trim();
-      const r = document.getElementById('reg-role').value;
 
-      if (!u || !p) {
-        showNotification('reg-notif', 'Please fill in all fields!', 'danger');
+      if (!fname || !u || !p) {
+        showNotification('reg-notif', 'Please fill in all registration fields!', 'danger');
         return;
       }
       if (users.find(acc => acc.username === u)) {
@@ -528,7 +557,8 @@
         return;
       }
 
-      users.push({ username: u, pass: p, role: r, status: "pending" });
+      // Default role to 'user' and status to 'pending'
+      users.push({ username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" });
       saveToGoogleSheet();
       showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
       setTimeout(() => toggleAuthMode(false), 2000);
@@ -546,7 +576,6 @@
         adminElements.forEach(el => el.style.display = 'inline-block');
       } else {
         adminElements.forEach(el => el.style.display = 'none');
-        switchTab('scanner', document.getElementById('tab-scanner-btn'));
       }
     }
 
@@ -694,6 +723,7 @@
       const receiptNo = document.getElementById('receipt-no').innerText;
       const office = document.getElementById('req-office').value;
       const requester = document.getElementById('req-name').value;
+      const releasedBy = currentUser.fullname || currentUser.username;
 
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items in receipt to release.', 'warning');
@@ -704,7 +734,7 @@
         let qty = scannedReceiptItems[code].qty;
         let invItem = inventory.find(i => i.code === code);
         if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
-        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty });
+        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty, releasedBy });
       }
 
       receiptCounter++;
@@ -716,7 +746,6 @@
       showNotification('receipt-notif', 'Property release completed & synced to cloud!', 'success');
     }
 
-    /* DIRECT PRINT FUNCTION FIX */
     function printReceiptOnly() {
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items to print in receipt.', 'warning');
@@ -852,24 +881,40 @@
       });
     }
 
-    /* STOCK OUT TABLE WITH EDITING & IN-SCREEN SAVE */
+    /* STOCK OUT LOG TABLE (READ-ONLY FOR USER, EDITABLE & REPRINT FOR ADMIN) */
     function renderStockOutTable() {
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
       stockOutLogs.forEach((l, index) => {
+        let reqCell = isAdmin 
+          ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 120px;">`
+          : (l.requester || '-');
+
+        let qtyCell = isAdmin 
+          ? `<input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 60px;">`
+          : l.qty;
+
+        let actionCell = isAdmin
+          ? `<button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
+             <button class="btn btn-primary" style="padding: 4px 8px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>`
+          : `-`;
+
         tbody.innerHTML += `
           <tr>
             <td>${l.receiptNo}</td>
             <td>${l.date}</td>
             <td>${l.office}</td>
-            <td><input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 120px;"></td>
+            <td>${reqCell}</td>
             <td>${l.code}</td>
-            <td><input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 60px;"></td>
-            <td>
-              <button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
-            </td>
+            <td>${qtyCell}</td>
+            <td><strong>${l.releasedBy || 'N/A'}</strong></td>
+            <td class="admin-only">${actionCell}</td>
           </tr>`;
       });
+
+      applyUserPermissions();
     }
 
     function saveStockOutRow(index) {
@@ -880,8 +925,29 @@
       stockOutLogs[index].qty = newQty;
 
       saveToGoogleSheet();
-      showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated successfully!`, 'success');
+      showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated!`, 'success');
       refreshAllViews();
+    }
+
+    function reprintHistoricalReceipt(index) {
+      const log = stockOutLogs[index];
+      
+      // Load receipt fields
+      document.getElementById('receipt-no').innerText = log.receiptNo;
+      document.getElementById('req-office').value = log.office;
+      document.getElementById('req-name').value = log.requester;
+      document.getElementById('receipt-date').innerText = log.date;
+      document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
+
+      // Load item row
+      let item = inventory.find(i => i.code === log.code);
+      scannedReceiptItems = {};
+      scannedReceiptItems[log.code] = { name: item ? item.name : 'Item ' + log.code, qty: log.qty };
+      renderReceipt();
+
+      // Switch to Scanner tab and trigger print
+      switchTab('scanner', document.getElementById('tab-scanner-btn'));
+      setTimeout(() => window.print(), 300);
     }
 
     function renderHistoryTable() {
@@ -902,7 +968,8 @@
       users.forEach((u, index) => {
         tbody.innerHTML += `
           <tr>
-            <td><strong>${u.username}</strong></td>
+            <td><strong>${u.fullname || 'N/A'}</strong></td>
+            <td>${u.username}</td>
             <td>
               <select id="usr-role-${index}">
                 <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
@@ -929,7 +996,7 @@
       users[index].status = document.getElementById(`usr-status-${index}`).value;
 
       saveToGoogleSheet();
-      showNotification('user-mgmt-notif', `User '${users[index].username}' updated successfully!`, 'success');
+      showNotification('user-mgmt-notif', `User '${users[index].username}' updated!`, 'success');
       refreshAllViews();
     }
 
@@ -937,7 +1004,7 @@
       const uname = users[index].username;
       users.splice(index, 1);
       saveToGoogleSheet();
-      showNotification('user-mgmt-notif', `User '${uname}' deleted successfully!`, 'warning');
+      showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
       refreshAllViews();
     }
 
