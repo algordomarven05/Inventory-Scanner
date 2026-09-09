@@ -15,6 +15,7 @@
     .bg-low { background-color: #0dcaf0 !important; color: black; }
     .bg-ok { background-color: #198754 !important; color: white; }
     .navbar-dark-custom { background-color: #1e293b; }
+    .card-stat { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   </style>
 </head>
 <body>
@@ -23,6 +24,9 @@
   <nav class="navbar navbar-expand-lg navbar-dark navbar-dark-custom px-3 mb-4">
     <a class="navbar-brand fw-bold" href="#">PGSO WMS</a>
     <span class="badge bg-success me-3"><i class="bi bi-circle-fill fs-6 me-1"></i> Live</span>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('scannerSection')"><i class="bi bi-qr-code-scan"></i> Scanner & Issue</a></li>
@@ -31,7 +35,7 @@
         <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('inventorySection')"><i class="bi bi-boxes"></i> Inventory</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('stockInLogSection')"><i class="bi bi-box-arrow-in-down"></i> Stock In</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('monthlyReportSection')"><i class="bi bi-file-earmark-bar-graph"></i> Monthly Report</a></li>
-        <li class="nav-item"><a class="nav-link active" href="#" onclick="showSection('userManagementSection')"><i class="bi bi-people-fill"></i> User Management</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('userManagementSection')"><i class="bi bi-people-fill"></i> User Management</a></li>
       </ul>
       <div class="d-flex align-items-center gap-2">
         <span class="text-white fw-semibold" id="currentUserDisplay">User</span>
@@ -42,25 +46,98 @@
 
   <div class="container-fluid px-4">
 
-    <!-- User Management Section -->
-    <div id="userManagementSection" class="content-section">
-      <h3 class="mb-4">User Management & Permissions</h3>
+    <!-- Scanner & Issue Section -->
+    <div id="scannerSection" class="content-section">
+      <h3 class="mb-4">Scanner & Issue Items</h3>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card card-stat p-4">
+            <h5 class="card-title mb-3">Requisition & Issue Slip</h5>
+            <form id="issueForm" onsubmit="handleIssue(event)">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Slip No.</label>
+                <input type="text" id="slipNoInput" class="form-control" readonly />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Office / Division</label>
+                <input type="text" id="officeInput" class="form-control" required placeholder="e.g. PGSO Main" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Requisitioner / Recipient</label>
+                <input type="text" id="requesterInput" class="form-control" required placeholder="Recipient name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Select Item</label>
+                <select id="itemSelect" class="form-select" required onchange="updateItemMaxQty()">
+                  <option value="">Choose item...</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Quantity</label>
+                <input type="number" id="qtyInput" class="form-control" min="1" value="1" required />
+              </div>
+              <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-circle"></i> Complete Issue</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="content-section d-none">
+      <h3 class="mb-4">Dashboard Overview</h3>
+      <div class="row g-3 mb-4">
+        <div class="col-md-2">
+          <div class="card card-stat bg-primary text-white p-3 text-center">
+            <h6>Total Items</h6>
+            <h2 id="totalItemsStat">0</h2>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card card-stat bg-ok text-white p-3 text-center">
+            <h6>Units in Stock</h6>
+            <h2 id="totalStockStat">0</h2>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card card-stat bg-expiring text-dark p-3 text-center">
+            <h6>Expiring Soon</h6>
+            <h2 id="expiringStat">0</h2>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card card-stat bg-expired text-white p-3 text-center">
+            <h6>Expired</h6>
+            <h2 id="expiredStat">0</h2>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card card-stat bg-out text-white p-3 text-center">
+            <h6>Out of Stock</h6>
+            <h2 id="outOfStockStat">0</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Section -->
+    <div id="inventorySection" class="content-section d-none">
+      <h3 class="mb-4">Inventory List</h3>
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead>
                 <tr>
-                  <th>Complete Name</th>
-                  <th>Username</th>
-                  <th>Role</th>
+                  <th>Item Code</th>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Stock Quantity</th>
+                  <th>Expiry Date</th>
                   <th>Status</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="userTableBody">
-                <!-- Dynamic user rows render here -->
-              </tbody>
+              <tbody id="inventoryTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -81,7 +158,6 @@
                   <th>Office</th>
                   <th>Requester</th>
                   <th>Item Details</th>
-                  <!-- Action column header injected dynamically for Admin -->
                 </tr>
               </thead>
               <tbody id="stockOutLogTableBody"></tbody>
@@ -104,7 +180,6 @@
                   <th>Supplier</th>
                   <th>Item Name</th>
                   <th>Quantity</th>
-                  <!-- Action column header injected dynamically for Admin -->
                 </tr>
               </thead>
               <tbody id="stockInLogTableBody"></tbody>
@@ -128,7 +203,6 @@
                   <th>Item Name</th>
                   <th>Quantity</th>
                   <th>Office / Requisitioner</th>
-                  <!-- Action column header injected dynamically for Admin -->
                 </tr>
               </thead>
               <tbody id="monthlyReportTableBody"></tbody>
@@ -138,33 +212,122 @@
       </div>
     </div>
 
-    <!-- Additional sections like Dashboard, Scanner, and Inventory remain available in your layout -->
+    <!-- User Management Section -->
+    <div id="userManagementSection" class="content-section d-none">
+      <h3 class="mb-4">User Management & Permissions</h3>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Complete Name</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Flag to prevent DOM re-renders while typing in inputs
     let isEditingUser = false;
 
-    // Default currentUser fallback if not logged in
     let currentUser = JSON.parse(localStorage.getItem('current_user') || '{"username":"admin","fullName":"Marven P. Algordo","role":"Admin"}');
+
+    let inventory = JSON.parse(localStorage.getItem('wms_inventory') || '[]');
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentUserDisplay').innerText = currentUser.fullName || currentUser.username;
-      renderUserManagement();
+      refreshAllData();
+      showSection('scannerSection');
+    });
+
+    function refreshAllData() {
+      inventory = JSON.parse(localStorage.getItem('wms_inventory') || '[]');
+      renderDashboard();
+      renderInventory();
+      populateItemSelect();
       renderStockOutLog();
       renderStockInLog();
       renderMonthlyReport();
-    });
+      renderUserManagement();
+      document.getElementById('slipNoInput').value = generateSlipNo();
+    }
 
-    // Navigation Switcher
     function showSection(sectionId) {
       document.querySelectorAll('.content-section').forEach(el => el.classList.add('d-none'));
       const activeSec = document.getElementById(sectionId);
       if (activeSec) activeSec.classList.remove('d-none');
     }
 
-    // 1. RECEIPT/SLIP NUMBER GENERATION
+    function calculateStatus(item) {
+      if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
+      const today = new Date();
+      if (item.expiry) {
+        const expDate = new Date(item.expiry);
+        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
+        if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
+      }
+      return { label: 'OK', class: 'bg-ok' };
+    }
+
+    function renderDashboard() {
+      let totalItems = inventory.length;
+      let totalStock = 0;
+      let expiring = 0;
+      let expired = 0;
+      let outOfStock = 0;
+
+      inventory.forEach(item => {
+        totalStock += Number(item.stock || 0);
+        const st = calculateStatus(item);
+        if (st.label === 'Out of Stock') outOfStock++;
+        else if (st.label === 'Expired') expired++;
+        else if (st.label === 'Expiring Soon') expiring++;
+      });
+
+      document.getElementById('totalItemsStat').innerText = totalItems;
+      document.getElementById('totalStockStat').innerText = totalStock;
+      document.getElementById('expiringStat').innerText = expiring;
+      document.getElementById('expiredStat').innerText = expired;
+      document.getElementById('outOfStockStat').innerText = outOfStock;
+    }
+
+    function renderInventory() {
+      const tbody = document.getElementById('inventoryTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = inventory.map(item => {
+        const st = calculateStatus(item);
+        return `
+          <tr>
+            <td>${item.code || 'N/A'}</td>
+            <td>${item.name || 'N/A'}</td>
+            <td>${item.category || 'General'}</td>
+            <td>${item.stock || 0}</td>
+            <td>${item.expiry || 'N/A'}</td>
+            <td><span class="badge ${st.class}">${st.label}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function populateItemSelect() {
+      const select = document.getElementById('itemSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">Choose item...</option>' + 
+        inventory.map((item, idx) => `<option value="${idx}">${item.name} (In Stock: ${item.stock})</option>`).join('');
+    }
+
     function generateSlipNo() {
       const today = new Date();
       const year = today.getFullYear();
@@ -172,28 +335,153 @@
       const prefix = `PGSO-${year}-${month}-`;
 
       const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      
       let maxSeq = 0;
       logs.forEach(log => {
         if (log.slipNo && log.slipNo.startsWith(prefix)) {
           const seqStr = log.slipNo.replace(prefix, '');
           const seqNum = parseInt(seqStr, 10);
-          if (!isNaN(seqNum) && seqNum > maxSeq) {
-            maxSeq = seqNum;
-          }
+          if (!isNaN(seqNum) && seqNum > maxSeq) maxSeq = seqNum;
         }
       });
-
-      const nextSeq = String(maxSeq + 1).padStart(4, '0');
-      return `${prefix}${nextSeq}`;
+      return `${prefix}${String(maxSeq + 1).padStart(4, '0')}`;
     }
 
-    // 2. USER MANAGEMENT
-    function renderUserManagement() {
-      if (isEditingUser) return; // Prevent overwriting active inputs during edit
+    function handleIssue(e) {
+      e.preventDefault();
+      const itemIdx = document.getElementById('itemSelect').value;
+      const qty = parseInt(document.getElementById('qtyInput').value, 10);
+      const office = document.getElementById('officeInput').value;
+      const requester = document.getElementById('requesterInput').value;
 
-      const userTableBody = document.getElementById('userTableBody');
-      if (!userTableBody) return;
+      if (itemIdx === '' || !inventory[itemIdx]) return alert('Select an item.');
+      if (inventory[itemIdx].stock < qty) return alert('Insufficient stock!');
+
+      inventory[itemIdx].stock -= qty;
+      localStorage.setItem('wms_inventory', JSON.stringify(inventory));
+
+      const newLog = {
+        slipNo: document.getElementById('slipNoInput').value,
+        date: new Date().toISOString().split('T')[0],
+        office,
+        requester,
+        itemName: inventory[itemIdx].name,
+        qty
+      };
+
+      const stockOutLogs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
+      stockOutLogs.push(newLog);
+      localStorage.setItem('stock_out_logs', JSON.stringify(stockOutLogs));
+
+      alert('Item issued successfully!');
+      e.target.reset();
+      refreshAllData();
+    }
+
+    function renderStockOutLog() {
+      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
+      const isAdmin = currentUser.role === 'Admin';
+      const headerRow = document.getElementById('stockOutHeaderRow');
+      if (headerRow) {
+        headerRow.innerHTML = `
+          <th>Slip No</th>
+          <th>Date</th>
+          <th>Office</th>
+          <th>Requester</th>
+          <th>Item Details</th>
+          ${isAdmin ? '<th>Action</th>' : ''}
+        `;
+      }
+      const tbody = document.getElementById('stockOutLogTableBody');
+      if (tbody) {
+        tbody.innerHTML = logs.map((log, index) => `
+          <tr>
+            <td>${log.slipNo || 'N/A'}</td>
+            <td>${log.date || 'N/A'}</td>
+            <td>${log.office || 'N/A'}</td>
+            <td>${log.requester || 'N/A'}</td>
+            <td>${log.itemName || ''} (${log.qty || 0})</td>
+            ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
+          </tr>
+        `).join('');
+      }
+    }
+
+    function deleteStockOutLog(index) {
+      if (!confirm('Are you sure you want to delete this record?')) return;
+      let logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
+      logs.splice(index, 1);
+      localStorage.setItem('stock_out_logs', JSON.stringify(logs));
+      refreshAllData();
+    }
+
+    function renderStockInLog() {
+      const logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
+      const isAdmin = currentUser.role === 'Admin';
+      const headerRow = document.getElementById('stockInHeaderRow');
+      if (headerRow) {
+        headerRow.innerHTML = `
+          <th>Date</th>
+          <th>Supplier</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+          ${isAdmin ? '<th>Action</th>' : ''}
+        `;
+      }
+      const tbody = document.getElementById('stockInLogTableBody');
+      if (tbody) {
+        tbody.innerHTML = logs.map((log, index) => `
+          <tr>
+            <td>${log.date || 'N/A'}</td>
+            <td>${log.supplier || 'N/A'}</td>
+            <td>${log.itemName || 'N/A'}</td>
+            <td>${log.qty || 0}</td>
+            ${isAdmin ? `<td><button onclick="deleteStockInLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
+          </tr>
+        `).join('');
+      }
+    }
+
+    function deleteStockInLog(index) {
+      if (!confirm('Are you sure you want to delete this record?')) return;
+      let logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
+      logs.splice(index, 1);
+      localStorage.setItem('stock_in_logs', JSON.stringify(logs));
+      refreshAllData();
+    }
+
+    function renderMonthlyReport() {
+      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
+      const isAdmin = currentUser.role === 'Admin';
+      const headerRow = document.getElementById('monthlyReportHeaderRow');
+      if (headerRow) {
+        headerRow.innerHTML = `
+          <th>Date</th>
+          <th>Slip No</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+          <th>Office / Requisitioner</th>
+          ${isAdmin ? '<th>Action</th>' : ''}
+        `;
+      }
+      const tbody = document.getElementById('monthlyReportTableBody');
+      if (tbody) {
+        tbody.innerHTML = logs.map((log, index) => `
+          <tr>
+            <td>${log.date || 'N/A'}</td>
+            <td>${log.slipNo || 'N/A'}</td>
+            <td>${log.itemName || 'N/A'}</td>
+            <td>${log.qty || 0}</td>
+            <td>${log.office || 'N/A'} - ${log.requester || ''}</td>
+            ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderUserManagement() {
+      if (isEditingUser) return;
+      const tbody = document.getElementById('userTableBody');
+      if (!tbody) return;
 
       let users = JSON.parse(localStorage.getItem('wms_users') || '[]');
       if (users.length === 0) {
@@ -204,20 +492,10 @@
         localStorage.setItem('wms_users', JSON.stringify(users));
       }
 
-      userTableBody.innerHTML = users.map((u, index) => `
+      tbody.innerHTML = users.map((u, index) => `
         <tr>
-          <td>
-            <input type="text" value="${u.fullName || ''}" 
-                   onfocus="isEditingUser=true" 
-                   onblur="isEditingUser=false; updateUser(${index}, 'fullName', this.value)" 
-                   class="form-control form-control-sm">
-          </td>
-          <td>
-            <input type="text" value="${u.username || ''}" 
-                   onfocus="isEditingUser=true" 
-                   onblur="isEditingUser=false; updateUser(${index}, 'username', this.value)" 
-                   class="form-control form-control-sm">
-          </td>
+          <td><input type="text" value="${u.fullName || ''}" onfocus="isEditingUser=true" onblur="isEditingUser=false; updateUser(${index}, 'fullName', this.value)" class="form-control form-control-sm"></td>
+          <td><input type="text" value="${u.username || ''}" onfocus="isEditingUser=true" onblur="isEditingUser=false; updateUser(${index}, 'username', this.value)" class="form-control form-control-sm"></td>
           <td>
             <select onchange="updateUser(${index}, 'role', this.value)" class="form-select form-select-sm">
               <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
@@ -231,7 +509,6 @@
             </select>
           </td>
           <td>
-            <button onclick="saveUser(${index})" class="btn btn-sm btn-success me-1">Save Changes</button>
             <button onclick="deleteUser(${index})" class="btn btn-sm btn-danger">Delete</button>
           </td>
         </tr>
@@ -246,130 +523,12 @@
       }
     }
 
-    function saveUser(index) {
-      alert('User details saved successfully!');
-      renderUserManagement();
-    }
-
     function deleteUser(index) {
       if (!confirm('Are you sure you want to delete this user?')) return;
       let users = JSON.parse(localStorage.getItem('wms_users') || '[]');
       users.splice(index, 1);
       localStorage.setItem('wms_users', JSON.stringify(users));
       renderUserManagement();
-    }
-
-    // 3. ADMIN DELETE LOGS (STOCK OUT, STOCK IN, MONTHLY REPORT)
-
-    // Stock Out Log
-    function renderStockOutLog() {
-      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-
-      const headerRow = document.getElementById('stockOutHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Slip No</th>
-          <th>Date</th>
-          <th>Office</th>
-          <th>Requester</th>
-          <th>Item Details</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
-      }
-
-      const tbody = document.getElementById('stockOutLogTableBody');
-      if (!tbody) return;
-
-      tbody.innerHTML = logs.map((log, index) => `
-        <tr>
-          <td>${log.slipNo || 'N/A'}</td>
-          <td>${log.date || 'N/A'}</td>
-          <td>${log.office || 'N/A'}</td>
-          <td>${log.requester || 'N/A'}</td>
-          <td>${log.itemName || ''} (${log.qty || 0})</td>
-          ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-        </tr>
-      `).join('');
-    }
-
-    function deleteStockOutLog(index) {
-      if (!confirm('Are you sure you want to delete this stock-out record?')) return;
-      let logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      logs.splice(index, 1);
-      localStorage.setItem('stock_out_logs', JSON.stringify(logs));
-      renderStockOutLog();
-      renderMonthlyReport();
-    }
-
-    // Stock In Log
-    function renderStockInLog() {
-      const logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-
-      const headerRow = document.getElementById('stockInHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Date</th>
-          <th>Supplier</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
-      }
-
-      const tbody = document.getElementById('stockInLogTableBody');
-      if (!tbody) return;
-
-      tbody.innerHTML = logs.map((log, index) => `
-        <tr>
-          <td>${log.date || 'N/A'}</td>
-          <td>${log.supplier || 'N/A'}</td>
-          <td>${log.itemName || 'N/A'}</td>
-          <td>${log.qty || 0}</td>
-          ${isAdmin ? `<td><button onclick="deleteStockInLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-        </tr>
-      `).join('');
-    }
-
-    function deleteStockInLog(index) {
-      if (!confirm('Are you sure you want to delete this stock-in record?')) return;
-      let logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
-      logs.splice(index, 1);
-      localStorage.setItem('stock_in_logs', JSON.stringify(logs));
-      renderStockInLog();
-    }
-
-    // Monthly Report
-    function renderMonthlyReport() {
-      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-
-      const headerRow = document.getElementById('monthlyReportHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Date</th>
-          <th>Slip No</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          <th>Office / Requisitioner</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
-      }
-
-      const tbody = document.getElementById('monthlyReportTableBody');
-      if (!tbody) return;
-
-      tbody.innerHTML = logs.map((log, index) => `
-        <tr>
-          <td>${log.date || 'N/A'}</td>
-          <td>${log.slipNo || 'N/A'}</td>
-          <td>${log.itemName || 'N/A'}</td>
-          <td>${log.qty || 0}</td>
-          <td>${log.office || 'N/A'} - ${log.requester || ''}</td>
-          ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-        </tr>
-      `).join('');
     }
 
     function logout() {
