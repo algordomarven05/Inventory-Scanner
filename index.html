@@ -59,7 +59,7 @@
 
     /* Layout Grids */
     .scanner-receipt-container { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 400px); gap: 15px; align-items: start; min-width: 640px; }
+    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(340px, 420px); gap: 15px; align-items: start; min-width: 640px; }
     .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
     .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
@@ -101,35 +101,68 @@
     .bg-expiring { background: #6f42c1; }
     .bg-expired { background: #343a40; }
 
-    /* REAL THERMAL RECEIPT STYLING */
+    /* REAL THERMAL RECEIPT STYLING WITH FULL COLORED LOGO */
     .receipt-paper { 
-      background: #fff8f0; 
+      background: #ffffff; 
       padding: 18px 15px; 
       border: 1px dashed #777; 
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      font-family: 'Courier New', Courier, monospace, 'Lucida Console'; 
+      font-family: 'Courier New', Courier, monospace; 
       color: #111;
       width: 100%;
-      max-width: 350px;
+      max-width: 380px;
       margin: 0 auto;
       box-sizing: border-box;
     }
 
     .pgso-header { text-align: center; margin-bottom: 12px; }
-    .pgso-logo { width: 60px; height: auto; margin-bottom: 4px; filter: grayscale(100%); }
+    /* FULL COLORED LOGO */
+    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
     .receipt-divider { border-top: 1px dashed #333; margin: 10px 0; }
 
-    .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; font-family: inherit; }
-    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #888; padding: 5px 2px; }
+    .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
+    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #888; padding: 4px 2px; }
     .receipt-paper th { text-align: left; background: transparent; font-weight: bold; text-transform: uppercase; }
 
     .receipt-inputs input {
       font-family: 'Courier New', Courier, monospace;
-      font-size: 12px;
+      font-size: 11px;
       border: none;
       border-bottom: 1px solid #444;
       background: transparent;
       outline: none;
+    }
+
+    /* SIDE-BY-SIDE SIGNATURE SECTION */
+    .signature-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 25px;
+      font-size: 10px;
+      text-align: center;
+    }
+    .sig-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .sig-name {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 2px;
+      min-height: 15px;
+    }
+    .sig-line {
+      border-top: 1px solid #000;
+      width: 100%;
+      margin: 0 auto 3px auto;
+    }
+    .sig-label {
+      font-size: 9px;
+      font-weight: bold;
     }
 
     /* Modal Styling */
@@ -246,18 +279,19 @@
           <div class="receipt-card">
             <div class="receipt-paper" id="printable-receipt">
               <div class="pgso-header">
-                <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
-                <div style="font-size:16px; font-weight:bold; letter-spacing: 1px;">PGSO WAREHOUSE</div>
-                <div style="font-size:10px;">PROVINCIAL GENERAL SERVICES OFFICE</div>
-                <div style="font-size:12px; font-weight:bold; margin-top:4px;">PROPERTY RELEASE RECEIPT</div>
+                <!-- COLORED LOGO -->
+                <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
+                <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
+                <div style="font-size:10px; font-weight:bold; color: #444;">Provincial General Services Office</div>
+                <div style="font-size:11px; font-weight:bold; margin-top:4px; text-decoration: underline;">SUPPLY RELEASE RECEIPT</div>
               </div>
 
               <div class="receipt-divider"></div>
 
               <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
-                <div><strong>RECEIPT NO:</strong> <span id="receipt-no"></span></div>
+                <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
                 <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
+                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;" oninput="updateReceivedByName(this.value)"></div>
                 <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
               </div>
 
@@ -277,19 +311,20 @@
 
               <div class="receipt-divider"></div>
 
-              <!-- Signature Area: Full Name directly ABOVE the line -->
-              <div style="margin-top: 30px; font-size: 11px; text-align: center;">
-                <div style="margin-bottom: 25px;">
-                  <div style="border-bottom: 1px solid #000; width: 80%; margin: 0 auto 3px auto;"></div>
-                  <div style="font-size: 10px;">RECEIVED BY (SIGNATURE)</div>
+              <!-- SIDE-BY-SIDE SIGNATURE SECTION -->
+              <div class="signature-grid">
+                <!-- LEFT: RELEASED BY -->
+                <div class="sig-box">
+                  <div id="released-by-signature" class="sig-name">STAFF NAME</div>
+                  <div class="sig-line"></div>
+                  <div class="sig-label">RELEASED BY</div>
                 </div>
 
-                <div>
-                  <div id="released-by-signature" style="font-weight: bold; text-transform: uppercase; font-size: 12px; margin-bottom: 2px;">
-                    STAFF NAME
-                  </div>
-                  <div style="border-top: 1px solid #000; width: 85%; margin: 0 auto 3px auto;"></div>
-                  <div style="font-size: 10px;">RELEASED BY (AUTHORIZED PERSONNEL)</div>
+                <!-- RIGHT: RECEIVED BY -->
+                <div class="sig-box">
+                  <div id="received-by-signature" class="sig-name">REQUESTER NAME</div>
+                  <div class="sig-line"></div>
+                  <div class="sig-label">RECEIVED BY</div>
                 </div>
               </div>
 
@@ -297,9 +332,10 @@
             </div>
 
             <!-- ACTIONS -->
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;" class="no-print">
+            <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" class="no-print">
               <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
-              <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
+              <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print / Save PDF</button>
+              <button class="btn btn-warning" onclick="exportReceiptCSV()">📥 Export CSV</button>
             </div>
             <div id="receipt-notif" class="notification-box no-print"></div>
           </div>
@@ -323,7 +359,7 @@
       </div>
     </div>
 
-    <!-- STOCK OUT LOG TAB (READ-ONLY FOR USERS, EDITABLE & REPRINT FOR ADMIN) -->
+    <!-- STOCK OUT LOG TAB -->
     <div id="stockout" class="tab-content">
       <h3>Stock Out History</h3>
       <div class="card-box" style="overflow-x: auto;">
@@ -429,7 +465,7 @@
       </div>
     </div>
 
-    <!-- USER MANAGEMENT TAB (ADMIN EDITABLE) -->
+    <!-- USER MANAGEMENT TAB -->
     <div id="users" class="tab-content">
       <h3>User Management & Permissions</h3>
       <div class="card-box" style="overflow-x: auto;">
@@ -634,6 +670,10 @@
       }
     }
 
+    function updateReceivedByName(val) {
+      document.getElementById('received-by-signature').innerText = val.trim().toUpperCase() || 'REQUESTER NAME';
+    }
+
     /* GOOGLE SHEETS CLOUD SYNC */
     async function loadFromGoogleSheet() {
       if (!GOOGLE_SCRIPT_URL) return;
@@ -798,15 +838,42 @@
       generateReceiptNumber();
       renderReceipt();
       refreshAllViews();
-      showNotification('receipt-notif', 'Property release completed & synced to cloud!', 'success');
+      showNotification('receipt-notif', 'Supply release completed & synced to cloud!', 'success');
     }
 
+    /* PRINTING & SAVE AS PDF */
     function printReceiptOnly() {
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items to print in receipt.', 'warning');
         return;
       }
-      window.print();
+      setTimeout(() => { window.print(); }, 150);
+    }
+
+    /* DIRECT RECEIPT CSV EXPORT FUNCTION */
+    function exportReceiptCSV() {
+      if (Object.keys(scannedReceiptItems).length === 0) {
+        showNotification('receipt-notif', 'No items in receipt to export.', 'warning');
+        return;
+      }
+      const receiptNo = document.getElementById('receipt-no').innerText;
+      const office = document.getElementById('req-office').value;
+      const requester = document.getElementById('req-name').value;
+      const date = document.getElementById('receipt-date').innerText;
+      const releasedBy = currentUser.fullname || currentUser.username;
+
+      let csv = `Slip No,Office,Requester,Date,Item Code,Item Name,Quantity,Released By\n`;
+      for (let code in scannedReceiptItems) {
+        let item = scannedReceiptItems[code];
+        csv += `"${receiptNo}","${office}","${requester}","${date}","${code}","${item.name}",${item.qty},"${releasedBy}"\n`;
+      }
+
+      let blob = new Blob([csv], { type: 'text/csv' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${receiptNo}_Supply_Release_Receipt.csv`;
+      link.click();
+      showNotification('receipt-notif', 'Receipt exported to CSV successfully!', 'success');
     }
 
     function calculateStatus(item) {
@@ -936,7 +1003,7 @@
       });
     }
 
-    /* STOCK OUT LOG TABLE (EDITABLE 'RELEASED BY' & REPRINT FOR ADMIN) */
+    /* STOCK OUT LOG TABLE */
     function renderStockOutTable() {
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
@@ -999,6 +1066,7 @@
       document.getElementById('req-name').value = log.requester;
       document.getElementById('receipt-date').innerText = log.date;
       document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
+      document.getElementById('received-by-signature').innerText = log.requester ? log.requester.toUpperCase() : 'REQUESTER NAME';
 
       // Load item row
       let item = inventory.find(i => i.code === log.code);
@@ -1022,7 +1090,7 @@
       });
     }
 
-    /* EDITABLE USER MANAGEMENT TABLE (ADMIN ONLY) */
+    /* USER MANAGEMENT TABLE */
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
@@ -1068,7 +1136,6 @@
       users[index].role = newRole;
       users[index].status = newStatus;
 
-      // If updating the currently logged-in admin, update session storage
       if (currentUser && currentUser.username === users[index].username) {
         currentUser.fullname = newName;
         sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
