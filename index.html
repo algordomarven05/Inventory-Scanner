@@ -11,6 +11,12 @@
     .container { display: flex; gap: 20px; max-width: 1100px; margin: auto; }
     .scanner-box, .receipt-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
     #reader { width: 100%; min-height: 300px; }
+    
+    /* Mirror video feed horizontally so camera moves like a mirror */
+    #reader video {
+      transform: scaleX(-1);
+    }
+
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #007bff; color: white; }
@@ -66,33 +72,50 @@
 
     let html5QrCode = null;
     let scannedItems = {};
-    let isCooldown = false; // Block rapid duplicate scans
+    let isCooldown = false;
+    let audioCtx = null;
 
     document.getElementById('receipt-date').innerText = new Date().toLocaleString();
 
-    // Generate a simple scanner beep sound using Web Audio API (no audio file required)
+    // Initialize/resume browser audio context on screen interaction
+    document.addEventListener('click', function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }, { once: false });
+
     function playBeepSound() {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+        
         osc.type = "sine";
-        osc.frequency.value = 1800; // Beep pitch
-        gain.gain.value = 0.1;      // Volume
+        osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // Beep pitch
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);      // Volume
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.12); // Beep duration (120ms)
+
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.15); // 150ms duration
       } catch (e) {
-        console.log("Audio not allowed yet:", e);
+        console.warn("Audio playback failed:", e);
       }
     }
 
     function onScanSuccess(decodedText) {
-      // Ignore scans if we are in cooldown mode
       if (isCooldown) return;
 
-      // Enable cooldown flag for 2 seconds
       isCooldown = true;
       playBeepSound();
 
@@ -106,7 +129,7 @@
 
       updateReceiptTable();
 
-      // Reset cooldown after 2000 ms (2 seconds)
+      // 2-second cooldown to prevent multi-scans
       setTimeout(() => {
         isCooldown = false;
       }, 2000);
