@@ -30,10 +30,20 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Left-Right Split Grid */
-    .scanner-receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-    @media (max-width: 900px) {
-      .scanner-receipt-grid { grid-template-columns: 1fr; }
+    /* Mobile Side-by-Side Horizontal Scroll Container */
+    .scanner-receipt-container {
+      overflow-x: auto;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fixed Side-by-Side Grid Layout */
+    .scanner-receipt-grid { 
+      display: grid; 
+      grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); 
+      gap: 15px; 
+      align-items: start;
+      min-width: 640px; /* Forces side-by-side rendering on mobile screens */
     }
     
     .scanner-card {
@@ -121,65 +131,67 @@
 
     <!-- SCANNER & RECEIPT TAB -->
     <div id="scanner" class="tab-content active">
-      <div class="scanner-receipt-grid">
-        
-        <!-- LEFT: Scanner Box -->
-        <div class="scanner-card">
-          <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
-          <div class="scanner-wrapper">
-            <div id="reader"></div>
-          </div>
+      <div class="scanner-receipt-container">
+        <div class="scanner-receipt-grid">
           
-          <div class="btn-group">
-            <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
-            <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
-            <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
-            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
+          <!-- LEFT: Scanner Box -->
+          <div class="scanner-card">
+            <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
+            <div class="scanner-wrapper">
+              <div id="reader"></div>
+            </div>
+            
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+              <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
+              <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
+              <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
+            </div>
           </div>
+
+          <!-- RIGHT: Receipt Box -->
+          <div class="receipt-card printable">
+            <div class="receipt-paper">
+              <div class="pgso-header">
+                <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
+                <h2 style="margin:0;">PGSO</h2>
+                <div style="font-size:12px; font-style:italic;">Provincial General Services Office</div>
+                <div style="font-weight:bold; margin-top:5px; text-transform:uppercase;">Property Release Receipt</div>
+              </div>
+
+              <div style="font-size: 13px; margin-bottom: 15px;">
+                <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
+                <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 180px;" value="PGSO" onchange="generateReceiptNumber()"></div>
+                <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 180px;"></div>
+                <div><strong>Date:</strong> <span id="receipt-date"></span></div>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code ID</th>
+                    <th>Item Name</th>
+                    <th style="text-align: center;">Qty</th>
+                    <th class="no-print">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="receipt-rows"></tbody>
+              </table>
+
+              <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
+                <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
+                <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Released By (PGSO)</div>
+              </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+              <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
+              <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
+            </div>
+          </div>
+
         </div>
-
-        <!-- RIGHT: Receipt Box -->
-        <div class="receipt-card printable">
-          <div class="receipt-paper">
-            <div class="pgso-header">
-              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
-              <h2 style="margin:0;">PGSO</h2>
-              <div style="font-size:12px; font-style:italic;">Provincial General Services Office</div>
-              <div style="font-weight:bold; margin-top:5px; text-transform:uppercase;">Property Release Receipt</div>
-            </div>
-
-            <div style="font-size: 13px; margin-bottom: 15px;">
-              <div><strong>Receipt No:</strong> <span id="receipt-no"></span></div>
-              <div><strong>Office:</strong> <input type="text" id="req-office" style="border:none; border-bottom:1px dotted #000; width: 180px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-              <div><strong>Requester:</strong> <input type="text" id="req-name" style="border:none; border-bottom:1px dotted #000; width: 180px;"></div>
-              <div><strong>Date:</strong> <span id="receipt-date"></span></div>
-            </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>Code ID</th>
-                  <th>Item Name</th>
-                  <th style="text-align: center;">Qty</th>
-                  <th class="no-print">Action</th>
-                </tr>
-              </thead>
-              <tbody id="receipt-rows"></tbody>
-            </table>
-
-            <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
-              <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Received By (Signature)</div>
-              <div style="width: 40%; border-top: 1px solid #000; padding-top: 5px;">Released By (PGSO)</div>
-            </div>
-          </div>
-
-          <!-- ACTIONS -->
-          <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
-            <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
-            <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
-          </div>
-        </div>
-
       </div>
     </div>
 
