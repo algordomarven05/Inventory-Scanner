@@ -19,16 +19,39 @@
     /* Header Bar */
     .navbar { background: var(--dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-    .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
     .tab-btn:hover { background: #34495e; }
     .tab-btn.active { background: var(--primary); border-color: #004085; }
 
     .sync-status { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #28a745; color: white; font-weight: bold; margin-left: 10px; }
+    .user-badge { font-size: 12px; background: #34495e; padding: 5px 10px; border-radius: 4px; font-weight: bold; color: #00d2d3; }
 
     .main-container { padding: 20px; max-width: 1400px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    /* In-Screen Notification Toast System */
+    .notification-box {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: bold;
+      display: none;
+    }
+    .notif-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .notif-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .notif-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+    /* Auth Screen */
+    .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a252f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .auth-card { background: white; padding: 30px; border-radius: 10px; width: 100%; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .auth-card h3 { margin-top: 0; color: var(--primary); text-align: center; }
+    .auth-card label { display: block; font-size: 12px; font-weight: bold; margin-top: 10px; }
+    .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
+    .auth-toggle a { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: underline; }
 
     /* Mobile Side-by-Side Horizontal Scroll Container */
     .scanner-receipt-container {
@@ -43,17 +66,11 @@
       grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); 
       gap: 15px; 
       align-items: start;
-      min-width: 640px; /* Forces side-by-side rendering on mobile screens */
+      min-width: 640px;
     }
     
-    .scanner-card {
-      background: #fff; padding: 20px; border-radius: 10px;
-      border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15);
-    }
-    .receipt-card {
-      background: #fff; padding: 20px; border-radius: 10px;
-      border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+    .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
+    .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
     /* Scanner Camera Frame */
     .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
@@ -101,29 +118,69 @@
     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
 
+    /* Dedicated Print Styling Fix */
     @media print {
-      body * { visibility: hidden; }
-      .printable, .printable * { visibility: visible; }
-      .printable { position: absolute; left: 0; top: 0; width: 100%; }
+      body * { visibility: hidden !important; }
+      #printable-receipt, #printable-receipt * { visibility: visible !important; }
+      #printable-receipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
       .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
 
+  <!-- LOGIN / REGISTER OVERLAY -->
+  <div id="auth-screen" class="auth-overlay">
+    <div class="auth-card">
+      <h3 id="auth-title">System Login</h3>
+      
+      <div id="login-form">
+        <label>Username:</label>
+        <input type="text" id="login-user">
+        <label>Password:</label>
+        <input type="password" id="login-pass">
+        <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="handleLogin()">Login</button>
+        <div id="login-notif" class="notification-box"></div>
+        <div class="auth-toggle">
+          Need an account? <a onclick="toggleAuthMode(true)">Register here</a>
+        </div>
+      </div>
+
+      <div id="register-form" style="display: none;">
+        <label>Username:</label>
+        <input type="text" id="reg-user">
+        <label>Password:</label>
+        <input type="password" id="reg-pass">
+        <label>Requested Role:</label>
+        <select id="reg-role">
+          <option value="user">User (Scanner & Dashboard)</option>
+          <option value="admin">Admin (Full Access)</option>
+        </select>
+        <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="handleRegister()">Register Account</button>
+        <div id="reg-notif" class="notification-box"></div>
+        <div class="auth-toggle">
+          Already registered? <a onclick="toggleAuthMode(false)">Back to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Top Navigation Bar -->
   <div class="navbar no-print">
     <div>
-      <h2 style="display:inline-block;">PGSO WMS & Scanner</h2>
+      <h2 style="display:inline-block;">PGSO WMS</h2>
       <span class="sync-status" id="sync-indicator">🟢 Live Cloud Synced</span>
     </div>
     <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
-      <button class="tab-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
-      <button class="tab-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
-      <button class="tab-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
-      <button class="tab-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
+      <button class="tab-btn active" id="tab-scanner-btn" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
+      <button class="tab-btn" id="tab-dashboard-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+      <button class="tab-btn admin-only" id="tab-inventory-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
+      <button class="tab-btn admin-only" id="tab-stockin-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
+      <button class="tab-btn admin-only" id="tab-stockout-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
+      <button class="tab-btn admin-only" id="tab-history-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
+      <button class="tab-btn admin-only" id="tab-users-btn" onclick="switchTab('users', this)">👥 User Management</button>
+      <span class="user-badge" id="current-user-display">User: Guest</span>
+      <button class="btn btn-danger" style="padding: 5px 10px;" onclick="handleLogout()">Logout</button>
     </div>
   </div>
 
@@ -147,11 +204,12 @@
               <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
               <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
             </div>
+            <div id="scanner-notif" class="notification-box"></div>
           </div>
 
           <!-- RIGHT: Receipt Box -->
-          <div class="receipt-card printable">
-            <div class="receipt-paper">
+          <div class="receipt-card">
+            <div class="receipt-paper" id="printable-receipt">
               <div class="pgso-header">
                 <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO">
                 <h2 style="margin:0;">PGSO</h2>
@@ -189,6 +247,7 @@
               <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
               <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print Receipt</button>
             </div>
+            <div id="receipt-notif" class="notification-box no-print"></div>
           </div>
 
         </div>
@@ -266,7 +325,7 @@
       </div>
     </div>
 
-    <!-- STOCK OUT LOG TAB -->
+    <!-- STOCK OUT LOG TAB (ADMIN EDITABLE) -->
     <div id="stockout" class="tab-content">
       <h3>Stock Out History</h3>
       <div class="card-box" style="overflow-x: auto;">
@@ -279,11 +338,13 @@
               <th>Requester</th>
               <th>Item Code</th>
               <th>Qty Issued</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="stockout-table-body"></tbody>
         </table>
       </div>
+      <div id="stockout-notif" class="notification-box"></div>
     </div>
 
     <!-- MONTHLY HISTORY REPORT TAB -->
@@ -311,6 +372,25 @@
           <tbody id="history-table-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- USER MANAGEMENT TAB (ADMIN ONLY) -->
+    <div id="users" class="tab-content">
+      <h3>User Management & Permissions</h3>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+      <div id="user-mgmt-notif" class="notification-box"></div>
     </div>
 
   </div>
@@ -365,6 +445,13 @@
     let stockOutLogs = [];
     let receiptCounter = 1;
 
+    // Default System Accounts
+    let users = [
+      { username: "admin", pass: "admin123", role: "admin", status: "active" },
+      { username: "staff", pass: "staff123", role: "user", status: "active" }
+    ];
+
+    let currentUser = null;
     let scannedReceiptItems = {};
     let html5QrCode = null;
     let isTorchOn = false;
@@ -374,11 +461,96 @@
     window.addEventListener('load', () => {
       loadFromGoogleSheet();
       generateReceiptNumber();
-      startCamera();
-      
+      checkAuthStatus();
       setInterval(loadFromGoogleSheet, 5000);
     });
 
+    // In-Screen Notification Helper Function
+    function showNotification(elementId, message, type = 'success') {
+      const notifEl = document.getElementById(elementId);
+      if (!notifEl) return;
+      notifEl.className = `notification-box notif-${type}`;
+      notifEl.innerText = message;
+      notifEl.style.display = 'block';
+      setTimeout(() => { notifEl.style.display = 'none'; }, 4000);
+    }
+
+    /* AUTHENTICATION & PERMISSIONS */
+    function checkAuthStatus() {
+      const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
+      if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('current-user-display').innerText = `${currentUser.username} (${currentUser.role.toUpperCase()})`;
+        applyUserPermissions();
+        startCamera();
+      } else {
+        document.getElementById('auth-screen').style.display = 'flex';
+      }
+    }
+
+    function toggleAuthMode(isRegister) {
+      document.getElementById('login-form').style.display = isRegister ? 'none' : 'block';
+      document.getElementById('register-form').style.display = isRegister ? 'block' : 'none';
+      document.getElementById('auth-title').innerText = isRegister ? 'Register Account' : 'System Login';
+    }
+
+    function handleLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+
+      const account = users.find(acc => acc.username === u && acc.pass === p);
+      if (!account) {
+        showNotification('login-notif', 'Invalid username or password!', 'danger');
+        return;
+      }
+      if (account.status !== 'active') {
+        showNotification('login-notif', `Account status is ${account.status.toUpperCase()}. Contact Admin.`, 'warning');
+        return;
+      }
+
+      currentUser = account;
+      sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+      checkAuthStatus();
+    }
+
+    function handleRegister() {
+      const u = document.getElementById('reg-user').value.trim();
+      const p = document.getElementById('reg-pass').value.trim();
+      const r = document.getElementById('reg-role').value;
+
+      if (!u || !p) {
+        showNotification('reg-notif', 'Please fill in all fields!', 'danger');
+        return;
+      }
+      if (users.find(acc => acc.username === u)) {
+        showNotification('reg-notif', 'Username already exists!', 'danger');
+        return;
+      }
+
+      users.push({ username: u, pass: p, role: r, status: "pending" });
+      saveToGoogleSheet();
+      showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
+      setTimeout(() => toggleAuthMode(false), 2000);
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('pgso_user');
+      currentUser = null;
+      location.reload();
+    }
+
+    function applyUserPermissions() {
+      const adminElements = document.querySelectorAll('.admin-only');
+      if (currentUser && currentUser.role === 'admin') {
+        adminElements.forEach(el => el.style.display = 'inline-block');
+      } else {
+        adminElements.forEach(el => el.style.display = 'none');
+        switchTab('scanner', document.getElementById('tab-scanner-btn'));
+      }
+    }
+
+    /* GOOGLE SHEETS CLOUD SYNC */
     async function loadFromGoogleSheet() {
       if (!GOOGLE_SCRIPT_URL) return;
 
@@ -391,17 +563,15 @@
           inventory = record.inventory || [];
           stockInLogs = record.stockInLogs || [];
           stockOutLogs = record.stockOutLogs || [];
+          if (record.users && record.users.length > 0) users = record.users;
           receiptCounter = record.receiptCounter || 1;
           
           const syncEl = document.getElementById('sync-indicator');
-          syncEl.innerText = '🟢 Live Cloud Synced (Google Sheets)';
+          syncEl.innerText = '🟢 Live Cloud Synced';
           syncEl.style.background = '#28a745';
           refreshAllViews();
-        } else {
-          throw new Error('Sync response failed');
-        }
+        } else { throw new Error('Sync response failed'); }
       } catch (err) {
-        console.error("Cloud Sync Error:", err);
         const syncEl = document.getElementById('sync-indicator');
         syncEl.innerText = '🔴 Cloud Sync Offline';
         syncEl.style.background = '#d9534f';
@@ -415,11 +585,9 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, receiptCounter })
+          body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, users, receiptCounter })
         });
-      } catch (err) {
-        console.error("Google Sheets Save Failed", err);
-      }
+      } catch (err) { console.error("Google Sheets Save Failed", err); }
     }
 
     function playBeepSound() {
@@ -441,7 +609,7 @@
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
       refreshAllViews();
     }
 
@@ -480,12 +648,13 @@
       if (scannedReceiptItems[code]) scannedReceiptItems[code].qty++;
       else scannedReceiptItems[code] = { name: name, qty: 1 };
       renderReceipt();
+      showNotification('scanner-notif', `Scanned: ${name}`, 'success');
     }
 
     function toggleTorch() {
       if (html5QrCode) {
         isTorchOn = !isTorchOn;
-        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => alert("Flashlight not supported."));
+        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => showNotification('scanner-notif', 'Flashlight not supported on device.', 'warning'));
       }
     }
 
@@ -527,7 +696,7 @@
       const requester = document.getElementById('req-name').value;
 
       if (Object.keys(scannedReceiptItems).length === 0) {
-        alert("No items in receipt to release.");
+        showNotification('receipt-notif', 'No items in receipt to release.', 'warning');
         return;
       }
 
@@ -544,12 +713,13 @@
       generateReceiptNumber();
       renderReceipt();
       refreshAllViews();
-      alert("Property release completed & synced to Google Sheet!");
+      showNotification('receipt-notif', 'Property release completed & synced to cloud!', 'success');
     }
 
+    /* DIRECT PRINT FUNCTION FIX */
     function printReceiptOnly() {
       if (Object.keys(scannedReceiptItems).length === 0) {
-        alert("No items to print.");
+        showNotification('receipt-notif', 'No items to print in receipt.', 'warning');
         return;
       }
       window.print();
@@ -671,6 +841,7 @@
       renderStockInTable();
       renderStockOutTable();
       renderHistoryTable();
+      renderUsersTable();
     }
 
     function renderStockInTable() {
@@ -681,12 +852,36 @@
       });
     }
 
+    /* STOCK OUT TABLE WITH EDITING & IN-SCREEN SAVE */
     function renderStockOutTable() {
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
-      stockOutLogs.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.receiptNo}</td><td>${l.date}</td><td>${l.office}</td><td>${l.requester}</td><td>${l.code}</td><td>${l.qty}</td></tr>`;
+      stockOutLogs.forEach((l, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${l.receiptNo}</td>
+            <td>${l.date}</td>
+            <td>${l.office}</td>
+            <td><input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 120px;"></td>
+            <td>${l.code}</td>
+            <td><input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 60px;"></td>
+            <td>
+              <button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
+            </td>
+          </tr>`;
       });
+    }
+
+    function saveStockOutRow(index) {
+      const newReq = document.getElementById(`so-req-${index}`).value.trim();
+      const newQty = parseInt(document.getElementById(`so-qty-${index}`).value) || 0;
+
+      stockOutLogs[index].requester = newReq;
+      stockOutLogs[index].qty = newQty;
+
+      saveToGoogleSheet();
+      showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated successfully!`, 'success');
+      refreshAllViews();
     }
 
     function renderHistoryTable() {
@@ -698,6 +893,52 @@
       stockOutLogs.forEach(l => {
         tbody.innerHTML += `<tr><td>${l.date}</td><td>Stock Out</td><td>${l.receiptNo}</td><td>${l.office}</td><td>${l.code}</td><td>-${l.qty}</td></tr>`;
       });
+    }
+
+    /* USER MANAGEMENT TABLE */
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '';
+      users.forEach((u, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${u.username}</strong></td>
+            <td>
+              <select id="usr-role-${index}">
+                <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </td>
+            <td>
+              <select id="usr-status-${index}">
+                <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
+                <option value="pending" ${u.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="inactive" ${u.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-success" style="padding: 4px 8px;" onclick="saveUserRow(${index})">Save Changes</button>
+              <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteUserRow(${index})">Delete</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function saveUserRow(index) {
+      users[index].role = document.getElementById(`usr-role-${index}`).value;
+      users[index].status = document.getElementById(`usr-status-${index}`).value;
+
+      saveToGoogleSheet();
+      showNotification('user-mgmt-notif', `User '${users[index].username}' updated successfully!`, 'success');
+      refreshAllViews();
+    }
+
+    function deleteUserRow(index) {
+      const uname = users[index].username;
+      users.splice(index, 1);
+      saveToGoogleSheet();
+      showNotification('user-mgmt-notif', `User '${uname}' deleted successfully!`, 'warning');
+      refreshAllViews();
     }
 
     function exportMonthlyCSV() {
