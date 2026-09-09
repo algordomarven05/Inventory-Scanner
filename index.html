@@ -1,554 +1,1257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PGSO - Inventory & Warehouse Management System</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    body { background-color: #f4f6f9; }
-    .bg-expired { background-color: #dc3545 !important; color: white; }
-    .bg-expiring { background-color: #ffc107 !important; color: black; }
-    .bg-out { background-color: #6c757d !important; color: white; }
-    .bg-critical { background-color: #fd7e14 !important; color: white; }
-    .bg-low { background-color: #0dcaf0 !important; color: black; }
-    .bg-ok { background-color: #198754 !important; color: white; }
-    .navbar-dark-custom { background-color: #1e293b; }
-    .card-stat { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .cursor-pointer { cursor: pointer; }
+    :root {
+      --primary: #0056b3;
+      --success: #1e7e34;
+      --warning: #f39c12;
+      --danger: #d9534f;
+      --dark: #1a252f;
+      --light: #f8f9fa;
+    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; color: #333; }
+    
+    /* Header Bar */
+    .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+    .tab-btn:hover { background: #34495e; }
+    .tab-btn.active { background: var(--primary); border-color: #004085; }
+
+    .sync-status { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #28a745; color: white; font-weight: bold; margin-left: 10px; }
+    
+    /* User Profile Bar */
+    .user-profile-badge { display: flex; align-items: center; gap: 10px; background: #2c3e50; padding: 4px 10px; border-radius: 20px; border: 1px solid #34495e; }
+    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #00d2d3; cursor: pointer; background: #fff; }
+    .profile-name { font-size: 13px; font-weight: bold; color: #fff; cursor: pointer; }
+
+    .main-container { padding: 20px; max-width: 1400px; margin: auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Notifications */
+    .notification-box {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: bold;
+      display: none;
+    }
+    .notif-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .notif-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .notif-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+    /* Auth Screen */
+    .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a252f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .auth-card { background: white; padding: 30px; border-radius: 10px; width: 100%; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .auth-card h3 { margin-top: 0; color: var(--primary); text-align: center; }
+    .auth-card label { display: block; font-size: 12px; font-weight: bold; margin-top: 10px; }
+    .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
+    .auth-toggle a { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: underline; }
+
+    /* Layout Grids */
+    .scanner-receipt-container { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(340px, 420px); gap: 15px; align-items: start; min-width: 640px; }
+    .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
+    .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    /* Scanner Wrapper */
+    .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
+    #reader { width: 100%; height: 100%; min-height: 280px; }
+    #reader video { transform: none !important; object-fit: cover; }
+
+    /* Buttons & Controls */
+    .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+    .btn { padding: 8px 14px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-primary { background: var(--primary); }
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-dark { background: var(--dark); }
+
+    /* Dashboard */
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; border-left: 5px solid var(--primary); }
+    .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #666; text-transform: uppercase; }
+    .dash-card .count { font-size: 22px; font-weight: bold; }
+
+    /* Tables */
+    .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
+    th { background: #f1f3f5; font-weight: 600; }
+    
+    .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
+    .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
+
+    /* Badges */
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
+    .bg-ok { background: #28a745; }
+    .bg-low { background: #ffc107; color: #000; }
+    .bg-critical { background: #fd7e14; }
+    .bg-out { background: #dc3545; }
+    .bg-expiring { background: #6f42c1; }
+    .bg-expired { background: #343a40; }
+
+    /* THERMAL RECEIPT STYLING */
+    .receipt-paper { 
+      background: #ffffff; 
+      padding: 18px 15px; 
+      border: 1px dashed #777; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Courier New', Courier, monospace; 
+      color: #111;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .pgso-header { text-align: center; margin-bottom: 12px; }
+    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
+    .receipt-divider { border-top: 1px dashed #333; margin: 10px 0; }
+
+    .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
+    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #888; padding: 4px 2px; }
+    .receipt-paper th { text-align: left; background: transparent; font-weight: bold; text-transform: uppercase; }
+
+    .receipt-inputs input {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      border: none;
+      border-bottom: 1px solid #444;
+      background: transparent;
+      outline: none;
+    }
+
+    /* SIDE-BY-SIDE SIGNATURE SECTION */
+    .signature-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 35px;
+      font-size: 10px;
+      text-align: center;
+    }
+    .sig-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .sig-name {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 2px;
+      min-height: 15px;
+    }
+    .sig-line {
+      border-top: 1px solid #000;
+      width: 100%;
+      margin: 0 auto 3px auto;
+    }
+    .sig-label {
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    /* Modal Styling */
+    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
+
+    /* Print Formatting */
+    @media print {
+      body * { visibility: hidden !important; }
+      #printable-receipt, #printable-receipt *, .printable, .printable * { visibility: visible !important; }
+      #printable-receipt { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 80mm !important; 
+        margin: 0; 
+        padding: 10px; 
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+      }
+      .no-print { display: none !important; }
+      .receipt-inputs input { border: none !important; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-dark-custom px-3 mb-4">
-    <a class="navbar-brand fw-bold" href="#">PGSO WMS</a>
-    <span class="badge bg-success me-3"><i class="bi bi-circle-fill fs-6 me-1"></i> Live</span>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('scannerSection')"><i class="bi bi-qr-code-scan"></i> Scanner & Issue</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('dashboardSection')"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('stockOutLogSection')"><i class="bi bi-box-arrow-right"></i> Stock Out Log</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('inventorySection')"><i class="bi bi-boxes"></i> Inventory</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('stockInLogSection')"><i class="bi bi-box-arrow-in-down"></i> Stock In</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('monthlyReportSection')"><i class="bi bi-file-earmark-bar-graph"></i> Monthly Report</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('userManagementSection')"><i class="bi bi-people-fill"></i> User Management</a></li>
-      </ul>
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-white fw-semibold" id="currentUserDisplay">User</span>
-        <button class="btn btn-danger btn-sm" onclick="logout()"><i class="bi bi-box-arrow-left"></i> Logout</button>
+  <!-- AUTHENTICATION OVERLAY -->
+  <div id="auth-screen" class="auth-overlay">
+    <div class="auth-card">
+      <h3 id="auth-title">System Login</h3>
+      
+      <div id="login-form">
+        <label>Username:</label>
+        <input type="text" id="login-user">
+        <label>Password:</label>
+        <input type="password" id="login-pass">
+        <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="handleLogin()">Login</button>
+        <div id="login-notif" class="notification-box"></div>
+        <div class="auth-toggle">
+          Need an account? <a onclick="toggleAuthMode(true)">Register here</a>
+        </div>
+      </div>
+
+      <div id="register-form" style="display: none;">
+        <label>Complete Name:</label>
+        <input type="text" id="reg-fullname" placeholder="e.g. Juan Dela Cruz">
+        <label>Username:</label>
+        <input type="text" id="reg-user">
+        <label>Password:</label>
+        <input type="password" id="reg-pass">
+        <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="handleRegister()">Register Account</button>
+        <div id="reg-notif" class="notification-box"></div>
+        <div class="auth-toggle">
+          Already registered? <a onclick="toggleAuthMode(false)">Back to Login</a>
+        </div>
       </div>
     </div>
-  </nav>
+  </div>
 
-  <div class="container-fluid px-4">
+  <!-- Profile Picture Upload -->
+  <input type="file" id="pfp-upload" accept="image/*" style="display: none;" onchange="handlePfpUpload(event)">
 
-    <!-- Scanner & Issue Section -->
-    <div id="scannerSection" class="content-section">
-      <h3 class="mb-4">Scanner & Issue Items</h3>
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="card card-stat p-4">
-            <h5 class="card-title mb-3">Requisition & Issue Slip</h5>
-            <form id="issueForm" onsubmit="handleIssue(event)">
-              <div class="mb-3">
-                <label class="form-label fw-bold">Slip No.</label>
-                <input type="text" id="slipNoInput" class="form-control" readonly />
+  <!-- Top Navigation Bar -->
+  <div class="navbar no-print">
+    <div>
+      <h2 style="display:inline-block;">PGSO WMS</h2>
+      <span class="sync-status" id="sync-indicator">🟢 Live Cloud Synced</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tab-scanner-btn" onclick="switchTab('scanner', this)">📷 Scanner & Issue</button>
+      <button class="tab-btn" id="tab-dashboard-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+      <button class="tab-btn" id="tab-stockout-btn" onclick="switchTab('stockout', this)">📤 Stock Out Log</button>
+      <button class="tab-btn" id="tab-inventory-btn" onclick="switchTab('inventory', this)">📦 Inventory</button>
+      <button class="tab-btn admin-only" id="tab-stockin-btn" onclick="switchTab('stockin', this)">📥 Stock In</button>
+      <button class="tab-btn admin-only" id="tab-history-btn" onclick="switchTab('history', this)">📑 Monthly Report</button>
+      <button class="tab-btn admin-only" id="tab-users-btn" onclick="switchTab('users', this)">👥 User Management</button>
+      
+      <!-- Profile Header -->
+      <div class="user-profile-badge">
+        <img id="user-avatar" class="profile-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile" onclick="triggerPfpUpload()" title="Click to change profile picture">
+        <span id="user-fullname" class="profile-name" onclick="triggerPfpUpload()" title="Click to change profile picture">User</span>
+      </div>
+
+      <button class="btn btn-danger" style="padding: 5px 10px;" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+
+    <!-- SCANNER & RECEIPT TAB -->
+    <div id="scanner" class="tab-content active">
+      <div class="scanner-receipt-container">
+        <div class="scanner-receipt-grid">
+          
+          <!-- Scanner Box -->
+          <div class="scanner-card">
+            <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
+            <div class="scanner-wrapper">
+              <div id="reader"></div>
+            </div>
+            
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+              <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
+              <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
+              <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
+            </div>
+            <div id="scanner-notif" class="notification-box"></div>
+          </div>
+
+          <!-- Thermal Receipt Box -->
+          <div class="receipt-card">
+            <div class="receipt-paper" id="printable-receipt">
+              <div class="pgso-header">
+                <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
+                <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
+                <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
+                <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Office / Division</label>
-                <input type="text" id="officeInput" class="form-control" required placeholder="e.g. PGSO Main" />
+
+              <div class="receipt-divider"></div>
+
+              <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
+                <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
+                <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
+                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
+                <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Requisitioner / Recipient</label>
-                <input type="text" id="requesterInput" class="form-control" required placeholder="Recipient name" />
+
+              <div class="receipt-divider"></div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>CODE</th>
+                    <th>ITEM NAME</th>
+                    <th style="text-align: center;">QTY</th>
+                    <th class="no-print"></th>
+                  </tr>
+                </thead>
+                <tbody id="receipt-rows"></tbody>
+              </table>
+
+              <div class="receipt-divider"></div>
+
+              <!-- SIGNATURE SECTION -->
+              <div class="signature-grid">
+                <div class="sig-box">
+                  <div id="released-by-signature" class="sig-name">STAFF NAME</div>
+                  <div class="sig-line"></div>
+                  <div class="sig-label">RELEASED BY</div>
+                </div>
+
+                <div class="sig-box">
+                  <div class="sig-name"></div>
+                  <div class="sig-line"></div>
+                  <div class="sig-label">RECEIVED BY</div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Select Item</label>
-                <select id="itemSelect" class="form-select" required>
-                  <option value="">Choose item...</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Quantity</label>
-                <input type="number" id="qtyInput" class="form-control" min="1" value="1" required />
-              </div>
-              <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-circle"></i> Complete Issue</button>
-            </form>
+
+              <div style="text-align: center; margin-top: 15px; font-size: 9px;">*** OFFICIAL SYSTEM RECORD ***</div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" class="no-print">
+              <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
+              <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print / Save PDF</button>
+              <button class="btn btn-warning" onclick="exportReceiptCSV()">📥 Export CSV</button>
+            </div>
+            <div id="receipt-notif" class="notification-box no-print"></div>
           </div>
+
         </div>
       </div>
     </div>
 
-    <!-- Dashboard Section -->
-    <div id="dashboardSection" class="content-section d-none">
-      <h3 class="mb-4">Dashboard Overview</h3>
-      <div class="row g-3 mb-4">
-        <div class="col-md-2">
-          <div class="card card-stat bg-primary text-white p-3 text-center">
-            <h6>Total Items</h6>
-            <h2 id="totalItemsStat">0</h2>
-          </div>
-        </div>
-        <div class="col-md-2">
-          <div class="card card-stat bg-ok text-white p-3 text-center">
-            <h6>Units in Stock</h6>
-            <h2 id="totalStockStat">0</h2>
-          </div>
-        </div>
-        <div class="col-md-2">
-          <div class="card card-stat bg-expiring text-dark p-3 text-center">
-            <h6>Expiring Soon</h6>
-            <h2 id="expiringStat">0</h2>
-          </div>
-        </div>
-        <div class="col-md-2">
-          <div class="card card-stat bg-expired text-white p-3 text-center">
-            <h6>Expired</h6>
-            <h2 id="expiredStat">0</h2>
-          </div>
-        </div>
-        <div class="col-md-2">
-          <div class="card card-stat bg-out text-white p-3 text-center">
-            <h6>Out of Stock</h6>
-            <h2 id="outOfStockStat">0</h2>
-          </div>
-        </div>
+    <!-- DASHBOARD TAB -->
+    <div id="dashboard" class="tab-content">
+      <h3>System Overview</h3>
+      <div class="dash-grid">
+        <div class="dash-card"><h4>Total Items</h4><div class="count" id="dash-total">0</div></div>
+        <div class="dash-card"><h4>Units in Stock</h4><div class="count" id="dash-units">0</div></div>
+        <div class="dash-card" style="border-color: #28a745;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
+        <div class="dash-card" style="border-color: #ffc107;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
+        <div class="dash-card" style="border-color: #fd7e14;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
+        <div class="dash-card" style="border-color: #dc3545;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
+        <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
+        <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
       </div>
     </div>
 
-    <!-- Inventory Section -->
-    <div id="inventorySection" class="content-section d-none">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Inventory List</h3>
-        <button class="btn btn-success btn-sm" onclick="showAddItemModal()"><i class="bi bi-plus-circle"></i> Add New Item</button>
+    <!-- STOCK OUT LOG TAB -->
+    <div id="stockout" class="tab-content">
+      <h3>Stock Out History</h3>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt No</th>
+              <th>Date</th>
+              <th>Requesting Office</th>
+              <th>Requester</th>
+              <th>Item Code</th>
+              <th>Qty Issued</th>
+              <th>Released By</th>
+              <th class="admin-only">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="stockout-table-body"></tbody>
+        </table>
       </div>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>Item Code</th>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Stock Quantity</th>
-                  <th>Expiry Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="inventoryTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+      <div id="stockout-notif" class="notification-box"></div>
+    </div>
+
+    <!-- INVENTORY TAB -->
+    <div id="inventory" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>Master Inventory List</h3>
+        <button class="btn btn-primary admin-only" onclick="openItemModal()">+ Add New Item</button>
+      </div>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Code</th>
+              <th>Location</th>
+              <th>Unit</th>
+              <th>Stock</th>
+              <th>Min</th>
+              <th>Batch</th>
+              <th>Expiry</th>
+              <th>Days Left</th>
+              <th>Status</th>
+              <th class="admin-only">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-table-body"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Stock Out Log Section -->
-    <div id="stockOutLogSection" class="content-section d-none">
-      <h3 class="mb-4">Stock Out Log</h3>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-              <thead>
-                <tr id="stockOutHeaderRow">
-                  <th>Slip No</th>
-                  <th>Date</th>
-                  <th>Office</th>
-                  <th>Requester</th>
-                  <th>Item Details</th>
-                </tr>
-              </thead>
-              <tbody id="stockOutLogTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+    <!-- STOCK IN TAB -->
+    <div id="stockin" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>Stock In Records</h3>
+        <button class="btn btn-success" onclick="openStockInModal()">+ New Delivery Stock In</button>
+      </div>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Code</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Delivered By / Office</th>
+              <th>Staff</th>
+              <th>Batch</th>
+              <th>Location</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="stockin-table-body"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Stock In Log Section -->
-    <div id="stockInLogSection" class="content-section d-none">
-      <h3 class="mb-4">Stock In Log</h3>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-              <thead>
-                <tr id="stockInHeaderRow">
-                  <th>Date</th>
-                  <th>Supplier</th>
-                  <th>Item Name</th>
-                  <th>Quantity</th>
-                </tr>
-              </thead>
-              <tbody id="stockInLogTableBody"></tbody>
-            </table>
-          </div>
+    <!-- MONTHLY HISTORY REPORT TAB -->
+    <div id="history" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>Monthly Activity Reports</h3>
+        <div>
+          <button class="btn btn-primary" onclick="printSelectedHistory()">Print Selected (PDF)</button>
+          <button class="btn btn-success" onclick="exportSelectedMonthlyCSV()">Export Selected (CSV)</button>
         </div>
+      </div>
+      <div class="card-box printable">
+        <h4>Completed Transactions Log</h4>
+        <table>
+          <thead>
+            <tr>
+              <th class="no-print" style="width: 30px;"><input type="checkbox" id="select-all-history" onchange="toggleSelectAllHistory(this)"></th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Reference No</th>
+              <th>Office / Source</th>
+              <th>Code</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Monthly Report Section -->
-    <div id="monthlyReportSection" class="content-section d-none">
-      <h3 class="mb-4">Monthly Report</h3>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-              <thead>
-                <tr id="monthlyReportHeaderRow">
-                  <th>Date</th>
-                  <th>Slip No</th>
-                  <th>Item Name</th>
-                  <th>Quantity</th>
-                  <th>Office / Requisitioner</th>
-                </tr>
-              </thead>
-              <tbody id="monthlyReportTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+    <!-- USER MANAGEMENT TAB -->
+    <div id="users" class="tab-content">
+      <h3>User Management & Permissions</h3>
+      <div class="card-box" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Complete Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
       </div>
-    </div>
-
-    <!-- User Management Section -->
-    <div id="userManagementSection" class="content-section d-none">
-      <h3 class="mb-4">User Management & Permissions</h3>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>Complete Name</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="userTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <div id="user-mgmt-notif" class="notification-box"></div>
     </div>
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- MODAL: ADD / EDIT ITEM -->
+  <div id="itemModal" class="modal">
+    <div class="modal-content">
+      <h3 id="item-modal-title">Inventory Item Details</h3>
+      <input type="hidden" id="m-edit-index" value="-1">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div><label>Item Name:</label><input type="text" id="m-name" style="width:100%;"></div>
+        <div><label>Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%;"></div>
+        <div><label>Barcode/QR Code:</label><input type="text" id="m-code" style="width:100%;"></div>
+        <div><label>Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%;"></div>
+        <div><label>Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%;"></div>
+        <div><label>Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%;"></div>
+        <div><label>Min Level:</label><input type="number" id="m-min" value="5" style="width:100%;"></div>
+        <div><label>Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%;"></div>
+        <div><label>Expiry Date:</label><input type="date" id="m-expiry" style="width:100%;"></div>
+      </div>
+      <div style="text-align: right; margin-top: 15px;">
+        <button class="btn btn-danger" onclick="closeModal('itemModal')">Cancel</button>
+        <button class="btn btn-success" onclick="saveInventoryItem()">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STOCK IN -->
+  <div id="stockInModal" class="modal">
+    <div class="modal-content">
+      <h3>Record New Stock In</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div><label>Item Barcode/QR Code:</label><input type="text" id="si-code" style="width:100%;"></div>
+        <div><label>Quantity Delivered:</label><input type="number" id="si-qty" value="1" style="width:100%;"></div>
+        <div><label>Delivered By / Office:</label><input type="text" id="si-office" style="width:100%;"></div>
+        <div><label>Receiving Staff:</label><input type="text" id="si-staff" style="width:100%;"></div>
+        <div><label>Batch / Lot Number:</label><input type="text" id="si-batch" style="width:100%;"></div>
+        <div><label>Rack / Storage Section:</label><input type="text" id="si-location" style="width:100%;"></div>
+        <div style="grid-column: span 2;"><label>Notes / Remarks:</label><input type="text" id="si-notes" style="width:100%;"></div>
+      </div>
+      <div style="text-align: right; margin-top: 15px;">
+        <button class="btn btn-danger" onclick="closeModal('stockInModal')">Cancel</button>
+        <button class="btn btn-success" onclick="processStockIn()">Submit Stock In</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    let isEditingUser = false;
-    let currentUser = JSON.parse(localStorage.getItem('current_user') || '{"username":"admin","fullName":"Marven P. Algordo","role":"Admin"}');
-    let inventory = JSON.parse(localStorage.getItem('wms_inventory') || '[]');
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu_2kpm2dJfWkYuoIUBPzWAbSBikUb435auHKIx6E6M-jDKriSNxmZBSoJSxWM1nT4/exec";
 
-    // Default sample inventory if none exists
-    if (inventory.length === 0) {
-      inventory = [
-        { code: 'ITEM-001', name: 'A4 Printing Paper', category: 'Supplies', stock: 50, expiry: '' },
-        { code: 'ITEM-002', name: 'Ballpoint Pens (Black)', category: 'Supplies', stock: 120, expiry: '' }
-      ];
-      localStorage.setItem('wms_inventory', JSON.stringify(inventory));
-    }
+    let inventory = [];
+    let stockInLogs = [];
+    let stockOutLogs = [];
+    let receiptCounter = 1;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const userDisplay = document.getElementById('currentUserDisplay');
-      if (userDisplay) userDisplay.innerText = currentUser.fullName || currentUser.username;
-      refreshAllData();
-      showSection('scannerSection');
+    let users = [
+      { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
+      { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
+    ];
+
+    let currentUser = null;
+    let scannedReceiptItems = {};
+    let html5QrCode = null;
+    let isTorchOn = false;
+    let lastScannedCode = null;
+    let lastScanTime = 0;
+
+    window.addEventListener('load', () => {
+      loadFromGoogleSheet();
+      generateReceiptNumber();
+      checkAuthStatus();
+      setInterval(loadFromGoogleSheet, 5000);
     });
 
-    function refreshAllData() {
-      inventory = JSON.parse(localStorage.getItem('wms_inventory') || '[]');
-      renderDashboard();
-      renderInventory();
-      populateItemSelect();
-      renderStockOutLog();
-      renderStockInLog();
-      renderMonthlyReport();
-      renderUserManagement();
-      
-      const slipInput = document.getElementById('slipNoInput');
-      if (slipInput) slipInput.value = generateSlipNo();
+    function showNotification(elementId, message, type = 'success') {
+      const notifEl = document.getElementById(elementId);
+      if (!notifEl) return;
+      notifEl.className = `notification-box notif-${type}`;
+      notifEl.innerText = message;
+      notifEl.style.display = 'block';
+      setTimeout(() => { notifEl.style.display = 'none'; }, 4000);
     }
 
-    function showSection(sectionId) {
-      document.querySelectorAll('.content-section').forEach(el => el.classList.add('d-none'));
-      const activeSec = document.getElementById(sectionId);
-      if (activeSec) activeSec.classList.remove('d-none');
+    function checkAuthStatus() {
+      const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
+      if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById('auth-screen').style.display = 'none';
+        
+        const nameToDisplay = currentUser.fullname || currentUser.username;
+        document.getElementById('user-fullname').innerText = nameToDisplay;
+        document.getElementById('released-by-signature').innerText = nameToDisplay;
+        
+        const avatarEl = document.getElementById('user-avatar');
+        if (currentUser.pfp) { avatarEl.src = currentUser.pfp; }
+
+        applyUserPermissions();
+        startCamera();
+      } else {
+        document.getElementById('auth-screen').style.display = 'flex';
+      }
+    }
+
+    function triggerPfpUpload() { document.getElementById('pfp-upload').click(); }
+
+    function handlePfpUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const imgData = evt.target.result;
+          document.getElementById('user-avatar').src = imgData;
+          currentUser.pfp = imgData;
+          
+          let uIdx = users.findIndex(u => u.username === currentUser.username);
+          if (uIdx >= 0) users[uIdx].pfp = imgData;
+
+          sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+          saveToGoogleSheet();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function toggleAuthMode(isRegister) {
+      document.getElementById('login-form').style.display = isRegister ? 'none' : 'block';
+      document.getElementById('register-form').style.display = isRegister ? 'block' : 'none';
+      document.getElementById('auth-title').innerText = isRegister ? 'Register Account' : 'System Login';
+    }
+
+    function handleLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+
+      const account = users.find(acc => acc.username === u && acc.pass === p);
+      if (!account) {
+        showNotification('login-notif', 'Invalid username or password!', 'danger');
+        return;
+      }
+      if (account.status !== 'active') {
+        showNotification('login-notif', `Account status is ${account.status.toUpperCase()}. Contact Admin.`, 'warning');
+        return;
+      }
+
+      currentUser = account;
+      sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+      checkAuthStatus();
+    }
+
+    function handleRegister() {
+      const fname = document.getElementById('reg-fullname').value.trim();
+      const u = document.getElementById('reg-user').value.trim();
+      const p = document.getElementById('reg-pass').value.trim();
+
+      if (!fname || !u || !p) {
+        showNotification('reg-notif', 'Please fill in all registration fields!', 'danger');
+        return;
+      }
+      if (users.find(acc => acc.username === u)) {
+        showNotification('reg-notif', 'Username already exists!', 'danger');
+        return;
+      }
+
+      users.push({ username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" });
+      saveToGoogleSheet();
+      showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
+      setTimeout(() => toggleAuthMode(false), 2000);
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('pgso_user');
+      currentUser = null;
+      location.reload();
+    }
+
+    function applyUserPermissions() {
+      const adminElements = document.querySelectorAll('.admin-only');
+      if (currentUser && currentUser.role === 'admin') {
+        adminElements.forEach(el => el.style.display = 'inline-block');
+      } else {
+        adminElements.forEach(el => el.style.display = 'none');
+      }
+    }
+
+    async function loadFromGoogleSheet() {
+      if (!GOOGLE_SCRIPT_URL) return;
+
+      try {
+        const cacheBuster = GOOGLE_SCRIPT_URL + (GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+        const res = await fetch(cacheBuster, { method: 'GET', redirect: 'follow' });
+
+        if (res.ok) {
+          const record = await res.json();
+          inventory = record.inventory || [];
+          stockInLogs = record.stockInLogs || [];
+          stockOutLogs = record.stockOutLogs || [];
+          if (record.users && record.users.length > 0) users = record.users;
+          receiptCounter = record.receiptCounter || 1;
+          
+          const syncEl = document.getElementById('sync-indicator');
+          syncEl.innerText = '🟢 Live Cloud Synced';
+          syncEl.style.background = '#28a745';
+          refreshAllViews();
+        } else { throw new Error('Sync response failed'); }
+      } catch (err) {
+        const syncEl = document.getElementById('sync-indicator');
+        syncEl.innerText = '🔴 Cloud Sync Offline';
+        syncEl.style.background = '#d9534f';
+      }
+    }
+
+    async function saveToGoogleSheet() {
+      if (!GOOGLE_SCRIPT_URL) return;
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, users, receiptCounter })
+        });
+      } catch (err) { console.error("Google Sheets Save Failed", err); }
+    }
+
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.12);
+      } catch (e) {}
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (btn) btn.classList.add('active');
+      refreshAllViews();
+    }
+
+    function generateReceiptNumber() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const seq = String(receiptCounter).padStart(4, '0');
+      const office = document.getElementById('req-office').value.toUpperCase() || 'PGSO';
+      document.getElementById('receipt-no').innerText = `${office}-${year}-${month}-${seq}`;
+      document.getElementById('receipt-date').innerText = date.toLocaleString();
+    }
+
+    function startCamera() {
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 15, qrbox: { width: 250, height: 180 } };
+      html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => console.log(err));
+    }
+
+    function stopCamera() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log(err));
+      }
+    }
+
+    function onCodeScanned(code) {
+      const now = Date.now();
+      if (code === lastScannedCode && (now - lastScanTime) < 1500) return;
+      lastScannedCode = code;
+      lastScanTime = now;
+      playBeepSound();
+
+      let item = inventory.find(i => i.code === code);
+      let name = item ? item.name : "Unknown Item / Raw Code";
+
+      if (scannedReceiptItems[code]) scannedReceiptItems[code].qty++;
+      else scannedReceiptItems[code] = { name: name, qty: 1 };
+      renderReceipt();
+      showNotification('scanner-notif', `Scanned: ${name}`, 'success');
+    }
+
+    function toggleTorch() {
+      if (html5QrCode) {
+        isTorchOn = !isTorchOn;
+        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => showNotification('scanner-notif', 'Flashlight not supported on device.', 'warning'));
+      }
+    }
+
+    function renderReceipt() {
+      const tbody = document.getElementById('receipt-rows');
+      tbody.innerHTML = '';
+      for (let code in scannedReceiptItems) {
+        let item = scannedReceiptItems[code];
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-size:10px;">${code}</td>
+            <td>${item.name}</td>
+            <td style="text-align: center;">
+              <div class="qty-controls">
+                <button class="qty-btn no-print" onclick="modQty('${code}', -1)">-</button>
+                <span>${item.qty}</span>
+                <button class="qty-btn no-print" onclick="modQty('${code}', 1)">+</button>
+              </div>
+            </td>
+            <td class="no-print" style="text-align: center;"><button class="btn btn-danger" style="padding: 1px 5px; font-size: 10px;" onclick="removeReceiptItem('${code}')">X</button></td>
+          </tr>`;
+      }
+    }
+
+    function modQty(code, delta) {
+      if (scannedReceiptItems[code]) {
+        scannedReceiptItems[code].qty += delta;
+        if (scannedReceiptItems[code].qty <= 0) delete scannedReceiptItems[code];
+        renderReceipt();
+      }
+    }
+
+    function removeReceiptItem(code) { delete scannedReceiptItems[code]; renderReceipt(); }
+    function clearReceipt() { scannedReceiptItems = {}; renderReceipt(); }
+
+    function completeReleaseOnly() {
+      const receiptNo = document.getElementById('receipt-no').innerText;
+      const office = document.getElementById('req-office').value;
+      const requester = document.getElementById('req-name').value;
+      const releasedBy = currentUser.fullname || currentUser.username;
+
+      if (Object.keys(scannedReceiptItems).length === 0) {
+        showNotification('receipt-notif', 'No items in receipt to release.', 'warning');
+        return;
+      }
+
+      for (let code in scannedReceiptItems) {
+        let qty = scannedReceiptItems[code].qty;
+        let invItem = inventory.find(i => i.code === code);
+        if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
+        stockOutLogs.push({ receiptNo, date: new Date().toLocaleString(), office, requester, code, qty, releasedBy });
+      }
+
+      receiptCounter++;
+      saveToGoogleSheet();
+      scannedReceiptItems = {};
+      generateReceiptNumber();
+      renderReceipt();
+      refreshAllViews();
+      showNotification('receipt-notif', 'Supply release completed & synced to cloud!', 'success');
+    }
+
+    function printReceiptOnly() {
+      if (Object.keys(scannedReceiptItems).length === 0) {
+        showNotification('receipt-notif', 'No items to print in receipt.', 'warning');
+        return;
+      }
+      setTimeout(() => { window.print(); }, 150);
+    }
+
+    function exportReceiptCSV() {
+      if (Object.keys(scannedReceiptItems).length === 0) {
+        showNotification('receipt-notif', 'No items in receipt to export.', 'warning');
+        return;
+      }
+      const receiptNo = document.getElementById('receipt-no').innerText;
+      const office = document.getElementById('req-office').value;
+      const requester = document.getElementById('req-name').value;
+      const date = document.getElementById('receipt-date').innerText;
+      const releasedBy = currentUser.fullname || currentUser.username;
+
+      let csv = `Slip No,Office,Requester,Date,Item Code,Item Name,Quantity,Released By\n`;
+      for (let code in scannedReceiptItems) {
+        let item = scannedReceiptItems[code];
+        csv += `"${receiptNo}","${office}","${requester}","${date}","${code}","${item.name}",${item.qty},"${releasedBy}"\n`;
+      }
+
+      let blob = new Blob([csv], { type: 'text/csv' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${receiptNo}_Supply_Release_Receipt.csv`;
+      link.click();
+      showNotification('receipt-notif', 'Receipt exported to CSV successfully!', 'success');
     }
 
     function calculateStatus(item) {
-      if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
       const today = new Date();
       if (item.expiry) {
         const expDate = new Date(item.expiry);
         const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+        item.daysLeft = diffDays;
         if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
         if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
-      }
+      } else { item.daysLeft = 'N/A'; }
+
+      if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
+      if (item.stock <= Math.floor(item.min / 2)) return { label: 'Critical', class: 'bg-critical' };
+      if (item.stock <= item.min) return { label: 'Low Stock', class: 'bg-low' };
       return { label: 'OK', class: 'bg-ok' };
     }
 
-    function renderDashboard() {
-      let totalStock = 0, expiring = 0, expired = 0, outOfStock = 0;
-      inventory.forEach(item => {
-        totalStock += Number(item.stock || 0);
-        const st = calculateStatus(item);
-        if (st.label === 'Out of Stock') outOfStock++;
-        else if (st.label === 'Expired') expired++;
-        else if (st.label === 'Expiring Soon') expiring++;
-      });
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = '';
+      const isAdmin = currentUser && currentUser.role === 'admin';
 
-      if (document.getElementById('totalItemsStat')) document.getElementById('totalItemsStat').innerText = inventory.length;
-      if (document.getElementById('totalStockStat')) document.getElementById('totalStockStat').innerText = totalStock;
-      if (document.getElementById('expiringStat')) document.getElementById('expiringStat').innerText = expiring;
-      if (document.getElementById('expiredStat')) document.getElementById('expiredStat').innerText = expired;
-      if (document.getElementById('outOfStockStat')) document.getElementById('outOfStockStat').innerText = outOfStock;
-    }
+      inventory.forEach((item, index) => {
+        const status = calculateStatus(item);
+        let actionCell = isAdmin 
+          ? `<button class="btn btn-warning" style="padding: 3px 6px; font-size: 11px;" onclick="editInventoryItem(${index})">✏️ Edit</button>
+             <button class="btn btn-danger" style="padding: 3px 6px; font-size: 11px;" onclick="deleteInventoryItem(${index})">🗑️ Delete</button>`
+          : `-`;
 
-    function renderInventory() {
-      const tbody = document.getElementById('inventoryTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = inventory.map(item => {
-        const st = calculateStatus(item);
-        return `
+        tbody.innerHTML += `
           <tr>
-            <td>${item.code || 'N/A'}</td>
-            <td>${item.name || 'N/A'}</td>
-            <td>${item.category || 'General'}</td>
-            <td>${item.stock || 0}</td>
-            <td>${item.expiry || 'N/A'}</td>
-            <td><span class="badge ${st.class}">${st.label}</span></td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function populateItemSelect() {
-      const select = document.getElementById('itemSelect');
-      if (!select) return;
-      select.innerHTML = '<option value="">Choose item...</option>' + 
-        inventory.map((item, idx) => `<option value="${idx}">${item.name} (In Stock: ${item.stock})</option>`).join('');
-    }
-
-    function generateSlipNo() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const prefix = `PGSO-${year}-${month}-`;
-
-      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      let maxSeq = 0;
-      logs.forEach(log => {
-        if (log.slipNo && log.slipNo.startsWith(prefix)) {
-          const seqStr = log.slipNo.replace(prefix, '');
-          const seqNum = parseInt(seqStr, 10);
-          if (!isNaN(seqNum) && seqNum > maxSeq) maxSeq = seqNum;
-        }
+            <td>${index + 1}</td>
+            <td><strong>${item.name}</strong></td>
+            <td>${item.category || '-'}</td>
+            <td>${item.code}</td>
+            <td>${item.location || '-'}</td>
+            <td>${item.unit || '-'}</td>
+            <td><strong>${item.stock}</strong></td>
+            <td>${item.min}</td>
+            <td>${item.batch || '-'}</td>
+            <td>${item.expiry || '-'}</td>
+            <td>${item.daysLeft}</td>
+            <td><span class="badge ${status.class}">${status.label}</span></td>
+            <td class="admin-only">${actionCell}</td>
+          </tr>`;
       });
-      return `${prefix}${String(maxSeq + 1).padStart(4, '0')}`;
+
+      applyUserPermissions();
     }
 
-    function handleIssue(e) {
-      e.preventDefault();
-      const itemIdx = document.getElementById('itemSelect').value;
-      const qty = parseInt(document.getElementById('qtyInput').value, 10);
-      const office = document.getElementById('officeInput').value;
-      const requester = document.getElementById('requesterInput').value;
+    function openItemModal() {
+      document.getElementById('m-edit-index').value = "-1";
+      document.getElementById('item-modal-title').innerText = "Add New Inventory Item";
+      document.getElementById('m-name').value = '';
+      document.getElementById('m-category').value = '';
+      document.getElementById('m-code').value = '';
+      document.getElementById('m-location').value = '';
+      document.getElementById('m-unit').value = '';
+      document.getElementById('m-stock').value = '0';
+      document.getElementById('m-min').value = '5';
+      document.getElementById('m-batch').value = '';
+      document.getElementById('m-expiry').value = '';
+      document.getElementById('itemModal').style.display = 'block';
+    }
 
-      if (itemIdx === '' || !inventory[itemIdx]) return alert('Please select an item.');
-      if (inventory[itemIdx].stock < qty) return alert('Insufficient stock level!');
+    function editInventoryItem(index) {
+      const item = inventory[index];
+      document.getElementById('m-edit-index').value = index;
+      document.getElementById('item-modal-title').innerText = "Edit Inventory Item";
+      document.getElementById('m-name').value = item.name || '';
+      document.getElementById('m-category').value = item.category || '';
+      document.getElementById('m-code').value = item.code || '';
+      document.getElementById('m-location').value = item.location || '';
+      document.getElementById('m-unit').value = item.unit || '';
+      document.getElementById('m-stock').value = item.stock || 0;
+      document.getElementById('m-min').value = item.min || 5;
+      document.getElementById('m-batch').value = item.batch || '';
+      document.getElementById('m-expiry').value = item.expiry || '';
+      document.getElementById('itemModal').style.display = 'block';
+    }
 
-      inventory[itemIdx].stock -= qty;
-      localStorage.setItem('wms_inventory', JSON.stringify(inventory));
+    function deleteInventoryItem(index) {
+      if (confirm(`Are you sure you want to delete '${inventory[index].name}'?`)) {
+        inventory.splice(index, 1);
+        saveToGoogleSheet();
+        refreshAllViews();
+      }
+    }
 
-      const newLog = {
-        slipNo: document.getElementById('slipNoInput').value,
-        date: new Date().toISOString().split('T')[0],
-        office,
-        requester,
-        itemName: inventory[itemIdx].name,
-        qty
+    function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function saveInventoryItem() {
+      const editIndex = parseInt(document.getElementById('m-edit-index').value);
+      const item = {
+        name: document.getElementById('m-name').value,
+        category: document.getElementById('m-category').value,
+        code: document.getElementById('m-code').value,
+        location: document.getElementById('m-location').value,
+        unit: document.getElementById('m-unit').value,
+        stock: parseInt(document.getElementById('m-stock').value) || 0,
+        min: parseInt(document.getElementById('m-min').value) || 5,
+        batch: document.getElementById('m-batch').value,
+        expiry: document.getElementById('m-expiry').value
       };
 
-      const stockOutLogs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      stockOutLogs.push(newLog);
-      localStorage.setItem('stock_out_logs', JSON.stringify(stockOutLogs));
+      if (editIndex >= 0) {
+        inventory[editIndex] = item;
+      } else {
+        const existingIdx = inventory.findIndex(i => i.code === item.code);
+        if (existingIdx >= 0) inventory[existingIdx] = item;
+        else inventory.push(item);
+      }
 
-      alert('Requisition & Issue completed successfully!');
-      e.target.reset();
-      refreshAllData();
+      saveToGoogleSheet();
+      closeModal('itemModal');
+      refreshAllViews();
     }
 
-    function renderStockOutLog() {
-      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-      const headerRow = document.getElementById('stockOutHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Slip No</th>
-          <th>Date</th>
-          <th>Office</th>
-          <th>Requester</th>
-          <th>Item Details</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
+    function processStockIn() {
+      const code = document.getElementById('si-code').value;
+      const qty = parseInt(document.getElementById('si-qty').value) || 0;
+      const office = document.getElementById('si-office').value;
+      const staff = document.getElementById('si-staff').value;
+      const batch = document.getElementById('si-batch').value;
+      const location = document.getElementById('si-location').value;
+      const notes = document.getElementById('si-notes').value;
+
+      let item = inventory.find(i => i.code === code);
+      if (item) {
+        item.stock += qty;
+        if (location) item.location = location;
+        if (batch) item.batch = batch;
       }
-      const tbody = document.getElementById('stockOutLogTableBody');
-      if (tbody) {
-        tbody.innerHTML = logs.map((log, index) => `
+
+      stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
+      saveToGoogleSheet();
+      closeModal('stockInModal');
+      refreshAllViews();
+    }
+
+    function refreshDashboard() {
+      let units = 0, ok = 0, low = 0, critical = 0, out = 0, expiring = 0, expired = 0;
+      inventory.forEach(item => {
+        units += item.stock;
+        const st = calculateStatus(item);
+        if (st.label === 'OK') ok++;
+        if (st.label === 'Low Stock') low++;
+        if (st.label === 'Critical') critical++;
+        if (st.label === 'Out of Stock') out++;
+        if (st.label === 'Expiring Soon') expiring++;
+        if (st.label === 'Expired') expired++;
+      });
+
+      document.getElementById('dash-total').innerText = inventory.length;
+      document.getElementById('dash-units').innerText = units;
+      document.getElementById('dash-ok').innerText = ok;
+      document.getElementById('dash-low').innerText = low;
+      document.getElementById('dash-critical').innerText = critical;
+      document.getElementById('dash-out').innerText = out;
+      document.getElementById('dash-expiring').innerText = expiring;
+      document.getElementById('dash-expired').innerText = expired;
+    }
+
+    function refreshAllViews() {
+      renderInventoryTable();
+      refreshDashboard();
+      renderStockInTable();
+      renderStockOutTable();
+      renderHistoryTable();
+      renderUsersTable();
+    }
+
+    function renderStockInTable() {
+      const tbody = document.getElementById('stockin-table-body');
+      tbody.innerHTML = '';
+      stockInLogs.forEach((l, i) => {
+        tbody.innerHTML += `<tr><td>${i+1}</td><td>${l.date}</td><td>${l.code}</td><td>${l.name}</td><td>${l.qty}</td><td>${l.office}</td><td>${l.staff}</td><td>${l.batch}</td><td>${l.location}</td><td>${l.notes}</td></tr>`;
+      });
+    }
+
+    function renderStockOutTable() {
+      const tbody = document.getElementById('stockout-table-body');
+      tbody.innerHTML = '';
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
+      stockOutLogs.forEach((l, index) => {
+        let reqCell = isAdmin 
+          ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 110px;">`
+          : (l.requester || '-');
+
+        let qtyCell = isAdmin 
+          ? `<input type="number" id="so-qty-${index}" value="${l.qty}" style="width: 50px;">`
+          : l.qty;
+
+        let relCell = isAdmin
+          ? `<input type="text" id="so-rel-${index}" value="${l.releasedBy || ''}" style="width: 130px;">`
+          : (l.releasedBy || 'N/A');
+
+        let actionCell = isAdmin
+          ? `<button class="btn btn-success" style="padding: 4px 8px;" onclick="saveStockOutRow(${index})">Save</button>
+             <button class="btn btn-primary" style="padding: 4px 8px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>`
+          : `-`;
+
+        tbody.innerHTML += `
           <tr>
-            <td>${log.slipNo || 'N/A'}</td>
-            <td>${log.date || 'N/A'}</td>
-            <td>${log.office || 'N/A'}</td>
-            <td>${log.requester || 'N/A'}</td>
-            <td>${log.itemName || ''} (${log.qty || 0})</td>
-            ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-          </tr>
-        `).join('');
-      }
+            <td>${l.receiptNo}</td>
+            <td>${l.date}</td>
+            <td>${l.office}</td>
+            <td>${reqCell}</td>
+            <td>${l.code}</td>
+            <td>${qtyCell}</td>
+            <td>${relCell}</td>
+            <td class="admin-only">${actionCell}</td>
+          </tr>`;
+      });
+
+      applyUserPermissions();
     }
 
-    function deleteStockOutLog(index) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-      let logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      logs.splice(index, 1);
-      localStorage.setItem('stock_out_logs', JSON.stringify(logs));
-      refreshAllData();
+    function saveStockOutRow(index) {
+      const newReq = document.getElementById(`so-req-${index}`).value.trim();
+      const newQty = parseInt(document.getElementById(`so-qty-${index}`).value) || 0;
+      const newRel = document.getElementById(`so-rel-${index}`).value.trim();
+
+      stockOutLogs[index].requester = newReq;
+      stockOutLogs[index].qty = newQty;
+      stockOutLogs[index].releasedBy = newRel;
+
+      saveToGoogleSheet();
+      showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated!`, 'success');
+      refreshAllViews();
     }
 
-    function renderStockInLog() {
-      const logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-      const headerRow = document.getElementById('stockInHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Date</th>
-          <th>Supplier</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
+    function reprintHistoricalReceipt(index) {
+      const log = stockOutLogs[index];
+      
+      document.getElementById('receipt-no').innerText = log.receiptNo;
+      document.getElementById('req-office').value = log.office;
+      document.getElementById('req-name').value = log.requester;
+      document.getElementById('receipt-date').innerText = log.date;
+      document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
+
+      let item = inventory.find(i => i.code === log.code);
+      scannedReceiptItems = {};
+      scannedReceiptItems[log.code] = { name: item ? item.name : 'Item ' + log.code, qty: log.qty };
+      renderReceipt();
+
+      switchTab('scanner', document.getElementById('tab-scanner-btn'));
+      setTimeout(() => window.print(), 300);
+    }
+
+    /* MONTHLY REPORT WITH CHECKBOX SELECTION */
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+      
+      let allLogs = [];
+      stockInLogs.forEach(l => {
+        allLogs.push({ date: l.date, type: 'Stock In', ref: '-', office: l.office, code: l.code, qty: `+${l.qty}` });
+      });
+      stockOutLogs.forEach(l => {
+        allLogs.push({ date: l.date, type: 'Stock Out', ref: l.receiptNo, office: l.office, code: l.code, qty: `-${l.qty}` });
+      });
+
+      allLogs.forEach((l, index) => {
+        tbody.innerHTML += `
+          <tr class="history-row">
+            <td class="no-print"><input type="checkbox" class="history-chk" data-idx="${index}"></td>
+            <td>${l.date}</td>
+            <td>${l.type}</td>
+            <td>${l.ref}</td>
+            <td>${l.office}</td>
+            <td>${l.code}</td>
+            <td>${l.qty}</td>
+          </tr>`;
+      });
+    }
+
+    function toggleSelectAllHistory(master) {
+      document.querySelectorAll('.history-chk').forEach(chk => chk.checked = master.checked);
+    }
+
+    function printSelectedHistory() {
+      const rows = document.querySelectorAll('.history-row');
+      rows.forEach(r => {
+        const chk = r.querySelector('.history-chk');
+        if (chk && !chk.checked) {
+          r.style.display = 'none';
+        }
+      });
+
+      window.print();
+
+      // Reset view after printing dialog closes
+      setTimeout(() => {
+        rows.forEach(r => r.style.display = '');
+      }, 500);
+    }
+
+    function exportSelectedMonthlyCSV() {
+      let csv = "Date,Type,Reference No,Office,Code,Qty\n";
+      const rows = document.querySelectorAll('.history-row');
+      let count = 0;
+
+      rows.forEach(r => {
+        const chk = r.querySelector('.history-chk');
+        if (chk && chk.checked) {
+          const cells = r.querySelectorAll('td');
+          csv += `"${cells[1].innerText}","${cells[2].innerText}","${cells[3].innerText}","${cells[4].innerText}","${cells[5].innerText}","${cells[6].innerText}"\n`;
+          count++;
+        }
+      });
+
+      if (count === 0) {
+        alert("Please select at least one record to export.");
+        return;
       }
-      const tbody = document.getElementById('stockInLogTableBody');
-      if (tbody) {
-        tbody.innerHTML = logs.map((log, index) => `
+
+      let blob = new Blob([csv], { type: 'text/csv' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `PGSO_Selected_Report_${Date.now()}.csv`;
+      link.click();
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '';
+      users.forEach((u, index) => {
+        tbody.innerHTML += `
           <tr>
-            <td>${log.date || 'N/A'}</td>
-            <td>${log.supplier || 'N/A'}</td>
-            <td>${log.itemName || 'N/A'}</td>
-            <td>${log.qty || 0}</td>
-            ${isAdmin ? `<td><button onclick="deleteStockInLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-          </tr>
-        `).join('');
-      }
+            <td><input type="text" id="usr-name-${index}" value="${u.fullname || ''}" style="width: 140px;"></td>
+            <td><input type="text" id="usr-user-${index}" value="${u.username || ''}" style="width: 110px;"></td>
+            <td>
+              <select id="usr-role-${index}">
+                <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </td>
+            <td>
+              <select id="usr-status-${index}">
+                <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
+                <option value="pending" ${u.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="inactive" ${u.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-success" style="padding: 4px 8px;" onclick="saveUserRow(${index})">Save Changes</button>
+              <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteUserRow(${index})">Delete</button>
+            </td>
+          </tr>`;
+      });
     }
 
-    function deleteStockInLog(index) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-      let logs = JSON.parse(localStorage.getItem('stock_in_logs') || '[]');
-      logs.splice(index, 1);
-      localStorage.setItem('stock_in_logs', JSON.stringify(logs));
-      refreshAllData();
-    }
+    function saveUserRow(index) {
+      const newName = document.getElementById(`usr-name-${index}`).value.trim();
+      const newUsername = document.getElementById(`usr-user-${index}`).value.trim();
+      const newRole = document.getElementById(`usr-role-${index}`).value;
+      const newStatus = document.getElementById(`usr-status-${index}`).value;
 
-    function renderMonthlyReport() {
-      const logs = JSON.parse(localStorage.getItem('stock_out_logs') || '[]');
-      const isAdmin = currentUser.role === 'Admin';
-      const headerRow = document.getElementById('monthlyReportHeaderRow');
-      if (headerRow) {
-        headerRow.innerHTML = `
-          <th>Date</th>
-          <th>Slip No</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          <th>Office / Requisitioner</th>
-          ${isAdmin ? '<th>Action</th>' : ''}
-        `;
-      }
-      const tbody = document.getElementById('monthlyReportTableBody');
-      if (tbody) {
-        tbody.innerHTML = logs.map((log, index) => `
-          <tr>
-            <td>${log.date || 'N/A'}</td>
-            <td>${log.slipNo || 'N/A'}</td>
-            <td>${log.itemName || 'N/A'}</td>
-            <td>${log.qty || 0}</td>
-            <td>${log.office || 'N/A'} - ${log.requester || ''}</td>
-            ${isAdmin ? `<td><button onclick="deleteStockOutLog(${index})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button></td>` : ''}
-          </tr>
-        `).join('');
-      }
-    }
-
-    function renderUserManagement() {
-      if (isEditingUser) return;
-      const tbody = document.getElementById('userTableBody');
-      if (!tbody) return;
-
-      let users = JSON.parse(localStorage.getItem('wms_users') || '[]');
-      if (users.length === 0) {
-        users = [
-          { username: 'admin', fullName: 'System Admin', role: 'Admin', status: 'Active' },
-          { username: 'mpa', fullName: 'Marven P. Algordo', role: 'Admin', status: 'Active' }
-        ];
-        localStorage.setItem('wms_users', JSON.stringify(users));
+      if (!newName || !newUsername) {
+        showNotification('user-mgmt-notif', 'Complete Name and Username cannot be empty!', 'danger');
+        return;
       }
 
-      tbody.innerHTML = users.map((u, index) => `
-        <tr>
-          <td><input type="text" value="${u.fullName || ''}" onfocus="isEditingUser=true" onblur="isEditingUser=false; updateUser(${index}, 'fullName', this.value)" class="form-control form-control-sm"></td>
-          <td><input type="text" value="${u.username || ''}" onfocus="isEditingUser=true" onblur="isEditingUser=false; updateUser(${index}, 'username', this.value)" class="form-control form-control-sm"></td>
-          <td>
-            <select onchange="updateUser(${index}, 'role', this.value)" class="form-select form-select-sm">
-              <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
-              <option value="Staff" ${u.role === 'Staff' ? 'selected' : ''}>Staff</option>
-            </select>
-          </td>
-          <td>
-            <select onchange="updateUser(${index}, 'status', this.value)" class="form-select form-select-sm">
-              <option value="Active" ${u.status === 'Active' ? 'selected' : ''}>Active</option>
-              <option value="Inactive" ${u.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-            </select>
-          </td>
-          <td>
-            <button onclick="saveUser(${index})" class="btn btn-sm btn-success me-1">Save</button>
-            <button onclick="deleteUser(${index})" class="btn btn-sm btn-danger">Delete</button>
-          </td>
-        </tr>
-      `).join('');
-    }
+      users[index].fullname = newName;
+      users[index].username = newUsername;
+      users[index].role = newRole;
+      users[index].status = newStatus;
 
-    function updateUser(index, field, value) {
-      const users = JSON.parse(localStorage.getItem('wms_users') || '[]');
-      if (users[index]) {
-        users[index][field] = value;
-        localStorage.setItem('wms_users', JSON.stringify(users));
+      if (currentUser && currentUser.username === users[index].username) {
+        currentUser.fullname = newName;
+        sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+        document.getElementById('user-fullname').innerText = newName;
+        document.getElementById('released-by-signature').innerText = newName;
       }
+
+      saveToGoogleSheet();
+      showNotification('user-mgmt-notif', `User account '${newUsername}' saved successfully!`, 'success');
+      refreshAllViews();
     }
 
-    function saveUser(index) {
-      alert('User updated successfully!');
-      renderUserManagement();
-    }
-
-    function deleteUser(index) {
-      if (!confirm('Are you sure you want to delete this user?')) return;
-      let users = JSON.parse(localStorage.getItem('wms_users') || '[]');
+    function deleteUserRow(index) {
+      const uname = users[index].username;
       users.splice(index, 1);
-      localStorage.setItem('wms_users', JSON.stringify(users));
-      renderUserManagement();
-    }
-
-    function logout() {
-      localStorage.removeItem('current_user');
-      window.location.reload();
+      saveToGoogleSheet();
+      showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
+      refreshAllViews();
     }
   </script>
 </body>
