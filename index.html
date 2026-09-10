@@ -3,131 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PGSO - Inventory & Warehouse Management System</title>
+  <title>PGO IMS - Provincial Governor's Office Inventory Management System</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     :root {
-      --primary: #0056b3;
-      --success: #1e7e34;
-      --warning: #f39c12;
-      --danger: #d9534f;
-      --dark: #1a252f;
-      --light: #f8f9fa;
+      --primary: #0284c7;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --light: #f8fafc;
     }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; color: #333; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f1f5f9; color: #334155; }
     
     /* Header Bar */
-    .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    .navbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+    .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .navbar h2 { margin: 0; font-size: 20px; letter-spacing: 1px; color: #38bdf8; font-weight: 800; }
     .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .tab-btn { background: #2c3e50; color: #fff; border: 1px solid #34495e; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
-    .tab-btn:hover { background: #34495e; }
-    .tab-btn.active { background: var(--primary); border-color: #004085; }
+    .tab-btn { color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.2s ease; opacity: 0.85; }
+    .tab-btn:hover { opacity: 1; transform: translateY(-1px); }
+    .tab-btn.active { opacity: 1; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-    .sync-status { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #28a745; color: white; font-weight: bold; margin-left: 10px; }
+    /* Color Coded Tabs */
+    #tab-scanner-btn { background: #059669; }
+    #tab-scanner-btn.active { background: #10b981; border-color: #34d399; }
+    
+    #tab-dashboard-btn { background: #0284c7; }
+    #tab-dashboard-btn.active { background: #38bdf8; border-color: #7dd3fc; color: #0f172a; }
+    
+    #tab-stockout-btn { background: #d97706; }
+    #tab-stockout-btn.active { background: #f59e0b; border-color: #fcd34d; color: #0f172a; }
+    
+    #tab-inventory-btn { background: #15803d; }
+    #tab-inventory-btn.active { background: #22c55e; border-color: #86efac; color: #0f172a; }
+    
+    #tab-stockin-btn { background: #7c3aed; }
+    #tab-stockin-btn.active { background: #a855f7; border-color: #d8b4fe; }
+    
+    #tab-history-btn { background: #0891b2; }
+    #tab-history-btn.active { background: #06b6d4; border-color: #67e8f9; color: #0f172a; }
+    
+    #tab-users-btn { background: #475569; }
+    #tab-users-btn.active { background: #64748b; border-color: #cbd5e1; }
+
+    .sync-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #10b981; color: white; font-weight: bold; margin-left: 10px; }
     
     /* User Profile Bar */
-    .user-profile-badge { display: flex; align-items: center; gap: 10px; background: #2c3e50; padding: 4px 10px; border-radius: 20px; border: 1px solid #34495e; }
-    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #00d2d3; cursor: pointer; background: #fff; }
-    .profile-name { font-size: 13px; font-weight: bold; color: #fff; cursor: pointer; }
+    .user-profile-badge { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 4px 12px; border-radius: 20px; border: 1px solid #334155; }
+    .profile-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8; cursor: pointer; background: #fff; }
+    .profile-name { font-size: 13px; font-weight: bold; color: #f8fafc; cursor: pointer; }
 
     .main-container { padding: 20px; max-width: 1400px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Notifications */
+    /* In-Screen Notifications & Alert Banners */
     .notification-box {
       margin-top: 10px;
       padding: 10px 15px;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 13px;
       font-weight: bold;
       display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-    .notif-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .notif-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .notif-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .notif-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .notif-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .notif-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    /* In-Screen Delete/Action Confirmation Bar */
+    .in-screen-confirm-bar {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .in-screen-confirm-bar .confirm-msg { font-weight: 700; font-size: 13px; }
+    .in-screen-confirm-bar .confirm-btns { display: flex; gap: 8px; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* Auth Screen */
-    .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a252f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .auth-card { background: white; padding: 30px; border-radius: 10px; width: 100%; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    .auth-card h3 { margin-top: 0; color: var(--primary); text-align: center; }
+    .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .auth-card { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    .auth-card h3 { margin-top: 0; color: #0284c7; text-align: center; }
     .auth-card label { display: block; font-size: 12px; font-weight: bold; margin-top: 10px; }
-    .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; }
     .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
-    .auth-toggle a { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: underline; }
+    .auth-toggle a { color: #0284c7; font-weight: bold; cursor: pointer; text-decoration: underline; }
 
-    /* Layout Grids */
-    .scanner-receipt-container { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-    .scanner-receipt-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(340px, 420px); gap: 15px; align-items: start; min-width: 640px; }
-    .scanner-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
-    .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border: 2px solid #2c3e50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    /* Vertical Scanner & Receipt Layout */
+    .scanner-receipt-vertical-layout { display: flex; flex-direction: column; gap: 20px; max-width: 650px; margin: 0 auto; }
+    
+    .compact-scanner-card { background: #fff; padding: 16px; border-radius: 10px; border-top: 5px solid #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .compact-scanner-card h3 { margin-top: 0; margin-bottom: 12px; color: #059669; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
 
-    /* Scanner Wrapper */
-    .scanner-wrapper { position: relative; border: 3px solid var(--dark); border-radius: 8px; overflow: hidden; background: #000; min-height: 280px; }
-    #reader { width: 100%; height: 100%; min-height: 280px; }
-    #reader video { transform: none !important; object-fit: cover; }
+    /* Compact Camera Box */
+    .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 200px; max-height: 220px; }
+    #reader { width: 100%; height: 100%; }
+    #reader video { transform: none !important; object-fit: cover; height: 100% !important; }
+
+    .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border-top: 5px solid #0284c7; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
 
     /* Buttons & Controls */
-    .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-    .btn { padding: 8px 14px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .btn-primary { background: var(--primary); }
-    .btn-success { background: var(--success); }
-    .btn-danger { background: var(--danger); }
-    .btn-warning { background: var(--warning); color: #000; }
-    .btn-dark { background: var(--dark); }
+    .btn-group { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; justify-content: space-between; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: #0284c7; }
+    .btn-success { background: #10b981; }
+    .btn-danger { background: #ef4444; }
+    .btn-warning { background: #f59e0b; color: #0f172a; }
+    .btn-dark { background: #334155; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
 
     /* Dashboard */
     .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; border-left: 5px solid var(--primary); }
-    .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #666; text-transform: uppercase; }
+    .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid #0284c7; }
+    .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #64748b; text-transform: uppercase; }
     .dash-card .count { font-size: 22px; font-weight: bold; }
 
     /* Tables */
-    .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; vertical-align: top; }
-    th { background: #f1f3f5; font-weight: 600; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
     
     .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
-    .qty-btn { background: #e9ecef; border: 1px solid #ced4da; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
+    .qty-btn { background: #e2e8f0; border: 1px solid #cbd5e1; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
 
     /* Badges */
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
-    .bg-ok { background: #28a745; }
-    .bg-low { background: #ffc107; color: #000; }
-    .bg-critical { background: #fd7e14; }
-    .bg-out { background: #dc3545; }
-    .bg-expiring { background: #6f42c1; }
-    .bg-expired { background: #343a40; }
+    .bg-ok { background: #10b981; }
+    .bg-low { background: #f59e0b; color: #000; }
+    .bg-critical { background: #f97316; }
+    .bg-out { background: #ef4444; }
+    .bg-expiring { background: #8b5cf6; }
+    .bg-expired { background: #475569; }
 
     /* THERMAL RECEIPT STYLING */
     .receipt-paper { 
       background: #ffffff; 
       padding: 18px 15px; 
-      border: 1px dashed #777; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px dashed #94a3b8; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       font-family: 'Courier New', Courier, monospace; 
-      color: #111;
+      color: #010409;
       width: 100%;
       max-width: 380px;
       margin: 0 auto;
       box-sizing: border-box;
     }
 
-    .pgso-header { text-align: center; margin-bottom: 12px; }
-    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
-    .receipt-divider { border-top: 1px dashed #333; margin: 10px 0; }
+    .pgo-header { text-align: center; margin-bottom: 12px; }
+    .pgo-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
+    .receipt-divider { border-top: 1px dashed #334155; margin: 10px 0; }
 
     .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
-    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #888; padding: 4px 2px; }
+    .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #94a3b8; padding: 4px 2px; }
     .receipt-paper th { text-align: left; background: transparent; font-weight: bold; text-transform: uppercase; }
 
     .receipt-inputs input, .receipt-remarks textarea {
       font-family: 'Courier New', Courier, monospace;
       font-size: 11px;
       border: none;
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #475569;
       background: transparent;
       outline: none;
     }
@@ -142,7 +191,6 @@
       line-height: 1.4;
     }
 
-    /* SIDE-BY-SIDE SIGNATURE SECTION */
     .signature-grid {
       display: flex;
       justify-content: space-between;
@@ -174,10 +222,6 @@
       font-weight: bold;
     }
 
-    /* Modal Styling */
-    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: #fff; margin: 3% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
-
     /* Print Formatting */
     @media print {
       body * { visibility: hidden !important; }
@@ -203,7 +247,7 @@
   <!-- AUTHENTICATION OVERLAY -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
-      <h3 id="auth-title">System Login</h3>
+      <h3 id="auth-title">PGO IMS Login</h3>
       
       <div id="login-form">
         <label>Username:</label>
@@ -239,7 +283,7 @@
   <!-- Top Navigation Bar -->
   <div class="navbar no-print">
     <div>
-      <h2 style="display:inline-block;">PGSO WMS</h2>
+      <h2 style="display:inline-block;">PGO IMS</h2>
       <span class="sync-status" id="sync-indicator">🟢 Live Cloud Synced</span>
     </div>
     <div class="nav-tabs">
@@ -263,96 +307,100 @@
 
   <div class="main-container">
 
+    <!-- GLOBAL IN-SCREEN CONFIRMATION BANNER CONTAINER -->
+    <div id="global-in-screen-confirm" class="in-screen-confirm-bar" style="display: none;">
+      <span class="confirm-msg" id="global-confirm-text">Are you sure you want to proceed?</span>
+      <div class="confirm-btns">
+        <button class="btn btn-danger btn-sm" id="global-confirm-yes-btn">Confirm Delete</button>
+        <button class="btn btn-dark btn-sm" onclick="hideInScreenConfirm()">Cancel</button>
+      </div>
+    </div>
+
     <!-- SCANNER & RECEIPT TAB -->
     <div id="scanner" class="tab-content active">
-      <div class="scanner-receipt-container">
-        <div class="scanner-receipt-grid">
+      <div class="scanner-receipt-vertical-layout">
+        
+        <!-- Compact Scanner Container (Placed Above) -->
+        <div class="compact-scanner-card">
+          <h3>📷 Barcode & QR Code Reader</h3>
+          <div class="scanner-wrapper">
+            <div id="reader"></div>
+          </div>
           
-          <!-- Scanner Box -->
-          <div class="scanner-card">
-            <h3 style="margin-top:0; color: var(--primary);">1. Barcode & QR Reader</h3>
-            <div class="scanner-wrapper">
-              <div id="reader"></div>
-            </div>
-            
-            <div class="btn-group">
-              <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
-              <button class="btn btn-dark" onclick="stopCamera()">🛑 Stop Camera</button>
-              <button class="btn btn-warning" onclick="toggleTorch()">🔦 Toggle Torch</button>
-              <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
-            </div>
-            <div id="scanner-notif" class="notification-box"></div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
+            <button class="btn btn-dark" onclick="stopCamera()">Stop Camera</button>
+            <button class="btn btn-warning" onclick="toggleTorch()">Toggle Torch</button>
+            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
           </div>
-
-          <!-- Thermal Receipt Box -->
-          <div class="receipt-card">
-            <div class="receipt-paper" id="printable-receipt">
-              <div class="pgso-header">
-                <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
-                <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
-                <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
-                <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
-              </div>
-
-              <div class="receipt-divider"></div>
-
-              <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
-                <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
-                <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
-                <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
-                <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
-              </div>
-
-              <div class="receipt-divider"></div>
-
-              <table>
-                <thead>
-                  <tr>
-                    <th>CODE</th>
-                    <th>ITEM NAME</th>
-                    <th style="text-align: center;">QTY</th>
-                    <th class="no-print"></th>
-                  </tr>
-                </thead>
-                <tbody id="receipt-rows"></tbody>
-              </table>
-
-              <!-- OPTIONAL REMARKS / NOTES SECTION -->
-              <div class="receipt-remarks">
-                <label>REMARKS / NOTES (OPTIONAL):</label>
-                <textarea id="receipt-remarks-text" rows="3" placeholder="Add optional remarks or comments here..."></textarea>
-              </div>
-
-              <div class="receipt-divider"></div>
-
-              <!-- SIGNATURE SECTION -->
-              <div class="signature-grid">
-                <div class="sig-box">
-                  <div id="released-by-signature" class="sig-name">STAFF NAME</div>
-                  <div class="sig-line"></div>
-                  <div class="sig-label">RELEASED BY</div>
-                </div>
-
-                <div class="sig-box">
-                  <div class="sig-name"></div>
-                  <div class="sig-line"></div>
-                  <div class="sig-label">RECEIVED BY</div>
-                </div>
-              </div>
-
-              <div style="text-align: center; margin-top: 15px; font-size: 9px;">*** OFFICIAL SYSTEM RECORD ***</div>
-            </div>
-
-            <!-- ACTIONS -->
-            <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" class="no-print">
-              <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
-              <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print / Save PDF</button>
-              <button class="btn btn-warning" onclick="exportReceiptCSV()">📥 Export CSV</button>
-            </div>
-            <div id="receipt-notif" class="notification-box no-print"></div>
-          </div>
-
+          <div id="scanner-notif" class="notification-box"></div>
         </div>
+
+        <!-- Thermal Receipt Container (Placed Directly Below) -->
+        <div class="receipt-card">
+          <div class="receipt-paper" id="printable-receipt">
+            <div class="pgo-header">
+              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgo-logo" alt="PGO Logo">
+              <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGO INVENTORY & SUPPLY SECTION</div>
+              <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial Governor's Office</div>
+              <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
+              <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
+              <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGO" onchange="generateReceiptNumber()"></div>
+              <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
+              <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>CODE</th>
+                  <th>ITEM NAME</th>
+                  <th style="text-align: center;">QTY</th>
+                  <th class="no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="receipt-rows"></tbody>
+            </table>
+
+            <div class="receipt-remarks">
+              <label>REMARKS / NOTES (OPTIONAL):</label>
+              <textarea id="receipt-remarks-text" rows="3" placeholder="Add optional remarks or comments here..."></textarea>
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <div class="signature-grid">
+              <div class="sig-box">
+                <div id="released-by-signature" class="sig-name">STAFF NAME</div>
+                <div class="sig-line"></div>
+                <div class="sig-label">RELEASED BY</div>
+              </div>
+
+              <div class="sig-box">
+                <div class="sig-name"></div>
+                <div class="sig-line"></div>
+                <div class="sig-label">RECEIVED BY</div>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px; font-size: 9px;">*** OFFICIAL SYSTEM RECORD ***</div>
+          </div>
+
+          <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" class="no-print">
+            <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
+            <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print / Save PDF</button>
+            <button class="btn btn-warning" onclick="exportReceiptCSV()">📥 Export CSV</button>
+          </div>
+          <div id="receipt-notif" class="notification-box no-print"></div>
+        </div>
+
       </div>
     </div>
 
@@ -362,12 +410,12 @@
       <div class="dash-grid">
         <div class="dash-card"><h4>Total Items</h4><div class="count" id="dash-total">0</div></div>
         <div class="dash-card"><h4>Units in Stock</h4><div class="count" id="dash-units">0</div></div>
-        <div class="dash-card" style="border-color: #28a745;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
-        <div class="dash-card" style="border-color: #ffc107;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
-        <div class="dash-card" style="border-color: #fd7e14;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
-        <div class="dash-card" style="border-color: #dc3545;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
-        <div class="dash-card" style="border-color: #6f42c1;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
-        <div class="dash-card" style="border-color: #343a40;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
+        <div class="dash-card" style="border-color: #10b981;"><h4>Items OK</h4><div class="count" id="dash-ok">0</div></div>
+        <div class="dash-card" style="border-color: #f59e0b;"><h4>Low Stock</h4><div class="count" id="dash-low">0</div></div>
+        <div class="dash-card" style="border-color: #f97316;"><h4>Critical</h4><div class="count" id="dash-critical">0</div></div>
+        <div class="dash-card" style="border-color: #ef4444;"><h4>Out of Stock</h4><div class="count" id="dash-out">0</div></div>
+        <div class="dash-card" style="border-color: #8b5cf6;"><h4>Expiring Soon</h4><div class="count" id="dash-expiring">0</div></div>
+        <div class="dash-card" style="border-color: #475569;"><h4>Expired</h4><div class="count" id="dash-expired">0</div></div>
       </div>
     </div>
 
@@ -400,8 +448,30 @@
     <div id="inventory" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3>Master Inventory List</h3>
-        <button class="btn btn-primary admin-only" onclick="openItemModal()">+ Add New Item</button>
+        <button class="btn btn-primary admin-only" onclick="toggleInlineItemForm()">+ Add New Item</button>
       </div>
+
+      <!-- IN-SCREEN INVENTORY ITEM FORM (REPLACES MODAL) -->
+      <div id="inline-item-form-container" class="card-box" style="display: none; border-top: 4px solid #10b981; background: #f8fafc;">
+        <h4 id="item-form-title" style="margin-top:0; color:#0f172a;">Inventory Item Details</h4>
+        <input type="hidden" id="m-edit-index" value="-1">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <div><label style="font-size:11px; font-weight:bold;">Item Name:</label><input type="text" id="m-name" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Barcode/QR Code:</label><input type="text" id="m-code" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Min Level:</label><input type="number" id="m-min" value="5" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Expiry Date:</label><input type="date" id="m-expiry" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+        </div>
+        <div style="text-align: right; margin-top: 15px;">
+          <button class="btn btn-dark" onclick="toggleInlineItemForm(false)">Cancel</button>
+          <button class="btn btn-success" onclick="saveInventoryItem()">Save Item</button>
+        </div>
+      </div>
+
       <div class="card-box" style="overflow-x: auto;">
         <table>
           <thead>
@@ -430,8 +500,27 @@
     <div id="stockin" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3>Stock In Records</h3>
-        <button class="btn btn-success" onclick="openStockInModal()">+ New Delivery Stock In</button>
+        <button class="btn btn-success" onclick="toggleInlineStockInForm()">+ New Delivery Stock In</button>
       </div>
+
+      <!-- IN-SCREEN STOCK IN FORM (REPLACES MODAL) -->
+      <div id="inline-stockin-form-container" class="card-box" style="display: none; border-top: 4px solid #7c3aed; background: #f8fafc;">
+        <h4 style="margin-top:0; color:#0f172a;">Record New Stock In Delivery</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <div><label style="font-size:11px; font-weight:bold;">Item Barcode/QR Code:</label><input type="text" id="si-code" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Quantity Delivered:</label><input type="number" id="si-qty" value="1" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Delivered By / Office:</label><input type="text" id="si-office" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Receiving Staff:</label><input type="text" id="si-staff" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Batch / Lot Number:</label><input type="text" id="si-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold;">Rack / Storage Section:</label><input type="text" id="si-location" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          <div style="grid-column: span 2;"><label style="font-size:11px; font-weight:bold;">Notes / Remarks:</label><input type="text" id="si-notes" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+        </div>
+        <div style="text-align: right; margin-top: 15px;">
+          <button class="btn btn-dark" onclick="toggleInlineStockInForm(false)">Cancel</button>
+          <button class="btn btn-success" onclick="processStockIn()">Submit Stock In</button>
+        </div>
+      </div>
+
       <div class="card-box" style="overflow-x: auto;">
         <table>
           <thead>
@@ -506,49 +595,6 @@
 
   </div>
 
-  <!-- MODAL: ADD / EDIT ITEM -->
-  <div id="itemModal" class="modal">
-    <div class="modal-content">
-      <h3 id="item-modal-title">Inventory Item Details</h3>
-      <input type="hidden" id="m-edit-index" value="-1">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div><label>Item Name:</label><input type="text" id="m-name" style="width:100%;"></div>
-        <div><label>Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%;"></div>
-        <div><label>Barcode/QR Code:</label><input type="text" id="m-code" style="width:100%;"></div>
-        <div><label>Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%;"></div>
-        <div><label>Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%;"></div>
-        <div><label>Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%;"></div>
-        <div><label>Min Level:</label><input type="number" id="m-min" value="5" style="width:100%;"></div>
-        <div><label>Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%;"></div>
-        <div><label>Expiry Date:</label><input type="date" id="m-expiry" style="width:100%;"></div>
-      </div>
-      <div style="text-align: right; margin-top: 15px;">
-        <button class="btn btn-danger" onclick="closeModal('itemModal')">Cancel</button>
-        <button class="btn btn-success" onclick="saveInventoryItem()">Save Item</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: STOCK IN -->
-  <div id="stockInModal" class="modal">
-    <div class="modal-content">
-      <h3>Record New Stock In</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div><label>Item Barcode/QR Code:</label><input type="text" id="si-code" style="width:100%;"></div>
-        <div><label>Quantity Delivered:</label><input type="number" id="si-qty" value="1" style="width:100%;"></div>
-        <div><label>Delivered By / Office:</label><input type="text" id="si-office" style="width:100%;"></div>
-        <div><label>Receiving Staff:</label><input type="text" id="si-staff" style="width:100%;"></div>
-        <div><label>Batch / Lot Number:</label><input type="text" id="si-batch" style="width:100%;"></div>
-        <div><label>Rack / Storage Section:</label><input type="text" id="si-location" style="width:100%;"></div>
-        <div style="grid-column: span 2;"><label>Notes / Remarks:</label><input type="text" id="si-notes" style="width:100%;"></div>
-      </div>
-      <div style="text-align: right; margin-top: 15px;">
-        <button class="btn btn-danger" onclick="closeModal('stockInModal')">Cancel</button>
-        <button class="btn btn-success" onclick="processStockIn()">Submit Stock In</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu_2kpm2dJfWkYuoIUBPzWAbSBikUb435auHKIx6E6M-jDKriSNxmZBSoJSxWM1nT4/exec";
 
@@ -560,7 +606,7 @@
 
     let users = [
       { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
-      { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
+      { username: "staff", pass: "staff123", fullname: "PGO Staff Member", role: "user", status: "active", pfp: "" }
     ];
 
     let currentUser = null;
@@ -587,8 +633,28 @@
       setTimeout(() => { notifEl.style.display = 'none'; }, 4000);
     }
 
+    /* IN-SCREEN CONFIRMATION SYSTEM (NO OVERLAYS/MODALS/BROWSER POPUPS) */
+    function promptInScreenConfirm(message, onConfirmCallback) {
+      const confirmContainer = document.getElementById('global-in-screen-confirm');
+      const textEl = document.getElementById('global-confirm-text');
+      const confirmBtn = document.getElementById('global-confirm-yes-btn');
+
+      textEl.innerText = message;
+      confirmContainer.style.display = 'flex';
+      confirmContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      confirmBtn.onclick = function() {
+        onConfirmCallback();
+        hideInScreenConfirm();
+      };
+    }
+
+    function hideInScreenConfirm() {
+      document.getElementById('global-in-screen-confirm').style.display = 'none';
+    }
+
     function checkAuthStatus() {
-      const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
+      const savedUser = JSON.parse(sessionStorage.getItem('pgo_user'));
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-screen').style.display = 'none';
@@ -621,7 +687,7 @@
           let uIdx = users.findIndex(u => u.username === currentUser.username);
           if (uIdx >= 0) users[uIdx].pfp = imgData;
 
-          sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+          sessionStorage.setItem('pgo_user', JSON.stringify(currentUser));
           saveToGoogleSheet();
         };
         reader.readAsDataURL(file);
@@ -631,7 +697,7 @@
     function toggleAuthMode(isRegister) {
       document.getElementById('login-form').style.display = isRegister ? 'none' : 'block';
       document.getElementById('register-form').style.display = isRegister ? 'block' : 'none';
-      document.getElementById('auth-title').innerText = isRegister ? 'Register Account' : 'System Login';
+      document.getElementById('auth-title').innerText = isRegister ? 'Register Account' : 'PGO IMS Login';
     }
 
     function handleLogin() {
@@ -649,7 +715,7 @@
       }
 
       currentUser = account;
-      sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+      sessionStorage.setItem('pgo_user', JSON.stringify(currentUser));
       checkAuthStatus();
     }
 
@@ -674,7 +740,7 @@
     }
 
     function handleLogout() {
-      sessionStorage.removeItem('pgso_user');
+      sessionStorage.removeItem('pgo_user');
       currentUser = null;
       location.reload();
     }
@@ -705,14 +771,14 @@
           
           const syncEl = document.getElementById('sync-indicator');
           syncEl.innerText = '🟢 Live Cloud Synced';
-          syncEl.style.background = '#28a745';
+          syncEl.style.background = '#10b981';
           generateReceiptNumber();
           refreshAllViews();
         } else { throw new Error('Sync response failed'); }
       } catch (err) {
         const syncEl = document.getElementById('sync-indicator');
         syncEl.innerText = '🔴 Cloud Sync Offline';
-        syncEl.style.background = '#d9534f';
+        syncEl.style.background = '#ef4444';
       }
     }
 
@@ -761,14 +827,14 @@
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const seq = String(receiptCounter).padStart(4, '0');
-      const office = document.getElementById('req-office').value.toUpperCase() || 'PGSO';
+      const office = document.getElementById('req-office').value.toUpperCase() || 'PGO';
       document.getElementById('receipt-no').innerText = `${office}-${year}-${month}-${seq}`;
       document.getElementById('receipt-date').innerText = date.toLocaleString();
     }
 
     function startCamera() {
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-      const config = { fps: 15, qrbox: { width: 250, height: 180 } };
+      const config = { fps: 15, qrbox: { width: 220, height: 140 } };
       html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => console.log(err));
     }
 
@@ -838,7 +904,7 @@
       const office = document.getElementById('req-office').value;
       const requester = document.getElementById('req-name').value;
       const remarks = document.getElementById('receipt-remarks-text').value.trim();
-      const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGSO Staff';
+      const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGO Staff';
 
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items in receipt to release.', 'warning');
@@ -862,7 +928,6 @@
         itemsList.push({ code: code, name: itemName, qty: qty });
       }
 
-      // Record transaction
       stockOutLogs.push({ 
         receiptNo, 
         date: new Date().toLocaleString(), 
@@ -876,7 +941,6 @@
         releasedBy 
       });
 
-      // Increment counter strictly for the NEXT sequential slip (0001 -> 0002 -> 0003...)
       receiptCounter = parseInt(receiptCounter || 1) + 1;
       saveToGoogleSheet();
 
@@ -906,7 +970,7 @@
       const requester = document.getElementById('req-name').value;
       const remarks = document.getElementById('receipt-remarks-text').value;
       const date = document.getElementById('receipt-date').innerText;
-      const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGSO Staff';
+      const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGO Staff';
 
       let csv = `Slip No,Office,Requester,Date,Item Code,Item Name,Quantity,Remarks,Released By\n`;
       for (let code in scannedReceiptItems) {
@@ -946,8 +1010,8 @@
       inventory.forEach((item, index) => {
         const status = calculateStatus(item);
         let actionCell = isAdmin 
-          ? `<button class="btn btn-warning" style="padding: 3px 6px; font-size: 11px;" onclick="editInventoryItem(${index})">✏️ Edit</button>
-             <button class="btn btn-danger" style="padding: 3px 6px; font-size: 11px;" onclick="deleteInventoryItem(${index})">🗑️ Delete</button>`
+          ? `<button class="btn btn-warning btn-sm" onclick="editInventoryItem(${index})">✏️ Edit</button>
+             <button class="btn btn-danger btn-sm" onclick="deleteInventoryItem(${index})">🗑️ Delete</button>`
           : `-`;
 
         tbody.innerHTML += `
@@ -971,25 +1035,32 @@
       applyUserPermissions();
     }
 
-    function openItemModal() {
-      document.getElementById('m-edit-index').value = "-1";
-      document.getElementById('item-modal-title').innerText = "Add New Inventory Item";
-      document.getElementById('m-name').value = '';
-      document.getElementById('m-category').value = '';
-      document.getElementById('m-code').value = '';
-      document.getElementById('m-location').value = '';
-      document.getElementById('m-unit').value = '';
-      document.getElementById('m-stock').value = '0';
-      document.getElementById('m-min').value = '5';
-      document.getElementById('m-batch').value = '';
-      document.getElementById('m-expiry').value = '';
-      document.getElementById('itemModal').style.display = 'block';
+    function toggleInlineItemForm(show = true) {
+      const el = document.getElementById('inline-item-form-container');
+      if (show) {
+        document.getElementById('m-edit-index').value = "-1";
+        document.getElementById('item-form-title').innerText = "Add New Inventory Item";
+        document.getElementById('m-name').value = '';
+        document.getElementById('m-category').value = '';
+        document.getElementById('m-code').value = '';
+        document.getElementById('m-location').value = '';
+        document.getElementById('m-unit').value = '';
+        document.getElementById('m-stock').value = '0';
+        document.getElementById('m-min').value = '5';
+        document.getElementById('m-batch').value = '';
+        document.getElementById('m-expiry').value = '';
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        el.style.display = 'none';
+      }
     }
 
     function editInventoryItem(index) {
       const item = inventory[index];
+      const el = document.getElementById('inline-item-form-container');
       document.getElementById('m-edit-index').value = index;
-      document.getElementById('item-modal-title').innerText = "Edit Inventory Item";
+      document.getElementById('item-form-title').innerText = "Edit Inventory Item";
       document.getElementById('m-name').value = item.name || '';
       document.getElementById('m-category').value = item.category || '';
       document.getElementById('m-code').value = item.code || '';
@@ -999,19 +1070,24 @@
       document.getElementById('m-min').value = item.min || 5;
       document.getElementById('m-batch').value = item.batch || '';
       document.getElementById('m-expiry').value = item.expiry || '';
-      document.getElementById('itemModal').style.display = 'block';
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth' });
     }
 
     function deleteInventoryItem(index) {
-      if (confirm(`Are you sure you want to delete '${inventory[index].name}'?`)) {
+      const item = inventory[index];
+      promptInScreenConfirm(`Are you sure you want to delete item '${item.name}'?`, () => {
         inventory.splice(index, 1);
         saveToGoogleSheet();
         refreshAllViews();
-      }
+      });
     }
 
-    function openStockInModal() { document.getElementById('stockInModal').style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function toggleInlineStockInForm(show = true) {
+      const el = document.getElementById('inline-stockin-form-container');
+      el.style.display = show ? 'block' : 'none';
+      if (show) el.scrollIntoView({ behavior: 'smooth' });
+    }
 
     function saveInventoryItem() {
       const editIndex = parseInt(document.getElementById('m-edit-index').value);
@@ -1036,7 +1112,7 @@
       }
 
       saveToGoogleSheet();
-      closeModal('itemModal');
+      toggleInlineItemForm(false);
       refreshAllViews();
     }
 
@@ -1058,16 +1134,16 @@
 
       stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
       saveToGoogleSheet();
-      closeModal('stockInModal');
+      toggleInlineStockInForm(false);
       refreshAllViews();
     }
 
     function deleteStockInRow(index) {
-      if (confirm("Are you sure you want to delete this Stock In record?")) {
+      promptInScreenConfirm("Are you sure you want to delete this Stock In record?", () => {
         stockInLogs.splice(index, 1);
         saveToGoogleSheet();
         refreshAllViews();
-      }
+      });
     }
 
     function refreshDashboard() {
@@ -1109,7 +1185,7 @@
 
       stockInLogs.forEach((l, i) => {
         let actionCell = isAdmin
-          ? `<button class="btn btn-danger" style="padding: 3px 6px; font-size: 11px;" onclick="deleteStockInRow(${i})">🗑️ Delete</button>`
+          ? `<button class="btn btn-danger btn-sm" onclick="deleteStockInRow(${i})">🗑️ Delete</button>`
           : `-`;
 
         tbody.innerHTML += `<tr>
@@ -1161,9 +1237,9 @@
           : (l.remarks || '-');
 
         let actionCell = isAdmin
-          ? `<button class="btn btn-success" style="padding: 4px 8px; margin-bottom: 2px;" onclick="saveStockOutRow(${index})">Save</button>
-             <button class="btn btn-primary" style="padding: 4px 8px; margin-bottom: 2px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>
-             <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteStockOutRow(${index})">🗑️ Delete</button>`
+          ? `<button class="btn btn-success btn-sm" style="margin-bottom: 2px;" onclick="saveStockOutRow(${index})">Save</button>
+             <button class="btn btn-primary btn-sm" style="margin-bottom: 2px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>
+             <button class="btn btn-danger btn-sm" onclick="deleteStockOutRow(${index})">🗑️ Delete</button>`
           : `-`;
 
         tbody.innerHTML += `
@@ -1203,12 +1279,13 @@
     }
 
     function deleteStockOutRow(index) {
-      if (confirm(`Are you sure you want to delete Stock Out entry #${stockOutLogs[index].receiptNo}?`)) {
+      const slipNo = stockOutLogs[index].receiptNo;
+      promptInScreenConfirm(`Are you sure you want to delete Stock Out entry #${slipNo}?`, () => {
         stockOutLogs.splice(index, 1);
         saveToGoogleSheet();
         showNotification('stockout-notif', 'Stock Out record deleted successfully!', 'warning');
         refreshAllViews();
-      }
+      });
     }
 
     function reprintHistoricalReceipt(index) {
@@ -1218,7 +1295,7 @@
       document.getElementById('req-office').value = log.office;
       document.getElementById('req-name').value = log.requester;
       document.getElementById('receipt-date').innerText = log.date;
-      document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
+      document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGO Personnel';
       document.getElementById('receipt-remarks-text').value = log.remarks || '';
 
       scannedReceiptItems = {};
@@ -1244,7 +1321,6 @@
       setTimeout(() => window.print(), 300);
     }
 
-    /* MONTHLY REPORT WITH CHECKBOX SELECTION AND DELETION */
     function renderHistoryTable() {
       const tbody = document.getElementById('history-table-body');
       tbody.innerHTML = '';
@@ -1260,7 +1336,7 @@
 
       allLogs.forEach((l, index) => {
         let actionCell = isAdmin 
-          ? `<button class="btn btn-danger no-print" style="padding: 2px 6px; font-size: 10px;" onclick="deleteHistoryRow('${l.source}', ${l.index})">🗑️ Delete</button>`
+          ? `<button class="btn btn-danger btn-sm no-print" onclick="deleteHistoryRow('${l.source}', ${l.index})">🗑️ Delete</button>`
           : `-`;
 
         tbody.innerHTML += `
@@ -1281,7 +1357,7 @@
     }
 
     function deleteHistoryRow(source, index) {
-      if (confirm("Are you sure you want to delete this log entry?")) {
+      promptInScreenConfirm("Are you sure you want to delete this log entry?", () => {
         if (source === 'in') {
           stockInLogs.splice(index, 1);
         } else if (source === 'out') {
@@ -1289,7 +1365,7 @@
         }
         saveToGoogleSheet();
         refreshAllViews();
-      }
+      });
     }
 
     function toggleSelectAllHistory(master) {
@@ -1327,14 +1403,14 @@
       });
 
       if (count === 0) {
-        alert("Please select at least one record to export.");
+        showNotification('history-notif', 'Please select at least one record to export.', 'warning');
         return;
       }
 
       let blob = new Blob([csv], { type: 'text/csv' });
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `PGSO_Selected_Report_${Date.now()}.csv`;
+      link.download = `PGO_Selected_Report_${Date.now()}.csv`;
       link.click();
     }
 
@@ -1360,8 +1436,8 @@
               </select>
             </td>
             <td>
-              <button class="btn btn-success" style="padding: 4px 8px;" onclick="saveUserRow(${index})">Save Changes</button>
-              <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteUserRow(${index})">Delete</button>
+              <button class="btn btn-success btn-sm" onclick="saveUserRow(${index})">Save Changes</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUserRow(${index})">Delete</button>
             </td>
           </tr>`;
       });
@@ -1385,7 +1461,7 @@
 
       if (currentUser && currentUser.username === users[index].username) {
         currentUser.fullname = newName;
-        sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
+        sessionStorage.setItem('pgo_user', JSON.stringify(currentUser));
         document.getElementById('user-fullname').innerText = newName;
         document.getElementById('released-by-signature').innerText = newName;
       }
@@ -1397,12 +1473,12 @@
 
     function deleteUserRow(index) {
       const uname = users[index].username;
-      if (confirm(`Are you sure you want to delete user '${uname}'?`)) {
+      promptInScreenConfirm(`Are you sure you want to delete user '${uname}'?`, () => {
         users.splice(index, 1);
         saveToGoogleSheet();
         showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
         refreshAllViews();
-      }
+      });
     }
   </script>
 </body>
