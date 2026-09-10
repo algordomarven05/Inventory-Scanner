@@ -164,8 +164,8 @@
       box-sizing: border-box;
     }
 
-    .pgo-header { text-align: center; margin-bottom: 12px; }
-    .pgo-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
+    .pgso-header { text-align: center; margin-bottom: 12px; }
+    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
     .receipt-divider { border-top: 1px dashed #334155; margin: 10px 0; }
 
     .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
@@ -339,7 +339,7 @@
         <!-- Thermal Receipt Container (Placed Directly Below) -->
         <div class="receipt-card">
           <div class="receipt-paper" id="printable-receipt">
-            <div class="pgo-header">
+            <div class="pgso-header">
               <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgo-logo" alt="PGO Logo">
               <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGO INVENTORY & SUPPLY SECTION</div>
               <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial Governor's Office</div>
@@ -654,7 +654,7 @@
     }
 
     function checkAuthStatus() {
-      const savedUser = JSON.parse(sessionStorage.getItem('pgo_user'));
+      const savedUser = JSON.parse(sessionStorage.getItem('pgso_user'));
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-screen').style.display = 'none';
@@ -687,7 +687,7 @@
           let uIdx = users.findIndex(u => u.username === currentUser.username);
           if (uIdx >= 0) users[uIdx].pfp = imgData;
 
-          sessionStorage.setItem('pgo_user', JSON.stringify(currentUser));
+          sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
           saveToGoogleSheet();
         };
         reader.readAsDataURL(file);
@@ -715,7 +715,7 @@
       }
 
       currentUser = account;
-      sessionStorage.setItem('pgo_user', JSON.stringify(currentUser));
+      sessionStorage.setItem('pgso_user', JSON.stringify(currentUser));
       checkAuthStatus();
     }
 
@@ -740,7 +740,7 @@
     }
 
     function handleLogout() {
-      sessionStorage.removeItem('pgo_user');
+      sessionStorage.removeItem('pgso_user');
       currentUser = null;
       location.reload();
     }
