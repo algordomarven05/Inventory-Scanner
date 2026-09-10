@@ -846,18 +846,31 @@
 
     function onCodeScanned(code) {
       const now = Date.now();
-      if (code === lastScannedCode && (now - lastScanTime) < 1500) return;
-      lastScannedCode = code;
+      const cleanCode = code ? code.trim() : "";
+      if (cleanCode === lastScannedCode && (now - lastScanTime) < 1500) return;
+      lastScannedCode = cleanCode;
       lastScanTime = now;
       playBeepSound();
 
-      let item = inventory.find(i => i.code === code);
-      let name = item ? item.name : "Unknown Item / Raw Code";
+      // Look up barcode/QR code in the master inventory list
+      let item = inventory.find(i => String(i.code).trim().toLowerCase() === cleanCode.toLowerCase());
 
-      if (scannedReceiptItems[code]) scannedReceiptItems[code].qty++;
-      else scannedReceiptItems[code] = { name: name, qty: 1 };
+      let itemName = "";
+      if (item && item.name) {
+        itemName = item.name;
+        showNotification('scanner-notif', `Scanned: ${itemName} (${cleanCode}) [Stock: ${item.stock}]`, 'success');
+      } else {
+        itemName = `Unregistered Item (${cleanCode})`;
+        showNotification('scanner-notif', `Scanned Code: ${cleanCode} (Not found in Inventory Master List)`, 'warning');
+      }
+
+      if (scannedReceiptItems[cleanCode]) {
+        scannedReceiptItems[cleanCode].qty++;
+      } else {
+        scannedReceiptItems[cleanCode] = { name: itemName, qty: 1 };
+      }
+
       renderReceipt();
-      showNotification('scanner-notif', `Scanned: ${name}`, 'success');
     }
 
     function toggleTorch() {
@@ -919,7 +932,7 @@
       for (let code in scannedReceiptItems) {
         let qty = scannedReceiptItems[code].qty;
         let itemName = scannedReceiptItems[code].name;
-        let invItem = inventory.find(i => i.code === code);
+        let invItem = inventory.find(i => String(i.code).trim().toLowerCase() === String(code).trim().toLowerCase());
         if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
 
         codeList.push(code);
@@ -1106,7 +1119,7 @@
       if (editIndex >= 0) {
         inventory[editIndex] = item;
       } else {
-        const existingIdx = inventory.findIndex(i => i.code === item.code);
+        const existingIdx = inventory.findIndex(i => String(i.code).trim().toLowerCase() === String(item.code).trim().toLowerCase());
         if (existingIdx >= 0) inventory[existingIdx] = item;
         else inventory.push(item);
       }
@@ -1117,7 +1130,7 @@
     }
 
     function processStockIn() {
-      const code = document.getElementById('si-code').value;
+      const code = document.getElementById('si-code').value.trim();
       const qty = parseInt(document.getElementById('si-qty').value) || 0;
       const office = document.getElementById('si-office').value;
       const staff = document.getElementById('si-staff').value;
@@ -1125,7 +1138,7 @@
       const location = document.getElementById('si-location').value;
       const notes = document.getElementById('si-notes').value;
 
-      let item = inventory.find(i => i.code === code);
+      let item = inventory.find(i => String(i.code).trim().toLowerCase() === code.toLowerCase());
       if (item) {
         item.stock += qty;
         if (location) item.location = location;
@@ -1310,7 +1323,7 @@
           let cleanCode = c.trim();
           let parsedQty = parseInt(qtys[i]) || 1;
           if (cleanCode) {
-            let item = inventory.find(inv => inv.code === cleanCode);
+            let item = inventory.find(inv => String(inv.code).trim().toLowerCase() === cleanCode.toLowerCase());
             scannedReceiptItems[cleanCode] = { name: item ? item.name : 'Item ' + cleanCode, qty: parsedQty };
           }
         });
