@@ -1000,9 +1000,9 @@
 
     function displayItemPreviewModal(query) {
       const matches = inventory.filter(i => 
-        String(i.code).trim().toLowerCase().includes(query.toLowerCase()) ||
-        String(i.name).trim().toLowerCase().includes(query.toLowerCase()) ||
-        (i.category && String(i.category).trim().toLowerCase().includes(query.toLowerCase()))
+        String(i.code || '').trim().toLowerCase().includes(query.toLowerCase()) ||
+        String(i.name || '').trim().toLowerCase().includes(query.toLowerCase()) ||
+        String(i.category || '').trim().toLowerCase().includes(query.toLowerCase())
       );
 
       const listContainer = document.getElementById('preview-results-list');
@@ -1236,6 +1236,7 @@
       return { label: 'OK', class: 'bg-ok' };
     }
 
+    /* UPDATED: Fixed Search and String Filtering Logic */
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       tbody.innerHTML = '';
@@ -1244,10 +1245,16 @@
 
       inventory.forEach((item, index) => {
         if (searchQuery) {
-          const matchName = (item.name || '').toLowerCase().includes(searchQuery);
-          const matchCategory = (item.category || '').toLowerCase().includes(searchQuery);
-          const matchCode = (item.code || '').toLowerCase().includes(searchQuery);
-          const matchLocation = (item.location || '').toLowerCase().includes(searchQuery);
+          const itemName = String(item.name || '').toLowerCase();
+          const itemCategory = String(item.category || '').toLowerCase();
+          const itemCode = String(item.code || '').toLowerCase();
+          const itemLocation = String(item.location || '').toLowerCase();
+
+          const matchName = itemName.includes(searchQuery);
+          const matchCategory = itemCategory.includes(searchQuery);
+          const matchCode = itemCode.includes(searchQuery);
+          const matchLocation = itemLocation.includes(searchQuery);
+
           if (!matchName && !matchCategory && !matchCode && !matchLocation) return;
         }
 
