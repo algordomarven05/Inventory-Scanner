@@ -18,6 +18,8 @@
     
     /* Header Bar */
     .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .brand-container { display: flex; align-items: center; gap: 10px; }
+    .brand-logo { height: 38px; width: auto; object-fit: contain; }
     .navbar h2 { margin: 0; font-size: 20px; letter-spacing: 1px; color: #38bdf8; font-weight: 800; }
     .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .tab-btn { color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.2s ease; opacity: 0.85; }
@@ -71,7 +73,7 @@
     .notif-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     .notif-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
 
-    /* In-Screen Delete/Action Confirmation Bar */
+    /* In-Screen Confirm Bar */
     .in-screen-confirm-bar {
       background: #fef2f2;
       border: 1px solid #fca5a5;
@@ -95,9 +97,10 @@
 
     /* Auth Screen */
     .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .auth-card { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    .auth-card h3 { margin-top: 0; color: #0284c7; text-align: center; }
-    .auth-card label { display: block; font-size: 12px; font-weight: bold; margin-top: 10px; }
+    .auth-card { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
+    .auth-logo { width: 80px; height: auto; margin-bottom: 12px; }
+    .auth-card h3 { margin-top: 0; margin-bottom: 15px; color: #0284c7; text-align: center; }
+    .auth-card label { display: block; text-align: left; font-size: 12px; font-weight: bold; margin-top: 10px; }
     .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; }
     .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
     .auth-toggle a { color: #0284c7; font-weight: bold; cursor: pointer; text-decoration: underline; }
@@ -106,14 +109,30 @@
     .scanner-receipt-vertical-layout { display: flex; flex-direction: column; gap: 20px; max-width: 650px; margin: 0 auto; }
     
     .compact-scanner-card { background: #fff; padding: 16px; border-radius: 10px; border-top: 5px solid #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .compact-scanner-card h3 { margin-top: 0; margin-bottom: 12px; color: #059669; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    .compact-scanner-card h3 { margin-top: 0; margin-bottom: 12px; color: #059669; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Compact Camera Box */
-    .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 200px; max-height: 220px; }
+    /* Camera Box & Toggle */
+    .camera-status-bar { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #10b981; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 200px; max-height: 220px; display: flex; justify-content: center; align-items: center; color: #64748b; }
     #reader { width: 100%; height: 100%; }
     #reader video { transform: none !important; object-fit: cover; height: 100% !important; }
 
     .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border-top: 5px solid #0284c7; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+    /* Modals & Overlays */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; width: 90%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); overflow: hidden; animation: fadeIn 0.2s ease-out; }
+    .modal-header { background: #0f172a; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h4 { margin: 0; font-size: 16px; color: #38bdf8; }
+    .modal-body { padding: 20px; max-height: 75vh; overflow-y: auto; }
+    .modal-footer { padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; }
 
     /* Buttons & Controls */
     .btn-group { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; justify-content: space-between; }
@@ -129,11 +148,8 @@
     /* Responsive Form Layout */
     .responsive-form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      max-height: 70vh;
-      overflow-y: auto;
-      padding-right: 4px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
     }
 
     /* Dashboard */
@@ -145,11 +161,15 @@
     /* Tables */
     .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: top; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: middle; }
     th { background: #f8fafc; font-weight: 600; color: #475569; }
     
     .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
     .qty-btn { background: #e2e8f0; border: 1px solid #cbd5e1; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
+
+    /* Item Preview Card */
+    .preview-item-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+    .preview-item-card:hover { border-color: #38bdf8; background: #f0f9ff; }
 
     /* Badges */
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
@@ -254,9 +274,10 @@
 </head>
 <body>
 
-  <!-- AUTHENTICATION OVERLAY -->
+  <!-- AUTHENTICATION OVERLAY WITH OFFICIAL PGSO LOGO -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
+      <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="auth-logo" alt="PGSO Official Logo">
       <h3 id="auth-title">PGSO IMS Login</h3>
       
       <div id="login-form">
@@ -290,10 +311,11 @@
   <!-- Profile Picture Upload -->
   <input type="file" id="pfp-upload" accept="image/*" style="display: none;" onchange="handlePfpUpload(event)">
 
-  <!-- Top Navigation Bar -->
+  <!-- Top Navigation Bar with Official PGSO Logo -->
   <div class="navbar no-print">
-    <div>
-      <h2 style="display:inline-block;">PGSO IMS</h2>
+    <div class="brand-container">
+      <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="brand-logo" alt="PGSO Logo">
+      <h2>PGSO IMS</h2>
       <span class="sync-status" id="sync-indicator">🟢 Live Cloud Synced</span>
     </div>
     <div class="nav-tabs">
@@ -330,34 +352,43 @@
     <div id="scanner" class="tab-content active">
       <div class="scanner-receipt-vertical-layout">
         
-        <!-- Compact Scanner Container (Placed Above) -->
+        <!-- Compact Scanner Container -->
         <div class="compact-scanner-card">
-          <h3>📷 Barcode & QR Code Reader</h3>
+          <h3>
+            <span>📷 Barcode & QR Code Reader</span>
+            <div class="camera-status-bar">
+              <span>Camera Status:</span>
+              <label class="switch">
+                <input type="checkbox" id="camera-toggle-switch" onchange="toggleMainCamera(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </h3>
+          
           <div class="scanner-wrapper">
-            <div id="reader"></div>
+            <div id="reader" style="display: none;"></div>
+            <div id="reader-placeholder">Camera is turned OFF. Switch toggle ON to scan barcodes.</div>
           </div>
           
           <div class="btn-group">
-            <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
-            <button class="btn btn-dark" onclick="stopCamera()">Stop Camera</button>
             <button class="btn btn-warning" onclick="toggleTorch()">Toggle Torch</button>
-            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned</button>
+            <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned Receipt</button>
           </div>
 
-          <!-- Convenience Store Style Manual Input & Search Section -->
+          <!-- Search / Barcode Entry Section -->
           <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e1; display: flex; gap: 6px;">
-            <input type="text" id="manual-scan-input" placeholder="Enter barcode or item name..." style="flex: 1; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') handleManualSearchAndAdd()">
-            <button class="btn btn-success" onclick="handleManualSearchAndAdd()">🔍 Search / Add</button>
+            <input type="text" id="manual-scan-input" placeholder="Search item name, brand, or code..." style="flex: 1; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') handleManualSearchAndPreview()">
+            <button class="btn btn-success" onclick="handleManualSearchAndPreview()">🔍 Search / View Items</button>
           </div>
 
           <div id="scanner-notif" class="notification-box"></div>
         </div>
 
-        <!-- Thermal Receipt Container (Placed Directly Below) -->
+        <!-- Thermal Receipt Container -->
         <div class="receipt-card">
           <div class="receipt-paper" id="printable-receipt">
             <div class="pgso-header">
-              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=c5CSyvxWh-sQ7kNvwHpqGDc&_nc_oc=AdrBPT33ErJYFukXQZq0oZ0zHp4IvFCp24pRDXkkq1HABsGss-oyMTc5vgGOJi96q6w&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=sq2FWRdZWWkoZrTsM_8E1g&_nc_ss=7b2a8&oh=00_AQLm7HqGLorQsV_gX987G5R-4apD8Mz21DLeZEf-1S25EQ&oe=6AA71B18" class="pgso-logo" alt="PGSO Logo">
+              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="pgso-logo" alt="PGSO Logo">
               <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
               <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
               <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
@@ -421,6 +452,23 @@
       </div>
     </div>
 
+    <!-- ITEM SEARCH & PREVIEW MODAL -->
+    <div id="preview-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4>🔎 Select Item to Add</h4>
+          <button class="btn btn-danger btn-sm" onclick="closePreviewModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 12px; color: #64748b; margin-top: 0;">Review item specifications (sizes, category, location) before adding to slip:</p>
+          <div id="preview-results-list"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-dark" onclick="closePreviewModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
     <!-- DASHBOARD TAB -->
     <div id="dashboard" class="tab-content">
       <h3>System Overview</h3>
@@ -467,45 +515,7 @@
         <h3>Master Inventory List</h3>
         <div style="display: flex; gap: 8px; align-items: center;">
           <input type="text" id="inventory-search-bar" placeholder="🔍 Search Inventory..." onkeyup="renderInventoryTable()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
-          <button class="btn btn-primary admin-only" onclick="toggleInlineItemForm()">+ Add New Item</button>
-        </div>
-      </div>
-
-      <!-- IN-SCREEN INVENTORY ITEM FORM WITH LIVE CAMERA SCANNER -->
-      <div id="inline-item-form-container" class="card-box" style="display: none; border-top: 4px solid #10b981; background: #f8fafc;">
-        <h4 id="item-form-title" style="margin-top:0; color:#0f172a;">Inventory Item Details</h4>
-        <input type="hidden" id="m-edit-index" value="-1">
-        
-        <div class="responsive-form-grid">
-          <div><label style="font-size:11px; font-weight:bold;">Item Name:</label><input type="text" id="m-name" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Category:</label><input type="text" id="m-category" placeholder="Office Supplies" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          
-          <!-- Barcode/QR Code Field with Clickable Camera Button -->
-          <div>
-            <label style="font-size:11px; font-weight:bold;">Barcode/QR Code:</label>
-            <div style="display: flex; gap: 4px;">
-              <input type="text" id="m-code" style="width:100%; padding:6px; box-sizing:border-box;">
-              <button class="btn btn-warning" type="button" onclick="toggleFormCodeScanner()" title="Scan Code with Camera">📷 Scan</button>
-            </div>
-          </div>
-          
-          <div><label style="font-size:11px; font-weight:bold;">Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Unit:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Min Level:</label><input type="number" id="m-min" value="5" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-          <div><label style="font-size:11px; font-weight:bold;">Expiry Date:</label><input type="date" id="m-expiry" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-        </div>
-
-        <!-- Inline Form Camera Scanner Modal Container -->
-        <div id="form-scanner-box" style="display: none; margin-top: 10px; padding: 10px; background: #000; border-radius: 8px;">
-          <div id="form-reader" style="width: 100%; height: 180px;"></div>
-          <button class="btn btn-danger btn-sm" style="margin-top: 6px; width: 100%;" onclick="toggleFormCodeScanner(false)">Close Scanner Camera</button>
-        </div>
-
-        <div style="text-align: right; margin-top: 15px;">
-          <button class="btn btn-dark" onclick="toggleInlineItemForm(false)">Cancel</button>
-          <button class="btn btn-success" onclick="saveInventoryItem()">Save Item</button>
+          <button class="btn btn-primary admin-only" onclick="toggleItemFormModal(true)">+ Add New Item</button>
         </div>
       </div>
 
@@ -530,6 +540,52 @@
           </thead>
           <tbody id="inventory-table-body"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- FOCUSED MODAL FOR ADD / EDIT INVENTORY ITEM -->
+    <div id="item-form-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 id="item-form-title">Inventory Item Details</h4>
+          <button class="btn btn-danger btn-sm" onclick="toggleItemFormModal(false)">✕</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="m-edit-index" value="-1">
+          <div class="responsive-form-grid">
+            <div><label style="font-size:11px; font-weight:bold;">Item Name / Specification:</label><input type="text" id="m-name" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Category / Brand:</label><input type="text" id="m-category" placeholder="e.g. Office Supplies / Canon" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            
+            <!-- Barcode Field with Camera Toggle Switch -->
+            <div>
+              <label style="font-size:11px; font-weight:bold;">Barcode / QR Code:</label>
+              <input type="text" id="m-code" style="width:100%; padding:6px; box-sizing:border-box;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+                <span style="font-size: 11px; font-weight: bold;">Camera Scanner:</span>
+                <label class="switch">
+                  <input type="checkbox" id="form-camera-toggle-switch" onchange="toggleFormCodeScanner(this.checked)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div><label style="font-size:11px; font-weight:bold;">Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Unit of Measure:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack, Ream" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Min Reorder Level:</label><input type="number" id="m-min" value="5" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Expiry Date:</label><input type="date" id="m-expiry" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+          </div>
+
+          <!-- Camera Box inside Form -->
+          <div id="form-scanner-box" style="display: none; margin-top: 12px; padding: 10px; background: #000; border-radius: 8px;">
+            <div id="form-reader" style="width: 100%; height: 180px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-dark" onclick="toggleItemFormModal(false)">Cancel</button>
+          <button class="btn btn-success" onclick="saveInventoryItem()">Save Item Record</button>
+        </div>
       </div>
     </div>
 
@@ -716,7 +772,6 @@
         if (currentUser.pfp) { avatarEl.src = currentUser.pfp; }
 
         applyUserPermissions();
-        startCamera();
       } else {
         document.getElementById('auth-screen').style.display = 'flex';
       }
@@ -873,6 +928,11 @@
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       if (btn) btn.classList.add('active');
+      
+      if (tabId !== 'scanner') {
+        toggleMainCamera(false);
+        document.getElementById('camera-toggle-switch').checked = false;
+      }
       refreshAllViews();
     }
 
@@ -886,15 +946,35 @@
       document.getElementById('receipt-date').innerText = date.toLocaleString();
     }
 
-    function startCamera() {
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-      const config = { fps: 15, qrbox: { width: 220, height: 140 } };
-      html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => console.log(err));
-    }
+    /* Controlled Camera Scanner Logic with Toggle Switch */
+    function toggleMainCamera(enable) {
+      const readerEl = document.getElementById('reader');
+      const placeholder = document.getElementById('reader-placeholder');
 
-    function stopCamera() {
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log(err));
+      if (enable) {
+        readerEl.style.display = 'block';
+        placeholder.style.display = 'none';
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 15, qrbox: { width: 220, height: 140 } };
+        html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => {
+          showNotification('scanner-notif', 'Camera access error or denied.', 'danger');
+          document.getElementById('camera-toggle-switch').checked = false;
+          toggleMainCamera(false);
+        });
+      } else {
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            readerEl.style.display = 'none';
+            placeholder.style.display = 'block';
+          }).catch(() => {
+            readerEl.style.display = 'none';
+            placeholder.style.display = 'block';
+          });
+        } else {
+          readerEl.style.display = 'none';
+          placeholder.style.display = 'block';
+        }
       }
     }
 
@@ -906,49 +986,89 @@
       lastScanTime = now;
       playBeepSound();
 
-      let item = inventory.find(i => String(i.code).trim().toLowerCase() === cleanCode.toLowerCase());
-
-      let itemName = "";
-      if (item && item.name) {
-        itemName = item.name;
-        showNotification('scanner-notif', `Scanned: ${itemName} (${cleanCode}) [Stock: ${item.stock}]`, 'success');
-      } else {
-        itemName = `Unregistered Item (${cleanCode})`;
-        showNotification('scanner-notif', `Scanned Code: ${cleanCode} (Not found in Inventory Master List)`, 'warning');
-      }
-
-      if (scannedReceiptItems[cleanCode]) {
-        scannedReceiptItems[cleanCode].qty++;
-      } else {
-        scannedReceiptItems[cleanCode] = { name: itemName, qty: 1 };
-      }
-
-      renderReceipt();
+      // View & Confirm Modal for scanned items
+      displayItemPreviewModal(cleanCode);
     }
 
-    /* Convenient Store Manual Search / Barcode Entry */
-    function handleManualSearchAndAdd() {
+    /* Manual Search and Preview Feature */
+    function handleManualSearchAndPreview() {
       const query = document.getElementById('manual-scan-input').value.trim();
       if (!query) return;
+      playBeepSound();
+      displayItemPreviewModal(query);
+    }
 
-      let item = inventory.find(i => 
-        String(i.code).trim().toLowerCase() === query.toLowerCase() ||
-        String(i.name).trim().toLowerCase().includes(query.toLowerCase())
+    function displayItemPreviewModal(query) {
+      const matches = inventory.filter(i => 
+        String(i.code).trim().toLowerCase().includes(query.toLowerCase()) ||
+        String(i.name).trim().toLowerCase().includes(query.toLowerCase()) ||
+        (i.category && String(i.category).trim().toLowerCase().includes(query.toLowerCase()))
       );
 
-      let codeToAdd = item ? item.code : query;
-      let nameToAdd = item ? item.name : `Manual Entry (${query})`;
+      const listContainer = document.getElementById('preview-results-list');
+      listContainer.innerHTML = '';
 
-      if (scannedReceiptItems[codeToAdd]) {
-        scannedReceiptItems[codeToAdd].qty++;
+      if (matches.length > 0) {
+        matches.forEach(item => {
+          listContainer.innerHTML += `
+            <div class="preview-item-card">
+              <div>
+                <div style="font-size: 14px; font-weight: bold; color: #0284c7;">${item.name}</div>
+                <div style="font-size: 11px; color: #475569; margin-top: 2px;">
+                  <span><strong>Code:</strong> ${item.code}</span> | 
+                  <span><strong>Category/Brand:</strong> ${item.category || 'N/A'}</span> | 
+                  <span><strong>Unit:</strong> ${item.unit || 'Pc'}</span>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                  <span><strong>Stock:</strong> ${item.stock}</span> | 
+                  <span><strong>Location:</strong> ${item.location || 'N/A'}</span>
+                </div>
+              </div>
+              <div style="display: flex; items-center; gap: 8px;">
+                <input type="number" id="preview-qty-${item.code}" value="1" min="1" max="${Math.max(1, item.stock)}" style="width: 55px; text-align: center; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <button class="btn btn-success" onclick="confirmAddItemToReceipt('${item.code}')">Add to Slip</button>
+              </div>
+            </div>`;
+        });
       } else {
-        scannedReceiptItems[codeToAdd] = { name: nameToAdd, qty: 1 };
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: #64748b;">
+            <p>No exact inventory match found for "<strong>${query}</strong>".</p>
+            <button class="btn btn-warning" onclick="addUnregisteredItemToReceipt('${query}')">+ Add as Manual / Unregistered Entry</button>
+          </div>`;
       }
 
-      playBeepSound();
+      document.getElementById('preview-modal').style.display = 'flex';
+    }
+
+    function confirmAddItemToReceipt(code) {
+      let item = inventory.find(i => String(i.code).trim().toLowerCase() === String(code).trim().toLowerCase());
+      const qtyInput = document.getElementById(`preview-qty-${code}`);
+      const addQty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+
+      if (scannedReceiptItems[code]) {
+        scannedReceiptItems[code].qty += addQty;
+      } else {
+        scannedReceiptItems[code] = { name: item ? item.name : `Item ${code}`, qty: addQty };
+      }
+
       renderReceipt();
-      showNotification('scanner-notif', `Added to slip: ${nameToAdd}`, 'success');
+      closePreviewModal();
+      showNotification('scanner-notif', `Added ${addQty}x '${item ? item.name : code}' to slip!`, 'success');
       document.getElementById('manual-scan-input').value = '';
+    }
+
+    function addUnregisteredItemToReceipt(codeOrName) {
+      let code = "UNREG-" + Date.now().toString().slice(-4);
+      scannedReceiptItems[code] = { name: `Manual: ${codeOrName}`, qty: 1 };
+      renderReceipt();
+      closePreviewModal();
+      showNotification('scanner-notif', `Added '${codeOrName}' to slip!`, 'warning');
+      document.getElementById('manual-scan-input').value = '';
+    }
+
+    function closePreviewModal() {
+      document.getElementById('preview-modal').style.display = 'none';
     }
 
     function toggleTorch() {
@@ -958,15 +1078,16 @@
       }
     }
 
-    /* Form Camera Scanner Functionality */
-    function toggleFormCodeScanner(show = true) {
+    /* Form Camera Scanner Functionality with Toggle Switch */
+    function toggleFormCodeScanner(enable) {
       const box = document.getElementById('form-scanner-box');
-      if (show) {
+      if (enable) {
         box.style.display = 'block';
         if (!formQrCode) formQrCode = new Html5Qrcode("form-reader");
         formQrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 160 }, (scannedText) => {
           document.getElementById('m-code').value = scannedText;
           playBeepSound();
+          document.getElementById('form-camera-toggle-switch').checked = false;
           toggleFormCodeScanner(false);
         }).catch(err => console.log(err));
       } else {
@@ -1157,8 +1278,9 @@
       applyUserPermissions();
     }
 
-    function toggleInlineItemForm(show = true) {
-      const el = document.getElementById('inline-item-form-container');
+    /* Focused Overlay Form for Add/Edit Inventory Item */
+    function toggleItemFormModal(show = true) {
+      const modal = document.getElementById('item-form-modal');
       if (show) {
         document.getElementById('m-edit-index').value = "-1";
         document.getElementById('item-form-title').innerText = "Add New Inventory Item";
@@ -1171,17 +1293,19 @@
         document.getElementById('m-min').value = '5';
         document.getElementById('m-batch').value = '';
         document.getElementById('m-expiry').value = '';
-        el.style.display = 'block';
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
+        document.getElementById('form-camera-toggle-switch').checked = false;
         toggleFormCodeScanner(false);
-        el.style.display = 'none';
+        modal.style.display = 'flex';
+      } else {
+        document.getElementById('form-camera-toggle-switch').checked = false;
+        toggleFormCodeScanner(false);
+        modal.style.display = 'none';
       }
     }
 
     function editInventoryItem(index) {
       const item = inventory[index];
-      const el = document.getElementById('inline-item-form-container');
+      const modal = document.getElementById('item-form-modal');
       document.getElementById('m-edit-index').value = index;
       document.getElementById('item-form-title').innerText = "Edit Inventory Item";
       document.getElementById('m-name').value = item.name || '';
@@ -1193,8 +1317,9 @@
       document.getElementById('m-min').value = item.min || 5;
       document.getElementById('m-batch').value = item.batch || '';
       document.getElementById('m-expiry').value = item.expiry || '';
-      el.style.display = 'block';
-      el.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('form-camera-toggle-switch').checked = false;
+      toggleFormCodeScanner(false);
+      modal.style.display = 'flex';
     }
 
     function deleteInventoryItem(index) {
@@ -1226,6 +1351,11 @@
         expiry: document.getElementById('m-expiry').value
       };
 
+      if (!item.name || !item.code) {
+        alert("Please specify at least an Item Name and Barcode/Code.");
+        return;
+      }
+
       if (editIndex >= 0) {
         inventory[editIndex] = item;
       } else {
@@ -1235,7 +1365,7 @@
       }
 
       saveToGoogleSheet();
-      toggleInlineItemForm(false);
+      toggleItemFormModal(false);
       refreshAllViews();
     }
 
