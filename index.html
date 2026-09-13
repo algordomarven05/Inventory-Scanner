@@ -25,7 +25,7 @@
     .tab-btn { color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.2s ease; opacity: 0.85; }
     .tab-btn:hover { opacity: 1; transform: translateY(-1px); }
     .tab-btn.active { opacity: 1; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-
+    
     /* Color Coded Tabs */
     #tab-scanner-btn { background: #059669; }
     #tab-scanner-btn.active { background: #10b981; border-color: #34d399; }
@@ -47,14 +47,12 @@
     
     #tab-users-btn { background: #475569; }
     #tab-users-btn.active { background: #64748b; border-color: #cbd5e1; }
-
     .sync-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #10b981; color: white; font-weight: bold; margin-left: 10px; }
     
     /* User Profile Bar */
     .user-profile-badge { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 4px 12px; border-radius: 20px; border: 1px solid #334155; }
     .profile-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8; cursor: pointer; background: #fff; }
     .profile-name { font-size: 13px; font-weight: bold; color: #f8fafc; cursor: pointer; }
-
     .main-container { padding: 20px; max-width: 1400px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -72,7 +70,7 @@
     .notif-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .notif-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     .notif-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-
+    
     /* In-Screen Confirm Bar */
     .in-screen-confirm-bar {
       background: #fef2f2;
@@ -89,12 +87,11 @@
     }
     .in-screen-confirm-bar .confirm-msg { font-weight: 700; font-size: 13px; }
     .in-screen-confirm-bar .confirm-btns { display: flex; gap: 8px; }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-5px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
+    
     /* Auth Screen */
     .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .auth-card { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
@@ -104,14 +101,13 @@
     .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; }
     .auth-toggle { text-align: center; margin-top: 15px; font-size: 12px; }
     .auth-toggle a { color: #0284c7; font-weight: bold; cursor: pointer; text-decoration: underline; }
-
-    /* Vertical Scanner & Receipt Layout */
-    .scanner-receipt-vertical-layout { display: flex; flex-direction: column; gap: 20px; max-width: 650px; margin: 0 auto; }
     
+    /* Layouts & Containers */
+    .scanner-receipt-vertical-layout { display: flex; flex-direction: column; gap: 20px; max-width: 650px; margin: 0 auto; }
     .compact-scanner-card { background: #fff; padding: 16px; border-radius: 10px; border-top: 5px solid #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .compact-scanner-card h3 { margin-top: 0; margin-bottom: 12px; color: #059669; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between; }
-
-    /* Camera Box & Toggle */
+    
+    /* Camera Box & Toggle Switches */
     .camera-status-bar { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; }
     .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -119,13 +115,11 @@
     .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
     input:checked + .slider { background-color: #10b981; }
     input:checked + .slider:before { transform: translateX(22px); }
-
     .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 200px; max-height: 220px; display: flex; justify-content: center; align-items: center; color: #64748b; }
     #reader { width: 100%; height: 100%; }
     #reader video { transform: none !important; object-fit: cover; height: 100% !important; }
-
     .receipt-card { background: #fff; padding: 20px; border-radius: 10px; border-top: 5px solid #0284c7; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-
+    
     /* Modals & Overlays */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; width: 90%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); overflow: hidden; animation: fadeIn 0.2s ease-out; }
@@ -133,7 +127,7 @@
     .modal-header h4 { margin: 0; font-size: 16px; color: #38bdf8; }
     .modal-body { padding: 20px; max-height: 75vh; overflow-y: auto; }
     .modal-footer { padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; }
-
+    
     /* Buttons & Controls */
     .btn-group { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; justify-content: space-between; }
     .btn { padding: 8px 12px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; transition: opacity 0.2s; }
@@ -144,21 +138,14 @@
     .btn-warning { background: #f59e0b; color: #0f172a; }
     .btn-dark { background: #334155; }
     .btn-sm { padding: 4px 8px; font-size: 11px; }
-
-    /* Responsive Form Layout */
-    .responsive-form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    /* Dashboard */
+    
+    /* Grid & Tables */
+    .responsive-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
     .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .dash-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid #0284c7; }
     .dash-card h4 { margin: 0 0 8px 0; font-size: 12px; color: #64748b; text-transform: uppercase; }
     .dash-card .count { font-size: 22px; font-weight: bold; }
-
-    /* Tables */
+    
     .card-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
     th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: middle; }
@@ -166,11 +153,10 @@
     
     .qty-controls { display: flex; align-items: center; gap: 8px; justify-content: center; }
     .qty-btn { background: #e2e8f0; border: 1px solid #cbd5e1; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; min-width: 24px; }
-
-    /* Item Preview Card */
+    
     .preview-item-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
     .preview-item-card:hover { border-color: #38bdf8; background: #f0f9ff; }
-
+    
     /* Badges */
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; display: inline-block; }
     .bg-ok { background: #10b981; }
@@ -179,94 +165,35 @@
     .bg-out { background: #ef4444; }
     .bg-expiring { background: #8b5cf6; }
     .bg-expired { background: #475569; }
-
-    /* THERMAL RECEIPT STYLING */
+    
+    /* Thermal Receipt Styling */
     .receipt-paper { 
-      background: #ffffff; 
-      padding: 18px 15px; 
-      border: 1px dashed #94a3b8; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      font-family: 'Courier New', Courier, monospace; 
-      color: #010409;
-      width: 100%;
-      max-width: 380px;
-      margin: 0 auto;
-      box-sizing: border-box;
+      background: #ffffff; padding: 18px 15px; border: 1px dashed #94a3b8; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      font-family: 'Courier New', Courier, monospace; color: #010409; width: 100%; max-width: 380px; margin: 0 auto; box-sizing: border-box;
     }
-
     .pgso-header { text-align: center; margin-bottom: 12px; }
-    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; filter: none !important; }
+    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; }
     .receipt-divider { border-top: 1px dashed #334155; margin: 10px 0; }
-
     .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
     .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #94a3b8; padding: 4px 2px; }
     .receipt-paper th { text-align: left; background: transparent; font-weight: bold; text-transform: uppercase; }
-
     .receipt-inputs input, .receipt-remarks textarea {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 11px;
-      border: none;
-      border-bottom: 1px solid #475569;
-      background: transparent;
-      outline: none;
+      font-family: 'Courier New', Courier, monospace; font-size: 11px; border: none; border-bottom: 1px solid #475569; background: transparent; outline: none;
     }
-
     .receipt-remarks { margin-top: 8px; }
     .receipt-remarks label { font-size: 10px; font-weight: bold; display: block; margin-bottom: 2px; }
-    .receipt-remarks textarea {
-      width: 100%;
-      height: 48px;
-      resize: none;
-      box-sizing: border-box;
-      line-height: 1.4;
-    }
-
-    .signature-grid {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      margin-top: 25px;
-      font-size: 10px;
-      text-align: center;
-    }
-    .sig-box {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-    .sig-name {
-      font-weight: bold;
-      text-transform: uppercase;
-      font-size: 11px;
-      margin-bottom: 2px;
-      min-height: 15px;
-    }
-    .sig-line {
-      border-top: 1px solid #000;
-      width: 100%;
-      margin: 0 auto 3px auto;
-    }
-    .sig-label {
-      font-size: 9px;
-      font-weight: bold;
-    }
-
+    .receipt-remarks textarea { width: 100%; height: 48px; resize: none; box-sizing: border-box; line-height: 1.4; }
+    .signature-grid { display: flex; justify-content: space-between; gap: 15px; margin-top: 25px; font-size: 10px; text-align: center; }
+    .sig-box { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+    .sig-name { font-weight: bold; text-transform: uppercase; font-size: 11px; margin-bottom: 2px; min-height: 15px; }
+    .sig-line { border-top: 1px solid #000; width: 100%; margin: 0 auto 3px auto; }
+    .sig-label { font-size: 9px; font-weight: bold; }
+    
     /* Print Formatting */
     @media print {
       body * { visibility: hidden !important; }
       #printable-receipt, #printable-receipt *, .printable, .printable * { visibility: visible !important; }
-      #printable-receipt { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 80mm !important; 
-        margin: 0; 
-        padding: 10px; 
-        border: none !important;
-        box-shadow: none !important;
-        background: #fff !important;
-      }
+      #printable-receipt { position: absolute; left: 0; top: 0; width: 80mm !important; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
       .no-print { display: none !important; }
       .receipt-inputs input, .receipt-remarks textarea { border: none !important; }
     }
@@ -274,7 +201,7 @@
 </head>
 <body>
 
-  <!-- AUTHENTICATION OVERLAY WITH OFFICIAL PGSO LOGO -->
+  <!-- AUTHENTICATION OVERLAY -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
       <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="auth-logo" alt="PGSO Official Logo">
@@ -291,7 +218,6 @@
           Need an account? <a onclick="toggleAuthMode(true)">Register here</a>
         </div>
       </div>
-
       <div id="register-form" style="display: none;">
         <label>Complete Name:</label>
         <input type="text" id="reg-fullname" placeholder="e.g. Juan Dela Cruz">
@@ -308,10 +234,10 @@
     </div>
   </div>
 
-  <!-- Profile Picture Upload -->
+  <!-- Profile Picture Upload Input -->
   <input type="file" id="pfp-upload" accept="image/*" style="display: none;" onchange="handlePfpUpload(event)">
 
-  <!-- Top Navigation Bar with Official PGSO Logo -->
+  <!-- Top Navigation Bar -->
   <div class="navbar no-print">
     <div class="brand-container">
       <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="brand-logo" alt="PGSO Logo">
@@ -332,13 +258,11 @@
         <img id="user-avatar" class="profile-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile" onclick="triggerPfpUpload()" title="Click to change profile picture">
         <span id="user-fullname" class="profile-name" onclick="triggerPfpUpload()" title="Click to change profile picture">User</span>
       </div>
-
       <button class="btn btn-danger" style="padding: 5px 10px;" onclick="handleLogout()">Logout</button>
     </div>
   </div>
 
   <div class="main-container">
-
     <!-- GLOBAL IN-SCREEN CONFIRMATION BANNER CONTAINER -->
     <div id="global-in-screen-confirm" class="in-screen-confirm-bar" style="display: none;">
       <span class="confirm-msg" id="global-confirm-text">Are you sure you want to proceed?</span>
@@ -351,8 +275,6 @@
     <!-- SCANNER & RECEIPT TAB -->
     <div id="scanner" class="tab-content active">
       <div class="scanner-receipt-vertical-layout">
-        
-        <!-- Compact Scanner Container -->
         <div class="compact-scanner-card">
           <h3>
             <span>📷 Barcode & QR Code Reader</span>
@@ -374,13 +296,10 @@
             <button class="btn btn-warning" onclick="toggleTorch()">Toggle Torch</button>
             <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned Receipt</button>
           </div>
-
-          <!-- Search / Barcode Entry Section -->
           <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e1; display: flex; gap: 6px;">
             <input type="text" id="manual-scan-input" placeholder="Search item name, brand, or code..." style="flex: 1; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') handleManualSearchAndPreview()">
             <button class="btn btn-success" onclick="handleManualSearchAndPreview()">🔍 Search / View Items</button>
           </div>
-
           <div id="scanner-notif" class="notification-box"></div>
         </div>
 
@@ -393,18 +312,14 @@
               <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
               <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
             </div>
-
             <div class="receipt-divider"></div>
-
             <div class="receipt-inputs" style="font-size: 11px; line-height: 1.5;">
               <div><strong>SLIP NO:</strong> <span id="receipt-no"></span></div>
               <div><strong>OFFICE:</strong> <input type="text" id="req-office" style="width: 140px;" value="PGSO" onchange="generateReceiptNumber()"></div>
               <div><strong>REQUESTER:</strong> <input type="text" id="req-name" style="width: 140px;"></div>
               <div><strong>DATE:</strong> <span id="receipt-date"></span></div>
             </div>
-
             <div class="receipt-divider"></div>
-
             <table>
               <thead>
                 <tr>
@@ -416,31 +331,25 @@
               </thead>
               <tbody id="receipt-rows"></tbody>
             </table>
-
             <div class="receipt-remarks">
               <label>REMARKS / NOTES (OPTIONAL):</label>
               <textarea id="receipt-remarks-text" rows="3" placeholder="Add optional remarks or comments here..."></textarea>
             </div>
-
             <div class="receipt-divider"></div>
-
             <div class="signature-grid">
               <div class="sig-box">
                 <div id="released-by-signature" class="sig-name">STAFF NAME</div>
                 <div class="sig-line"></div>
                 <div class="sig-label">RELEASED BY</div>
               </div>
-
               <div class="sig-box">
                 <div class="sig-name"></div>
                 <div class="sig-line"></div>
                 <div class="sig-label">RECEIVED BY</div>
               </div>
             </div>
-
             <div style="text-align: center; margin-top: 15px; font-size: 9px;">*** OFFICIAL SYSTEM RECORD ***</div>
           </div>
-
           <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" class="no-print">
             <button class="btn btn-success" onclick="completeReleaseOnly()">✅ Complete Release</button>
             <button class="btn btn-primary" onclick="printReceiptOnly()">🖨️ Print / Save PDF</button>
@@ -448,7 +357,6 @@
           </div>
           <div id="receipt-notif" class="notification-box no-print"></div>
         </div>
-
       </div>
     </div>
 
@@ -460,7 +368,7 @@
           <button class="btn btn-danger btn-sm" onclick="closePreviewModal()">✕</button>
         </div>
         <div class="modal-body">
-          <p style="font-size: 12px; color: #64748b; margin-top: 0;">Review item specifications (sizes, category, location) before adding to slip:</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 0;">Review item specifications before adding to slip:</p>
           <div id="preview-results-list"></div>
         </div>
         <div class="modal-footer">
@@ -518,7 +426,6 @@
           <button class="btn btn-primary admin-only" onclick="toggleItemFormModal(true)">+ Add New Item</button>
         </div>
       </div>
-
       <div class="card-box" style="overflow-x: auto;">
         <table>
           <thead>
@@ -543,7 +450,7 @@
       </div>
     </div>
 
-    <!-- FOCUSED MODAL FOR ADD / EDIT INVENTORY ITEM -->
+    <!-- MODAL FOR ADD / EDIT INVENTORY ITEM WITH TORCH & CAMERA TOGGLE -->
     <div id="item-form-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
@@ -556,16 +463,20 @@
             <div><label style="font-size:11px; font-weight:bold;">Item Name / Specification:</label><input type="text" id="m-name" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             <div><label style="font-size:11px; font-weight:bold;">Category / Brand:</label><input type="text" id="m-category" placeholder="e.g. Office Supplies / Canon" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             
-            <!-- Barcode Field with Camera Toggle Switch -->
+            <!-- Barcode Field with Controls -->
             <div>
               <label style="font-size:11px; font-weight:bold;">Barcode / QR Code:</label>
               <input type="text" id="m-code" style="width:100%; padding:6px; box-sizing:border-box;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-                <span style="font-size: 11px; font-weight: bold;">Camera Scanner:</span>
-                <label class="switch">
-                  <input type="checkbox" id="form-camera-toggle-switch" onchange="toggleFormCodeScanner(this.checked)">
-                  <span class="slider"></span>
-                </label>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 11px; font-weight: bold;">Camera Scanner:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="form-camera-toggle-switch" onchange="toggleFormCodeScanner(this.checked)">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <!-- TORCH BUTTON ADDED FOR INVENTORY MODAL -->
+                <button type="button" class="btn btn-warning btn-sm" onclick="toggleFormTorch()">🔦 Torch</button>
               </div>
             </div>
             
@@ -576,8 +487,7 @@
             <div><label style="font-size:11px; font-weight:bold;">Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             <div><label style="font-size:11px; font-weight:bold;">Expiry Date:</label><input type="date" id="m-expiry" style="width:100%; padding:6px; box-sizing:border-box;"></div>
           </div>
-
-          <!-- Camera Box inside Form -->
+          <!-- Modal Camera Viewport -->
           <div id="form-scanner-box" style="display: none; margin-top: 12px; padding: 10px; background: #000; border-radius: 8px;">
             <div id="form-reader" style="width: 100%; height: 180px;"></div>
           </div>
@@ -595,8 +505,6 @@
         <h3>Stock In Records</h3>
         <button class="btn btn-success" onclick="toggleInlineStockInForm()">+ New Delivery Stock In</button>
       </div>
-
-      <!-- IN-SCREEN STOCK IN FORM -->
       <div id="inline-stockin-form-container" class="card-box" style="display: none; border-top: 4px solid #7c3aed; background: #f8fafc;">
         <h4 style="margin-top:0; color:#0f172a;">Record New Stock In Delivery</h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
@@ -613,7 +521,6 @@
           <button class="btn btn-success" onclick="processStockIn()">Submit Stock In</button>
         </div>
       </div>
-
       <div class="card-box" style="overflow-x: auto;">
         <table>
           <thead>
@@ -685,49 +592,66 @@
       </div>
       <div id="user-mgmt-notif" class="notification-box"></div>
     </div>
-
   </div>
 
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu_2kpm2dJfWkYuoIUBPzWAbSBikUb435auHKIx6E6M-jDKriSNxmZBSoJSxWM1nT4/exec";
-
+    
     let inventory = [];
     let stockInLogs = [];
     let stockOutLogs = [];
     let receiptCounter = 1;
     let isSaving = false;
-
     let users = [
       { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
       { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
     ];
-
     let currentUser = null;
     let scannedReceiptItems = {};
     let html5QrCode = null;
     let formQrCode = null;
     let isTorchOn = false;
+    let isFormTorchOn = false;
     let lastScannedCode = null;
     let lastScanTime = 0;
 
     window.addEventListener('load', () => {
-      loadPersistentAccounts();
-      loadFromGoogleSheet();
+      loadLocalState();
       checkAuthStatus();
+      loadFromGoogleSheet();
+      // Regular background poll for cloud synchronization
       setInterval(() => {
         if (!isSaving) loadFromGoogleSheet();
-      }, 5000);
+      }, 7000);
     });
 
-    function loadPersistentAccounts() {
-      const storedUsers = localStorage.getItem('pgso_users');
-      if (storedUsers) {
-        try { users = JSON.parse(storedUsers); } catch (e) {}
+    function loadLocalState() {
+      try {
+        const storedUsers = localStorage.getItem('pgso_users');
+        if (storedUsers) users = JSON.parse(storedUsers);
+        
+        const storedInv = localStorage.getItem('pgso_inventory');
+        if (storedInv) inventory = JSON.parse(storedInv);
+
+        const storedIn = localStorage.getItem('pgso_stockin');
+        if (storedIn) stockInLogs = JSON.parse(storedIn);
+
+        const storedOut = localStorage.getItem('pgso_stockout');
+        if (storedOut) stockOutLogs = JSON.parse(storedOut);
+      } catch (e) {
+        console.error("Local storage restoration error:", e);
       }
     }
 
-    function savePersistentAccounts() {
-      localStorage.setItem('pgso_users', JSON.stringify(users));
+    function saveLocalState() {
+      try {
+        localStorage.setItem('pgso_users', JSON.stringify(users));
+        localStorage.setItem('pgso_inventory', JSON.stringify(inventory));
+        localStorage.setItem('pgso_stockin', JSON.stringify(stockInLogs));
+        localStorage.setItem('pgso_stockout', JSON.stringify(stockOutLogs));
+      } catch (e) {
+        console.error("Local storage quota error:", e);
+      }
     }
 
     function showNotification(elementId, message, type = 'success') {
@@ -743,11 +667,9 @@
       const confirmContainer = document.getElementById('global-in-screen-confirm');
       const textEl = document.getElementById('global-confirm-text');
       const confirmBtn = document.getElementById('global-confirm-yes-btn');
-
       textEl.innerText = message;
       confirmContainer.style.display = 'flex';
       confirmContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
       confirmBtn.onclick = function() {
         onConfirmCallback();
         hideInScreenConfirm();
@@ -770,8 +692,8 @@
         
         const avatarEl = document.getElementById('user-avatar');
         if (currentUser.pfp) { avatarEl.src = currentUser.pfp; }
-
         applyUserPermissions();
+        refreshAllViews();
       } else {
         document.getElementById('auth-screen').style.display = 'flex';
       }
@@ -779,21 +701,32 @@
 
     function triggerPfpUpload() { document.getElementById('pfp-upload').click(); }
 
+    // Compress uploaded profile pictures to keep Base64 footprint small & prevent storage truncation
     function handlePfpUpload(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          const imgData = evt.target.result;
-          document.getElementById('user-avatar').src = imgData;
-          currentUser.pfp = imgData;
-          
-          let uIdx = users.findIndex(u => u.username === currentUser.username);
-          if (uIdx >= 0) users[uIdx].pfp = imgData;
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 100;
+            canvas.height = 100;
+            ctx.drawImage(img, 0, 0, 100, 100);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
-          localStorage.setItem('pgso_user', JSON.stringify(currentUser));
-          savePersistentAccounts();
-          saveToGoogleSheet();
+            document.getElementById('user-avatar').src = compressedBase64;
+            currentUser.pfp = compressedBase64;
+            
+            let uIdx = users.findIndex(u => u.username === currentUser.username);
+            if (uIdx >= 0) users[uIdx].pfp = compressedBase64;
+            
+            localStorage.setItem('pgso_user', JSON.stringify(currentUser));
+            saveLocalState();
+            saveToGoogleSheet();
+          };
+          img.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -808,7 +741,6 @@
     function handleLogin() {
       const u = document.getElementById('login-user').value.trim();
       const p = document.getElementById('login-pass').value.trim();
-
       const account = users.find(acc => acc.username === u && acc.pass === p);
       if (!account) {
         showNotification('login-notif', 'Invalid username or password!', 'danger');
@@ -818,7 +750,6 @@
         showNotification('login-notif', `Account status is ${account.status.toUpperCase()}. Contact Admin.`, 'warning');
         return;
       }
-
       currentUser = account;
       localStorage.setItem('pgso_user', JSON.stringify(currentUser));
       checkAuthStatus();
@@ -828,7 +759,6 @@
       const fname = document.getElementById('reg-fullname').value.trim();
       const u = document.getElementById('reg-user').value.trim();
       const p = document.getElementById('reg-pass').value.trim();
-
       if (!fname || !u || !p) {
         showNotification('reg-notif', 'Please fill in all registration fields!', 'danger');
         return;
@@ -837,9 +767,8 @@
         showNotification('reg-notif', 'Username already exists!', 'danger');
         return;
       }
-
       users.push({ username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" });
-      savePersistentAccounts();
+      saveLocalState();
       saveToGoogleSheet();
       showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
       setTimeout(() => toggleAuthMode(false), 2000);
@@ -862,21 +791,30 @@
 
     async function loadFromGoogleSheet() {
       if (!GOOGLE_SCRIPT_URL || isSaving) return;
-
       try {
         const cacheBuster = GOOGLE_SCRIPT_URL + (GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
         const res = await fetch(cacheBuster, { method: 'GET', redirect: 'follow' });
-
         if (res.ok) {
           const record = await res.json();
-          inventory = record.inventory || [];
-          stockInLogs = record.stockInLogs || [];
-          stockOutLogs = record.stockOutLogs || [];
-          if (record.users && record.users.length > 0) {
-            users = record.users;
-            savePersistentAccounts();
+          if (record && Object.keys(record).length > 0) {
+            inventory = record.inventory || inventory;
+            stockInLogs = record.stockInLogs || stockInLogs;
+            stockOutLogs = record.stockOutLogs || stockOutLogs;
+            
+            if (record.users && record.users.length > 0) {
+              // Merge profiles to ensure user profile pictures are preserved locally
+              record.users.forEach(remoteUser => {
+                let localUser = users.find(u => u.username === remoteUser.username);
+                if (localUser && localUser.pfp && !remoteUser.pfp) {
+                  remoteUser.pfp = localUser.pfp;
+                }
+              });
+              users = record.users;
+            }
+            if (record.receiptCounter) receiptCounter = parseInt(record.receiptCounter) || receiptCounter;
+            
+            saveLocalState();
           }
-          if (record.receiptCounter) receiptCounter = parseInt(record.receiptCounter) || 1;
           
           const syncEl = document.getElementById('sync-indicator');
           syncEl.innerText = '🟢 Live Cloud Synced';
@@ -894,17 +832,20 @@
     async function saveToGoogleSheet() {
       if (!GOOGLE_SCRIPT_URL) return;
       isSaving = true;
+      saveLocalState();
+      
       try {
+        const payload = JSON.stringify({ inventory, stockInLogs, stockOutLogs, users, receiptCounter });
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, users, receiptCounter })
+          body: payload
         });
       } catch (err) { 
         console.error("Google Sheets Save Failed", err); 
       } finally {
-        setTimeout(() => { isSaving = false; }, 2000);
+        setTimeout(() => { isSaving = false; }, 3000);
       }
     }
 
@@ -946,11 +887,9 @@
       document.getElementById('receipt-date').innerText = date.toLocaleString();
     }
 
-    /* Controlled Camera Scanner Logic with Toggle Switch */
     function toggleMainCamera(enable) {
       const readerEl = document.getElementById('reader');
       const placeholder = document.getElementById('reader-placeholder');
-
       if (enable) {
         readerEl.style.display = 'block';
         placeholder.style.display = 'none';
@@ -985,12 +924,9 @@
       lastScannedCode = cleanCode;
       lastScanTime = now;
       playBeepSound();
-
-      // View & Confirm Modal for scanned items
       displayItemPreviewModal(cleanCode);
     }
 
-    /* Manual Search and Preview Feature */
     function handleManualSearchAndPreview() {
       const query = document.getElementById('manual-scan-input').value.trim();
       if (!query) return;
@@ -1004,10 +940,8 @@
         String(i.name || '').trim().toLowerCase().includes(query.toLowerCase()) ||
         String(i.category || '').trim().toLowerCase().includes(query.toLowerCase())
       );
-
       const listContainer = document.getElementById('preview-results-list');
       listContainer.innerHTML = '';
-
       if (matches.length > 0) {
         matches.forEach(item => {
           listContainer.innerHTML += `
@@ -1024,7 +958,7 @@
                   <span><strong>Location:</strong> ${item.location || 'N/A'}</span>
                 </div>
               </div>
-              <div style="display: flex; items-center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 <input type="number" id="preview-qty-${item.code}" value="1" min="1" max="${Math.max(1, item.stock)}" style="width: 55px; text-align: center; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
                 <button class="btn btn-success" onclick="confirmAddItemToReceipt('${item.code}')">Add to Slip</button>
               </div>
@@ -1037,7 +971,6 @@
             <button class="btn btn-warning" onclick="addUnregisteredItemToReceipt('${query}')">+ Add as Manual / Unregistered Entry</button>
           </div>`;
       }
-
       document.getElementById('preview-modal').style.display = 'flex';
     }
 
@@ -1045,13 +978,11 @@
       let item = inventory.find(i => String(i.code).trim().toLowerCase() === String(code).trim().toLowerCase());
       const qtyInput = document.getElementById(`preview-qty-${code}`);
       const addQty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-
       if (scannedReceiptItems[code]) {
         scannedReceiptItems[code].qty += addQty;
       } else {
         scannedReceiptItems[code] = { name: item ? item.name : `Item ${code}`, qty: addQty };
       }
-
       renderReceipt();
       closePreviewModal();
       showNotification('scanner-notif', `Added ${addQty}x '${item ? item.name : code}' to slip!`, 'success');
@@ -1074,11 +1005,11 @@
     function toggleTorch() {
       if (html5QrCode) {
         isTorchOn = !isTorchOn;
-        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => showNotification('scanner-notif', 'Flashlight not supported on device.', 'warning'));
+        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => showNotification('scanner-notif', 'Torch/Flashlight not supported on this device.', 'warning'));
       }
     }
 
-    /* Form Camera Scanner Functionality with Toggle Switch */
+    /* Modal Form Scanner & Torch controls */
     function toggleFormCodeScanner(enable) {
       const box = document.getElementById('form-scanner-box');
       if (enable) {
@@ -1089,7 +1020,7 @@
           playBeepSound();
           document.getElementById('form-camera-toggle-switch').checked = false;
           toggleFormCodeScanner(false);
-        }).catch(err => console.log(err));
+        }).catch(err => console.log("Modal scanner error:", err));
       } else {
         if (formQrCode && formQrCode.isScanning) {
           formQrCode.stop().then(() => {
@@ -1098,6 +1029,15 @@
         } else {
           box.style.display = 'none';
         }
+      }
+    }
+
+    function toggleFormTorch() {
+      if (formQrCode && formQrCode.isScanning) {
+        isFormTorchOn = !isFormTorchOn;
+        formQrCode.applyVideoConstraints({ advanced: [{ torch: isFormTorchOn }] }).catch(err => alert("Torch not supported or camera is off."));
+      } else {
+        alert("Please toggle ON the modal camera scanner first to enable torch.");
       }
     }
 
@@ -1139,45 +1079,28 @@
       const requester = document.getElementById('req-name').value;
       const remarks = document.getElementById('receipt-remarks-text').value.trim();
       const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGSO Staff';
-
       if (Object.keys(scannedReceiptItems).length === 0) {
         showNotification('receipt-notif', 'No items in receipt to release.', 'warning');
         return;
       }
-
-      let codeList = [];
-      let nameList = [];
-      let qtyList = [];
-      let itemsList = [];
-
+      let codeList = [], nameList = [], qtyList = [], itemsList = [];
       for (let code in scannedReceiptItems) {
         let qty = scannedReceiptItems[code].qty;
         let itemName = scannedReceiptItems[code].name;
         let invItem = inventory.find(i => String(i.code).trim().toLowerCase() === String(code).trim().toLowerCase());
         if (invItem) invItem.stock = Math.max(0, invItem.stock - qty);
-
         codeList.push(code);
         nameList.push(itemName);
         qtyList.push(qty);
         itemsList.push({ code: code, name: itemName, qty: qty });
       }
-
       stockOutLogs.push({ 
-        receiptNo, 
-        date: new Date().toLocaleString(), 
-        office, 
-        requester, 
-        code: codeList.join('<br>'), 
-        name: nameList.join('<br>'), 
-        qty: qtyList.join('<br>'), 
-        items: itemsList,
-        remarks, 
-        releasedBy 
+        receiptNo, date: new Date().toLocaleString(), office, requester, 
+        code: codeList.join('<br>'), name: nameList.join('<br>'), qty: qtyList.join('<br>'), 
+        items: itemsList, remarks, releasedBy 
       });
-
       receiptCounter = parseInt(receiptCounter || 1) + 1;
       saveToGoogleSheet();
-
       scannedReceiptItems = {};
       document.getElementById('receipt-remarks-text').value = '';
       generateReceiptNumber();
@@ -1205,13 +1128,11 @@
       const remarks = document.getElementById('receipt-remarks-text').value;
       const date = document.getElementById('receipt-date').innerText;
       const releasedBy = currentUser ? (currentUser.fullname || currentUser.username) : 'PGSO Staff';
-
       let csv = `Slip No,Office,Requester,Date,Item Code,Item Name,Quantity,Remarks,Released By\n`;
       for (let code in scannedReceiptItems) {
         let item = scannedReceiptItems[code];
         csv += `"${receiptNo}","${office}","${requester}","${date}","${code}","${item.name}",${item.qty},"${remarks}","${releasedBy}"\n`;
       }
-
       let blob = new Blob([csv], { type: 'text/csv' });
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -1229,41 +1150,32 @@
         if (diffDays <= 0) return { label: 'Expired', class: 'bg-expired' };
         if (diffDays <= 30) return { label: 'Expiring Soon', class: 'bg-expiring' };
       } else { item.daysLeft = 'N/A'; }
-
       if (item.stock <= 0) return { label: 'Out of Stock', class: 'bg-out' };
       if (item.stock <= Math.floor(item.min / 2)) return { label: 'Critical', class: 'bg-critical' };
       if (item.stock <= item.min) return { label: 'Low Stock', class: 'bg-low' };
       return { label: 'OK', class: 'bg-ok' };
     }
 
-    /* UPDATED: Fixed Search and String Filtering Logic */
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       tbody.innerHTML = '';
       const isAdmin = currentUser && currentUser.role === 'admin';
       const searchQuery = (document.getElementById('inventory-search-bar')?.value || '').toLowerCase().trim();
-
+      
       inventory.forEach((item, index) => {
         if (searchQuery) {
           const itemName = String(item.name || '').toLowerCase();
           const itemCategory = String(item.category || '').toLowerCase();
           const itemCode = String(item.code || '').toLowerCase();
           const itemLocation = String(item.location || '').toLowerCase();
-
-          const matchName = itemName.includes(searchQuery);
-          const matchCategory = itemCategory.includes(searchQuery);
-          const matchCode = itemCode.includes(searchQuery);
-          const matchLocation = itemLocation.includes(searchQuery);
-
-          if (!matchName && !matchCategory && !matchCode && !matchLocation) return;
+          if (!itemName.includes(searchQuery) && !itemCategory.includes(searchQuery) && 
+              !itemCode.includes(searchQuery) && !itemLocation.includes(searchQuery)) return;
         }
-
         const status = calculateStatus(item);
         let actionCell = isAdmin 
           ? `<button class="btn btn-warning btn-sm" onclick="editInventoryItem(${index})">✏️ Edit</button>
              <button class="btn btn-danger btn-sm" onclick="deleteInventoryItem(${index})">🗑️ Delete</button>`
           : `-`;
-
         tbody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
@@ -1281,11 +1193,9 @@
             <td class="admin-only">${actionCell}</td>
           </tr>`;
       });
-
       applyUserPermissions();
     }
 
-    /* Focused Overlay Form for Add/Edit Inventory Item */
     function toggleItemFormModal(show = true) {
       const modal = document.getElementById('item-form-modal');
       if (show) {
@@ -1347,22 +1257,20 @@
     function saveInventoryItem() {
       const editIndex = parseInt(document.getElementById('m-edit-index').value);
       const item = {
-        name: document.getElementById('m-name').value,
-        category: document.getElementById('m-category').value,
-        code: document.getElementById('m-code').value,
-        location: document.getElementById('m-location').value,
-        unit: document.getElementById('m-unit').value,
+        name: document.getElementById('m-name').value.trim(),
+        category: document.getElementById('m-category').value.trim(),
+        code: document.getElementById('m-code').value.trim(),
+        location: document.getElementById('m-location').value.trim(),
+        unit: document.getElementById('m-unit').value.trim(),
         stock: parseInt(document.getElementById('m-stock').value) || 0,
         min: parseInt(document.getElementById('m-min').value) || 5,
-        batch: document.getElementById('m-batch').value,
+        batch: document.getElementById('m-batch').value.trim(),
         expiry: document.getElementById('m-expiry').value
       };
-
       if (!item.name || !item.code) {
         alert("Please specify at least an Item Name and Barcode/Code.");
         return;
       }
-
       if (editIndex >= 0) {
         inventory[editIndex] = item;
       } else {
@@ -1370,7 +1278,6 @@
         if (existingIdx >= 0) inventory[existingIdx] = item;
         else inventory.push(item);
       }
-
       saveToGoogleSheet();
       toggleItemFormModal(false);
       refreshAllViews();
@@ -1384,14 +1291,12 @@
       const batch = document.getElementById('si-batch').value;
       const location = document.getElementById('si-location').value;
       const notes = document.getElementById('si-notes').value;
-
       let item = inventory.find(i => String(i.code).trim().toLowerCase() === code.toLowerCase());
       if (item) {
         item.stock += qty;
         if (location) item.location = location;
         if (batch) item.batch = batch;
       }
-
       stockInLogs.push({ date: new Date().toLocaleDateString(), code, name: item ? item.name : 'Unknown', qty, office, staff, batch, location, notes });
       saveToGoogleSheet();
       toggleInlineStockInForm(false);
@@ -1418,7 +1323,6 @@
         if (st.label === 'Expiring Soon') expiring++;
         if (st.label === 'Expired') expired++;
       });
-
       document.getElementById('dash-total').innerText = inventory.length;
       document.getElementById('dash-units').innerText = units;
       document.getElementById('dash-ok').innerText = ok;
@@ -1442,12 +1346,10 @@
       const tbody = document.getElementById('stockin-table-body');
       tbody.innerHTML = '';
       const isAdmin = currentUser && currentUser.role === 'admin';
-
       stockInLogs.forEach((l, i) => {
         let actionCell = isAdmin
           ? `<button class="btn btn-danger btn-sm" onclick="deleteStockInRow(${i})">🗑️ Delete</button>`
           : `-`;
-
         tbody.innerHTML += `<tr>
           <td>${i+1}</td>
           <td>${l.date}</td>
@@ -1462,7 +1364,6 @@
           <td class="admin-only">${actionCell}</td>
         </tr>`;
       });
-
       applyUserPermissions();
     }
 
@@ -1470,15 +1371,12 @@
       const tbody = document.getElementById('stockout-table-body');
       tbody.innerHTML = '';
       const isAdmin = currentUser && currentUser.role === 'admin';
-
       stockOutLogs.forEach((l, index) => {
         let reqCell = isAdmin 
           ? `<input type="text" id="so-req-${index}" value="${l.requester || ''}" style="width: 110px;">`
           : (l.requester || '-');
-
         let codeDisplay = Array.isArray(l.code) ? l.code.join('<br>') : l.code;
         let nameDisplay = Array.isArray(l.name) ? l.name.join('<br>') : (l.name || '-');
-
         let qtyDisplay = '';
         if (isAdmin) {
           let qtyText = String(l.qty).replace(/<br\s*[\/]?>/gi, '\n');
@@ -1487,21 +1385,17 @@
         } else {
           qtyDisplay = String(l.qty);
         }
-
         let relCell = isAdmin
           ? `<input type="text" id="so-rel-${index}" value="${l.releasedBy || ''}" style="width: 120px;">`
           : (l.releasedBy || 'N/A');
-
         let remCell = isAdmin
           ? `<input type="text" id="so-rem-${index}" value="${l.remarks || ''}" style="width: 110px;">`
           : (l.remarks || '-');
-
         let actionCell = isAdmin
           ? `<button class="btn btn-success btn-sm" style="margin-bottom: 2px;" onclick="saveStockOutRow(${index})">Save</button>
              <button class="btn btn-primary btn-sm" style="margin-bottom: 2px;" onclick="reprintHistoricalReceipt(${index})">🖨️ Reprint</button>
              <button class="btn btn-danger btn-sm" onclick="deleteStockOutRow(${index})">🗑️ Delete</button>`
           : `-`;
-
         tbody.innerHTML += `
           <tr>
             <td style="font-weight: bold; font-family: monospace;">${l.receiptNo}</td>
@@ -1516,7 +1410,6 @@
             <td class="admin-only">${actionCell}</td>
           </tr>`;
       });
-
       applyUserPermissions();
     }
 
@@ -1525,14 +1418,11 @@
       const newQtyInput = document.getElementById(`so-qty-${index}`).value.trim();
       const newRel = document.getElementById(`so-rel-${index}`).value.trim();
       const newRem = document.getElementById(`so-rem-${index}`).value.trim();
-
       const formattedQty = newQtyInput.split('\n').map(q => q.trim()).filter(q => q !== '').join('<br>');
-
       stockOutLogs[index].requester = newReq;
       stockOutLogs[index].qty = formattedQty;
       stockOutLogs[index].releasedBy = newRel;
       stockOutLogs[index].remarks = newRem;
-
       saveToGoogleSheet();
       showNotification('stockout-notif', `Stock Out Record #${stockOutLogs[index].receiptNo} updated!`, 'success');
       refreshAllViews();
@@ -1557,7 +1447,6 @@
       document.getElementById('receipt-date').innerText = log.date;
       document.getElementById('released-by-signature').innerText = log.releasedBy || 'PGSO Personnel';
       document.getElementById('receipt-remarks-text').value = log.remarks || '';
-
       scannedReceiptItems = {};
       if (log.items && log.items.length > 0) {
         log.items.forEach(item => {
@@ -1575,7 +1464,6 @@
           }
         });
       }
-
       renderReceipt();
       switchTab('scanner', document.getElementById('tab-scanner-btn'));
       setTimeout(() => window.print(), 300);
@@ -1593,12 +1481,10 @@
       stockOutLogs.forEach((l, originalIdx) => {
         allLogs.push({ date: l.date, type: 'Stock Out', ref: l.receiptNo, office: l.office, code: l.code, name: l.name || '-', qty: l.qty, source: 'out', index: originalIdx });
       });
-
       allLogs.forEach((l, index) => {
         let actionCell = isAdmin 
           ? `<button class="btn btn-danger btn-sm no-print" onclick="deleteHistoryRow('${l.source}', ${l.index})">🗑️ Delete</button>`
           : `-`;
-
         tbody.innerHTML += `
           <tr class="history-row">
             <td class="no-print"><input type="checkbox" class="history-chk" data-idx="${index}"></td>
@@ -1612,7 +1498,6 @@
             <td class="admin-only no-print">${actionCell}</td>
           </tr>`;
       });
-
       applyUserPermissions();
     }
 
@@ -1640,9 +1525,7 @@
           r.style.display = 'none';
         }
       });
-
       window.print();
-
       setTimeout(() => {
         rows.forEach(r => r.style.display = '');
       }, 500);
@@ -1652,7 +1535,6 @@
       let csv = "Date,Type,Reference No,Office,Code,Name,Qty\n";
       const rows = document.querySelectorAll('.history-row');
       let count = 0;
-
       rows.forEach(r => {
         const chk = r.querySelector('.history-chk');
         if (chk && chk.checked) {
@@ -1661,12 +1543,10 @@
           count++;
         }
       });
-
       if (count === 0) {
         showNotification('history-notif', 'Please select at least one record to export.', 'warning');
         return;
       }
-
       let blob = new Blob([csv], { type: 'text/csv' });
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -1708,25 +1588,25 @@
       const newUsername = document.getElementById(`usr-user-${index}`).value.trim();
       const newRole = document.getElementById(`usr-role-${index}`).value;
       const newStatus = document.getElementById(`usr-status-${index}`).value;
-
       if (!newName || !newUsername) {
         showNotification('user-mgmt-notif', 'Complete Name and Username cannot be empty!', 'danger');
         return;
       }
-
       users[index].fullname = newName;
       users[index].username = newUsername;
       users[index].role = newRole;
       users[index].status = newStatus;
-
+      
       if (currentUser && currentUser.username === users[index].username) {
         currentUser.fullname = newName;
+        currentUser.role = newRole;
+        currentUser.status = newStatus;
         localStorage.setItem('pgso_user', JSON.stringify(currentUser));
         document.getElementById('user-fullname').innerText = newName;
         document.getElementById('released-by-signature').innerText = newName;
       }
-
-      savePersistentAccounts();
+      
+      saveLocalState();
       saveToGoogleSheet();
       showNotification('user-mgmt-notif', `User account '${newUsername}' saved successfully!`, 'success');
       refreshAllViews();
@@ -1736,7 +1616,7 @@
       const uname = users[index].username;
       promptInScreenConfirm(`Are you sure you want to delete user '${uname}'?`, () => {
         users.splice(index, 1);
-        savePersistentAccounts();
+        saveLocalState();
         saveToGoogleSheet();
         showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
         refreshAllViews();
