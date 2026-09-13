@@ -120,7 +120,7 @@
     input:checked + .slider { background-color: #10b981; }
     input:checked + .slider:before { transform: translateX(22px); }
 
-    .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 200px; max-height: 220px; display: flex; justify-content: center; align-items: center; color: #64748b; }
+    .scanner-wrapper { position: relative; border: 2px solid #0f172a; border-radius: 8px; overflow: hidden; background: #000; height: 220px; max-height: 240px; display: flex; justify-content: center; align-items: center; color: #64748b; }
     #reader { width: 100%; height: 100%; }
     #reader video { transform: none !important; object-fit: cover; height: 100% !important; }
 
@@ -371,7 +371,7 @@
           </div>
           
           <div class="btn-group">
-            <button class="btn btn-warning" onclick="toggleTorch()">Toggle Torch</button>
+            <button class="btn btn-warning" onclick="toggleTorch()">⚡ Toggle Torch / Flashlight</button>
             <button class="btn btn-danger" onclick="clearReceipt()">Clear Scanned Receipt</button>
           </div>
 
@@ -711,6 +711,7 @@
     let lastScanTime = 0;
 
     window.addEventListener('load', () => {
+      loadLocalDataBackups();
       loadPersistentAccounts();
       loadFromGoogleSheet();
       checkAuthStatus();
@@ -718,6 +719,25 @@
         if (!isSaving) loadFromGoogleSheet();
       }, 5000);
     });
+
+    function loadLocalDataBackups() {
+      try {
+        const inv = localStorage.getItem('pgso_inventory_backup');
+        if (inv) inventory = JSON.parse(inv);
+        const inL = localStorage.getItem('pgso_stockin_backup');
+        if (inL) stockInLogs = JSON.parse(inL);
+        const outL = localStorage.getItem('pgso_stockout_backup');
+        if (outL) stockOutLogs = JSON.parse(outL);
+      } catch (e) {}
+    }
+
+    function saveLocalDataBackups() {
+      try {
+        localStorage.setItem('pgso_inventory_backup', JSON.stringify(inventory));
+        localStorage.setItem('pgso_stockin_backup', JSON.stringify(stockInLogs));
+        localStorage.setItem('pgso_stockout_backup', JSON.stringify(stockOutLogs));
+      } catch (e) {}
+    }
 
     function loadPersistentAccounts() {
       const storedUsers = localStorage.getItem('pgso_users');
@@ -761,7 +781,9 @@
     function checkAuthStatus() {
       const savedUser = JSON.parse(localStorage.getItem('pgso_user'));
       if (savedUser) {
-        currentUser = savedUser;
+        const liveUser = users.find(u => u.username === savedUser.username);
+        currentUser = liveUser ? liveUser : savedUser;
+        
         document.getElementById('auth-screen').style.display = 'none';
         
         const nameToDisplay = currentUser.fullname || currentUser.username;
@@ -838,7 +860,8 @@
         return;
       }
 
-      users.push({ username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" });
+      const newAccount = { username: u, pass: p, fullname: fname, role: "user", status: "pending", pfp: "" };
+      users.push(newAccount);
       savePersistentAccounts();
       saveToGoogleSheet();
       showNotification('reg-notif', 'Registration submitted! Awaiting Admin approval.', 'success');
@@ -869,14 +892,27 @@
 
         if (res.ok) {
           const record = await res.json();
-          inventory = record.inventory || [];
-          stockInLogs = record.stockInLogs || [];
-          stockOutLogs = record.stockOutLogs || [];
+          if (record.inventory) inventory = record.inventory;
+          if (record.stockInLogs) stockInLogs = record.stockInLogs;
+          if (record.stockOutLogs) stockOutLogs = record.stockOutLogs;
+          
           if (record.users && record.users.length > 0) {
-            users = record.users;
+            record.users.forEach(remoteUser => {
+              let localUser = users.find(u => u.username === remoteUser.username);
+              if (!localUser) {
+                users.push(remoteUser);
+              } else {
+                localUser.role = remoteUser.role;
+                localUser.status = remoteUser.status;
+                if (remoteUser.fullname) localUser.fullname = remoteUser.fullname;
+                if (remoteUser.pfp) localUser.pfp = remoteUser.pfp;
+              }
+            });
             savePersistentAccounts();
           }
           if (record.receiptCounter) receiptCounter = parseInt(record.receiptCounter) || 1;
+          
+          saveLocalDataBackups();
           
           const syncEl = document.getElementById('sync-indicator');
           syncEl.innerText = '🟢 Live Cloud Synced';
@@ -886,12 +922,15 @@
         } else { throw new Error('Sync response failed'); }
       } catch (err) {
         const syncEl = document.getElementById('sync-indicator');
-        syncEl.innerText = '🔴 Cloud Sync Offline';
-        syncEl.style.background = '#ef4444';
+        syncEl.innerText = '🟡 Offline / Local Cache Active';
+        syncEl.style.background = '#f59e0b';
       }
     }
 
     async function saveToGoogleSheet() {
+      saveLocalDataBackups();
+      savePersistentAccounts();
+
       if (!GOOGLE_SCRIPT_URL) return;
       isSaving = true;
       try {
@@ -902,7 +941,7 @@
           body: JSON.stringify({ inventory, stockInLogs, stockOutLogs, users, receiptCounter })
         });
       } catch (err) { 
-        console.error("Google Sheets Save Failed", err); 
+        console.error("Google Sheets Save Failed - Saved locally.", err); 
       } finally {
         setTimeout(() => { isSaving = false; }, 2000);
       }
@@ -946,7 +985,7 @@
       document.getElementById('receipt-date').innerText = date.toLocaleString();
     }
 
-    /* Controlled Camera Scanner Logic with Toggle Switch */
+    /* Rectangular Camera Scanner Logic */
     function toggleMainCamera(enable) {
       const readerEl = document.getElementById('reader');
       const placeholder = document.getElementById('reader-placeholder');
@@ -955,9 +994,11 @@
         readerEl.style.display = 'block';
         placeholder.style.display = 'none';
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 15, qrbox: { width: 220, height: 140 } };
+        
+        // Rectangular bounding box optimized for standard barcodes
+        const config = { fps: 20, qrbox: { width: 280, height: 120 } };
         html5QrCode.start({ facingMode: "environment" }, config, onCodeScanned).catch(err => {
-          showNotification('scanner-notif', 'Camera access error or denied.', 'danger');
+          showNotification('scanner-notif', 'Camera access error or permission denied.', 'danger');
           document.getElementById('camera-toggle-switch').checked = false;
           toggleMainCamera(false);
         });
@@ -986,11 +1027,9 @@
       lastScanTime = now;
       playBeepSound();
 
-      // View & Confirm Modal for scanned items
       displayItemPreviewModal(cleanCode);
     }
 
-    /* Manual Search and Preview Feature */
     function handleManualSearchAndPreview() {
       const query = document.getElementById('manual-scan-input').value.trim();
       if (!query) return;
@@ -1024,7 +1063,7 @@
                   <span><strong>Location:</strong> ${item.location || 'N/A'}</span>
                 </div>
               </div>
-              <div style="display: flex; items-center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 <input type="number" id="preview-qty-${item.code}" value="1" min="1" max="${Math.max(1, item.stock)}" style="width: 55px; text-align: center; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
                 <button class="btn btn-success" onclick="confirmAddItemToReceipt('${item.code}')">Add to Slip</button>
               </div>
@@ -1071,10 +1110,19 @@
       document.getElementById('preview-modal').style.display = 'none';
     }
 
+    /* Flashlight / Torch Control */
     function toggleTorch() {
-      if (html5QrCode) {
+      if (html5QrCode && html5QrCode.isScanning) {
         isTorchOn = !isTorchOn;
-        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).catch(err => showNotification('scanner-notif', 'Flashlight not supported on device.', 'warning'));
+        html5QrCode.applyVideoConstraints({
+          advanced: [{ torch: isTorchOn }]
+        }).then(() => {
+          showNotification('scanner-notif', `Torch ${isTorchOn ? 'ON' : 'OFF'}`, 'success');
+        }).catch(err => {
+          showNotification('scanner-notif', 'Torch/Flashlight not supported on this device/camera.', 'warning');
+        });
+      } else {
+        showNotification('scanner-notif', 'Turn ON the camera scanner first to toggle the torch.', 'warning');
       }
     }
 
@@ -1084,7 +1132,7 @@
       if (enable) {
         box.style.display = 'block';
         if (!formQrCode) formQrCode = new Html5Qrcode("form-reader");
-        formQrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 160 }, (scannedText) => {
+        formQrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 220, height: 100 } }, (scannedText) => {
           document.getElementById('m-code').value = scannedText;
           playBeepSound();
           document.getElementById('form-camera-toggle-switch').checked = false;
@@ -1183,7 +1231,7 @@
       generateReceiptNumber();
       renderReceipt();
       refreshAllViews();
-      showNotification('receipt-notif', 'Supply release completed & synced to cloud!', 'success');
+      showNotification('receipt-notif', 'Supply release completed & saved!', 'success');
     }
 
     function printReceiptOnly() {
@@ -1236,7 +1284,6 @@
       return { label: 'OK', class: 'bg-ok' };
     }
 
-    /* UPDATED: Fixed Search and String Filtering Logic */
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       tbody.innerHTML = '';
@@ -1285,7 +1332,6 @@
       applyUserPermissions();
     }
 
-    /* Focused Overlay Form for Add/Edit Inventory Item */
     function toggleItemFormModal(show = true) {
       const modal = document.getElementById('item-form-modal');
       if (show) {
@@ -1721,6 +1767,8 @@
 
       if (currentUser && currentUser.username === users[index].username) {
         currentUser.fullname = newName;
+        currentUser.role = newRole;
+        currentUser.status = newStatus;
         localStorage.setItem('pgso_user', JSON.stringify(currentUser));
         document.getElementById('user-fullname').innerText = newName;
         document.getElementById('released-by-signature').innerText = newName;
