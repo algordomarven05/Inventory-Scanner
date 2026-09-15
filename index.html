@@ -603,7 +603,7 @@
     let receiptCounter = 1;
     let isSaving = false;
     let users = [
-      { username: "admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
+      { username: "Admin", pass: "admin123", fullname: "System Administrator", role: "admin", status: "active", pfp: "" },
       { username: "staff", pass: "staff123", fullname: "PGSO Staff Member", role: "user", status: "active", pfp: "" }
     ];
     let currentUser = null;
@@ -615,8 +615,28 @@
     let lastScannedCode = null;
     let lastScanTime = 0;
 
+    function initAutoAdmin() {
+      let targetUser = users.find(u => u.username.toLowerCase() === 'admin');
+      if (targetUser) {
+        targetUser.username = "Admin";
+        targetUser.pass = "admin123";
+        targetUser.role = "admin";
+        targetUser.status = "active";
+      } else {
+        users.unshift({
+          username: "Admin",
+          pass: "admin123",
+          fullname: "System Administrator",
+          role: "admin",
+          status: "active",
+          pfp: ""
+        });
+      }
+    }
+
     window.addEventListener('load', () => {
       loadLocalState();
+      initAutoAdmin();
       checkAuthStatus();
       loadFromGoogleSheet();
       // Regular background poll for cloud synchronization
@@ -741,7 +761,7 @@
     function handleLogin() {
       const u = document.getElementById('login-user').value.trim();
       const p = document.getElementById('login-pass').value.trim();
-      const account = users.find(acc => acc.username === u && acc.pass === p);
+      const account = users.find(acc => acc.username.toLowerCase() === u.toLowerCase() && acc.pass === p);
       if (!account) {
         showNotification('login-notif', 'Invalid username or password!', 'danger');
         return;
@@ -763,7 +783,7 @@
         showNotification('reg-notif', 'Please fill in all registration fields!', 'danger');
         return;
       }
-      if (users.find(acc => acc.username === u)) {
+      if (users.find(acc => acc.username.toLowerCase() === u.toLowerCase())) {
         showNotification('reg-notif', 'Username already exists!', 'danger');
         return;
       }
@@ -802,7 +822,6 @@
             stockOutLogs = record.stockOutLogs || stockOutLogs;
             
             if (record.users && record.users.length > 0) {
-              // Merge profiles to ensure user profile pictures are preserved locally
               record.users.forEach(remoteUser => {
                 let localUser = users.find(u => u.username === remoteUser.username);
                 if (localUser && localUser.pfp && !remoteUser.pfp) {
@@ -811,6 +830,7 @@
               });
               users = record.users;
             }
+            initAutoAdmin();
             if (record.receiptCounter) receiptCounter = parseInt(record.receiptCounter) || receiptCounter;
             
             saveLocalState();
