@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PGSO IMS - Provincial General Services Office Inventory Management System</title>
+  
+  <!-- External Libraries -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
     :root {
       --primary: #0284c7;
@@ -19,7 +24,7 @@
     /* Header Bar */
     .navbar { background: var(--dark); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .brand-container { display: flex; align-items: center; gap: 10px; }
-    .brand-logo { height: 38px; width: auto; object-fit: contain; }
+    .brand-logo { height: 38px; width: auto; object-fit: contain; border-radius: 50%; background: #fff; padding: 2px; }
     .navbar h2 { margin: 0; font-size: 20px; letter-spacing: 1px; color: #38bdf8; font-weight: 800; }
     .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .tab-btn { color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.2s ease; opacity: 0.85; }
@@ -95,7 +100,7 @@
     /* Auth Screen */
     .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .auth-card { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
-    .auth-logo { width: 80px; height: auto; margin-bottom: 12px; }
+    .auth-logo { width: 80px; height: auto; margin-bottom: 12px; border-radius: 50%; }
     .auth-card h3 { margin-top: 0; margin-bottom: 15px; color: #0284c7; text-align: center; }
     .auth-card label { display: block; text-align: left; font-size: 12px; font-weight: bold; margin-top: 10px; }
     .auth-card input, .auth-card select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; }
@@ -122,7 +127,7 @@
     
     /* Modals & Overlays */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: white; width: 90%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); overflow: hidden; animation: fadeIn 0.2s ease-out; }
+    .modal-content { background: white; width: 90%; max-width: 750px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); overflow: hidden; animation: fadeIn 0.2s ease-out; }
     .modal-header { background: #0f172a; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
     .modal-header h4 { margin: 0; font-size: 16px; color: #38bdf8; }
     .modal-body { padding: 20px; max-height: 75vh; overflow-y: auto; }
@@ -172,7 +177,7 @@
       font-family: 'Courier New', Courier, monospace; color: #010409; width: 100%; max-width: 380px; margin: 0 auto; box-sizing: border-box;
     }
     .pgso-header { text-align: center; margin-bottom: 12px; }
-    .pgso-logo { width: 65px; height: auto; margin-bottom: 4px; }
+    .pgso-logo { width: 60px; height: 60px; margin-bottom: 4px; border-radius: 50%; }
     .receipt-divider { border-top: 1px dashed #334155; margin: 10px 0; }
     .receipt-paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; font-family: inherit; }
     .receipt-paper th, .receipt-paper td { border: none; border-bottom: 1px dotted #94a3b8; padding: 4px 2px; }
@@ -189,11 +194,18 @@
     .sig-line { border-top: 1px solid #000; width: 100%; margin: 0 auto 3px auto; }
     .sig-label { font-size: 9px; font-weight: bold; }
     
+    /* Code Generation Grid */
+    .barcode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
+    .barcode-item-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; background: #fff; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+    .barcode-item-card h5 { margin: 0 0 6px 0; font-size: 13px; color: #0f172a; }
+    .barcode-render-box { margin: 10px auto; min-height: 90px; display: flex; justify-content: center; align-items: center; }
+    
     /* Print Formatting */
     @media print {
       body * { visibility: hidden !important; }
-      #printable-receipt, #printable-receipt *, .printable, .printable * { visibility: visible !important; }
+      #printable-receipt, #printable-receipt *, #printable-barcode-area, #printable-barcode-area *, .printable, .printable * { visibility: visible !important; }
       #printable-receipt { position: absolute; left: 0; top: 0; width: 80mm !important; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
+      #printable-barcode-area { position: absolute; left: 0; top: 0; width: 100%; }
       .no-print { display: none !important; }
       .receipt-inputs input, .receipt-remarks textarea { border: none !important; }
     }
@@ -204,7 +216,11 @@
   <!-- AUTHENTICATION OVERLAY -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
-      <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="auth-logo" alt="PGSO Official Logo">
+      <svg class="auth-logo" viewBox="0 0 100 100" width="80" height="80">
+        <circle cx="50" cy="50" r="48" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+        <path d="M50 15 L80 35 L80 65 L50 85 L20 65 L20 35 Z" fill="none" stroke="#ffffff" stroke-width="4"/>
+        <text x="50" y="55" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="middle">PGSO</text>
+      </svg>
       <h3 id="auth-title">PGSO IMS Login</h3>
       
       <div id="login-form">
@@ -240,7 +256,11 @@
   <!-- Top Navigation Bar -->
   <div class="navbar no-print">
     <div class="brand-container">
-      <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="brand-logo" alt="PGSO Logo">
+      <svg class="brand-logo" viewBox="0 0 100 100" width="38" height="38">
+        <circle cx="50" cy="50" r="48" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+        <path d="M50 15 L80 35 L80 65 L50 85 L20 65 L20 35 Z" fill="none" stroke="#ffffff" stroke-width="4"/>
+        <text x="50" y="55" font-size="22" font-weight="bold" fill="#ffffff" text-anchor="middle">PGSO</text>
+      </svg>
       <h2>PGSO IMS</h2>
       <span class="sync-status" id="sync-indicator">🟢 Live Cloud Synced</span>
     </div>
@@ -307,7 +327,11 @@
         <div class="receipt-card">
           <div class="receipt-paper" id="printable-receipt">
             <div class="pgso-header">
-              <img src="https://scontent.fceb1-1.fna.fbcdn.net/v/t39.30808-6/235994604_137742715190692_4912516257234848479_n.jpg?stp=dst-jpg_tt6&cstp=mx1524x1524&ctp=s1524x1524&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEUKurVe68dNwd_eOitScCMunNVMBqamNC6c1UwGpqY0BC56z4FmqQAKQ7Y0uXHXFz11vY8YqaAOna6xy04e0S4&_nc_ohc=fcgnTXpcy8sQ7kNvwFvEJS4&_nc_oc=AdouYgPObMI2J1rD2ALN1ybhW-HeySLYsjigZa6E9ln-VCt6AOk6tyXu9yTKrjDYleM&_nc_zt=23&_nc_ht=scontent.fceb1-1.fna&_nc_gid=a4Ut9r7iIko2jiZA5RYkkQ&_nc_ss=7b2a8&oh=00_AQIiQgutOeuHkHHg9vxRJgYPzXWcJwR416q99TPtmvs6KQ&oe=6AA94D98" class="pgso-logo" alt="PGSO Logo">
+              <svg class="pgso-logo" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="#0284c7" stroke="#000000" stroke-width="2"/>
+                <path d="M50 15 L80 35 L80 65 L50 85 L20 65 L20 35 Z" fill="none" stroke="#ffffff" stroke-width="4"/>
+                <text x="50" y="55" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="middle">PGSO</text>
+              </svg>
               <div style="font-size:12px; font-weight:bold; letter-spacing: 0.5px;">PGSO INVENTORY & SUPPLY SECTION</div>
               <div style="font-size:10px; font-weight:bold; color: #444; font-style: italic;">Provincial General Services Office</div>
               <div style="font-size:11px; font-weight:bold; margin-top:4px;">SUPPLY RELEASE RECEIPT</div>
@@ -421,8 +445,9 @@
     <div id="inventory" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
         <h3>Master Inventory List</h3>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <input type="text" id="inventory-search-bar" placeholder="🔍 Search Inventory..." onkeyup="renderInventoryTable()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+          <button class="btn btn-warning admin-only" onclick="openBarcodeGenModal()">🏷️ Generate Code Generator</button>
           <button class="btn btn-primary admin-only" onclick="toggleItemFormModal(true)">+ Add New Item</button>
         </div>
       </div>
@@ -450,6 +475,40 @@
       </div>
     </div>
 
+    <!-- BARCODE & QR CODE GENERATOR MODAL -->
+    <div id="barcode-gen-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4>🏷️ Unique Barcode & QR Generator</h4>
+          <button class="btn btn-danger btn-sm" onclick="closeBarcodeGenModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="flex: 1; min-width: 150px;">
+              <label style="font-size:11px; font-weight:bold;">Filter by Category:</label>
+              <select id="barcode-cat-filter" onchange="renderBarcodeGeneratorCards()" style="width:100%; padding:6px; border-radius:6px; border:1px solid #cbd5e1;">
+                <option value="ALL">All Categories</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+              <label style="font-size:11px; font-weight:bold;">Code Format:</label>
+              <select id="barcode-type-select" onchange="renderBarcodeGeneratorCards()" style="width:100%; padding:6px; border-radius:6px; border:1px solid #cbd5e1;">
+                <option value="BARCODE">Standard Barcode (CODE128)</option>
+                <option value="QR">2D QR Code</option>
+              </select>
+            </div>
+          </div>
+          <div id="printable-barcode-area">
+            <div class="barcode-grid" id="barcode-cards-container"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Print Labels</button>
+          <button class="btn btn-dark" onclick="closeBarcodeGenModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL FOR ADD / EDIT INVENTORY ITEM WITH TORCH & CAMERA TOGGLE -->
     <div id="item-form-modal" class="modal-overlay">
       <div class="modal-content">
@@ -461,12 +520,15 @@
           <input type="hidden" id="m-edit-index" value="-1">
           <div class="responsive-form-grid">
             <div><label style="font-size:11px; font-weight:bold;">Item Name / Specification:</label><input type="text" id="m-name" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-            <div><label style="font-size:11px; font-weight:bold;">Category / Brand:</label><input type="text" id="m-category" placeholder="e.g. Office Supplies / Canon" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Category / Brand:</label><input type="text" id="m-category" placeholder="e.g. Cleaning / Janitorial" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             
-            <!-- Barcode Field with Controls -->
+            <!-- Barcode Field with Auto Generator -->
             <div>
               <label style="font-size:11px; font-weight:bold;">Barcode / QR Code:</label>
-              <input type="text" id="m-code" style="width:100%; padding:6px; box-sizing:border-box;">
+              <div style="display:flex; gap:4px;">
+                <input type="text" id="m-code" style="flex:1; padding:6px; box-sizing:border-box;">
+                <button type="button" class="btn btn-warning btn-sm" onclick="autoGenerateItemCode()" title="Auto assign code for unbarcoded items like broom/rag">Auto</button>
+              </div>
               <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span style="font-size: 11px; font-weight: bold;">Camera Scanner:</span>
@@ -475,13 +537,12 @@
                     <span class="slider"></span>
                   </label>
                 </div>
-                <!-- TORCH BUTTON ADDED FOR INVENTORY MODAL -->
                 <button type="button" class="btn btn-warning btn-sm" onclick="toggleFormTorch()">🔦 Torch</button>
               </div>
             </div>
             
             <div><label style="font-size:11px; font-weight:bold;">Storage Location:</label><input type="text" id="m-location" placeholder="Rack A-1" style="width:100%; padding:6px; box-sizing:border-box;"></div>
-            <div><label style="font-size:11px; font-weight:bold;">Unit of Measure:</label><input type="text" id="m-unit" placeholder="Box, Pc, Pack, Ream" style="width:100%; padding:6px; box-sizing:border-box;"></div>
+            <div><label style="font-size:11px; font-weight:bold;">Unit of Measure:</label><input type="text" id="m-unit" placeholder="Pc, Bundle, Box" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             <div><label style="font-size:11px; font-weight:bold;">Available Stock:</label><input type="number" id="m-stock" value="0" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             <div><label style="font-size:11px; font-weight:bold;">Min Reorder Level:</label><input type="number" id="m-min" value="5" style="width:100%; padding:6px; box-sizing:border-box;"></div>
             <div><label style="font-size:11px; font-weight:bold;">Batch / Lot No:</label><input type="text" id="m-batch" style="width:100%; padding:6px; box-sizing:border-box;"></div>
@@ -639,7 +700,6 @@
       initAutoAdmin();
       checkAuthStatus();
       loadFromGoogleSheet();
-      // Regular background poll for cloud synchronization
       setInterval(() => {
         if (!isSaving) loadFromGoogleSheet();
       }, 7000);
@@ -721,7 +781,6 @@
 
     function triggerPfpUpload() { document.getElementById('pfp-upload').click(); }
 
-    // Compress uploaded profile pictures to keep Base64 footprint small & prevent storage truncation
     function handlePfpUpload(e) {
       const file = e.target.files[0];
       if (file) {
@@ -1029,7 +1088,6 @@
       }
     }
 
-    /* Modal Form Scanner & Torch controls */
     function toggleFormCodeScanner(enable) {
       const box = document.getElementById('form-scanner-box');
       if (enable) {
@@ -1059,6 +1117,14 @@
       } else {
         alert("Please toggle ON the modal camera scanner first to enable torch.");
       }
+    }
+
+    function autoGenerateItemCode() {
+      const name = document.getElementById('m-name').value.trim() || 'ITEM';
+      const category = document.getElementById('m-category').value.trim() || 'GEN';
+      const prefix = (category.slice(0, 3) + '-' + name.slice(0, 3)).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const uniqueCode = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+      document.getElementById('m-code').value = uniqueCode;
     }
 
     function renderReceipt() {
@@ -1214,6 +1280,84 @@
           </tr>`;
       });
       applyUserPermissions();
+    }
+
+    /* BARCODE & QR GENERATOR MODAL LOGIC */
+    function openBarcodeGenModal() {
+      const select = document.getElementById('barcode-cat-filter');
+      select.innerHTML = '<option value="ALL">All Categories</option>';
+      const categories = [...new Set(inventory.map(i => i.category || 'Uncategorized'))];
+      categories.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+      document.getElementById('barcode-gen-modal').style.display = 'flex';
+      renderBarcodeGeneratorCards();
+    }
+
+    function closeBarcodeGenModal() {
+      document.getElementById('barcode-gen-modal').style.display = 'none';
+    }
+
+    function renderBarcodeGeneratorCards() {
+      const selectedCat = document.getElementById('barcode-cat-filter').value;
+      const codeType = document.getElementById('barcode-type-select').value;
+      const container = document.getElementById('barcode-cards-container');
+      container.innerHTML = '';
+
+      const itemsToRender = inventory.filter(i => selectedCat === 'ALL' || (i.category || 'Uncategorized') === selectedCat);
+
+      if (itemsToRender.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #64748b;">No items found under selected category.</div>';
+        return;
+      }
+
+      itemsToRender.forEach((item, idx) => {
+        const cardId = `barcode-render-${idx}`;
+        const itemCode = item.code || `PGSO-${idx+1}`;
+        container.innerHTML += `
+          <div class="barcode-item-card">
+            <h5 style="margin-bottom:2px;">${item.name}</h5>
+            <div style="font-size:10px; color:#64748b;">${item.category || 'General Supplies'}</div>
+            <div class="barcode-render-box" id="${cardId}"></div>
+            <div style="font-size:11px; font-weight:bold; font-family:monospace; margin-top:2px;">${itemCode}</div>
+          </div>`;
+      });
+
+      // Render actual Barcodes or QR Codes after DOM injection
+      setTimeout(() => {
+        itemsToRender.forEach((item, idx) => {
+          const cardId = `barcode-render-${idx}`;
+          const box = document.getElementById(cardId);
+          if (!box) return;
+          box.innerHTML = '';
+          const itemCode = item.code || `PGSO-${idx+1}`;
+
+          if (codeType === 'BARCODE') {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            box.appendChild(svg);
+            try {
+              JsBarcode(svg, itemCode, {
+                format: "CODE128",
+                width: 1.5,
+                height: 45,
+                displayValue: false
+              });
+            } catch (e) {
+              box.innerHTML = '<span style="color:red; font-size:10px;">Barcode error</span>';
+            }
+          } else {
+            try {
+              new QRCode(box, {
+                text: itemCode,
+                width: 65,
+                height: 65
+              });
+            } catch (e) {
+              box.innerHTML = '<span style="color:red; font-size:10px;">QR error</span>';
+            }
+          }
+        });
+      }, 50);
     }
 
     function toggleItemFormModal(show = true) {
@@ -1596,49 +1740,44 @@
               </select>
             </td>
             <td>
-              <button class="btn btn-success btn-sm" onclick="saveUserRow(${index})">Save Changes</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteUserRow(${index})">Delete</button>
+              <button class="btn btn-success btn-sm" onclick="saveUser(${index})">Save</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Delete</button>
             </td>
           </tr>`;
       });
     }
 
-    function saveUserRow(index) {
-      const newName = document.getElementById(`usr-name-${index}`).value.trim();
-      const newUsername = document.getElementById(`usr-user-${index}`).value.trim();
-      const newRole = document.getElementById(`usr-role-${index}`).value;
-      const newStatus = document.getElementById(`usr-status-${index}`).value;
-      if (!newName || !newUsername) {
-        showNotification('user-mgmt-notif', 'Complete Name and Username cannot be empty!', 'danger');
+    function saveUser(index) {
+      const updatedName = document.getElementById(`usr-name-${index}`).value.trim();
+      const updatedUser = document.getElementById(`usr-user-${index}`).value.trim();
+      const updatedRole = document.getElementById(`usr-role-${index}`).value;
+      const updatedStatus = document.getElementById(`usr-status-${index}`).value;
+
+      if (!updatedUser) {
+        showNotification('user-mgmt-notif', 'Username cannot be empty!', 'danger');
         return;
       }
-      users[index].fullname = newName;
-      users[index].username = newUsername;
-      users[index].role = newRole;
-      users[index].status = newStatus;
-      
-      if (currentUser && currentUser.username === users[index].username) {
-        currentUser.fullname = newName;
-        currentUser.role = newRole;
-        currentUser.status = newStatus;
-        localStorage.setItem('pgso_user', JSON.stringify(currentUser));
-        document.getElementById('user-fullname').innerText = newName;
-        document.getElementById('released-by-signature').innerText = newName;
-      }
-      
-      saveLocalState();
+
+      users[index].fullname = updatedName;
+      users[index].username = updatedUser;
+      users[index].role = updatedRole;
+      users[index].status = updatedStatus;
+
       saveToGoogleSheet();
-      showNotification('user-mgmt-notif', `User account '${newUsername}' saved successfully!`, 'success');
+      showNotification('user-mgmt-notif', `User account '${updatedUser}' successfully updated!`, 'success');
       refreshAllViews();
     }
 
-    function deleteUserRow(index) {
-      const uname = users[index].username;
-      promptInScreenConfirm(`Are you sure you want to delete user '${uname}'?`, () => {
+    function deleteUser(index) {
+      const targetUser = users[index];
+      if (targetUser.username.toLowerCase() === 'admin') {
+        showNotification('user-mgmt-notif', 'System Administrator account cannot be deleted!', 'danger');
+        return;
+      }
+      promptInScreenConfirm(`Are you sure you want to delete user account '${targetUser.username}'?`, () => {
         users.splice(index, 1);
-        saveLocalState();
         saveToGoogleSheet();
-        showNotification('user-mgmt-notif', `User '${uname}' deleted!`, 'warning');
+        showNotification('user-mgmt-notif', 'User account deleted successfully.', 'warning');
         refreshAllViews();
       });
     }
